@@ -1,0 +1,21 @@
+== Getting qdiffdir ============================================================
+
+The project is hosted on github.com under the PollardBanknote organization.
+
+You can download it as a zip from http://github.com/PollardBanknote/qdiffdir
+or use git to clone the repo.
+
+== Building ====================================================================
+
+qdiffdir is a Qt project and requires Qt. Also, some parts of it currently
+assume a *nix operating system.
+
+Tested on Centos 5 with Qt 4.7.4:
+
+  mkdir qdiffdir-build                   # Make some directory to build in
+  cd qdiffdir-build                      # Change into it
+  qmake /path/to/your/copy/of/qdiffdir   # Run qmake to make a Makefile
+  make                                   # Run make to compile the program
+  cp qdiffdir /wherever/you/want         # "Install" the program
+
+After this it's safe to delete the source code and build directory.
