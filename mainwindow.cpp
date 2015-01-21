@@ -29,12 +29,15 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(const std::vector< std::string >& dirnames, int f) :
-	QMainWindow(0),
-	ui(new Ui::MainWindow)
+MainWindow::MainWindow(
+	const std::vector< std::string >& dirnames,
+	bool show_left_only,
+	bool show_right_only,
+	bool show_identical
+) : QMainWindow(0), ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
-	ui->widget->setFlags(f);
+	ui->widget->setFlags(show_left_only, show_right_only, show_identical);
 
 	if ( dirnames.size() == 1 )
 	{

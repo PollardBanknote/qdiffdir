@@ -32,9 +32,7 @@
 #include <QtGui/QApplication>
 
 #include "mainwindow.h"
-#include "dirdiffform.h"
 #include "detach.h"
-#include "comparewidget.h"
 
 /** @brief Start the application based on command line arguments
  */
@@ -43,10 +41,14 @@ int main(
 	char* argv[]
 )
 {
+    // options for the application
 	std::vector< std::string > filenames;
 
-	int flags = CompareWidget::ShowLeftOnly | CompareWidget::ShowRightOnly | CompareWidget::ShowIdentical;
+    bool show_left_only = true;
+    bool show_right_only = true;
+    bool show_identical = true;
 
+    // command line processing
 	bool no_more_switches = false;
 	bool help             = false;
 
@@ -62,27 +64,27 @@ int main(
 
 			if ( s == "--left=show" )
 			{
-				flags |= CompareWidget::ShowLeftOnly;
+                show_left_only = true;
 			}
 			else if ( s == "--left=hide" )
 			{
-				flags &= ~CompareWidget::ShowLeftOnly;
+                show_left_only = false;
 			}
 			else if ( s == "--right=show" )
 			{
-				flags |= CompareWidget::ShowRightOnly;
-			}
+                show_right_only = true;
+            }
 			else if ( s == "--right=hide" )
-			{
-				flags &= ~CompareWidget::ShowRightOnly;
+            {
+                show_right_only = false;
 			}
 			else if ( s == "--same=show" )
 			{
-				flags |= CompareWidget::ShowIdentical;
+                show_identical = true;
 			}
 			else if ( s == "--same=hide" )
 			{
-				flags &= ~CompareWidget::ShowIdentical;
+                show_identical = false;
 			}
 			else if ( s == "--help" )
 			{
@@ -119,7 +121,7 @@ int main(
 
 	QApplication a(argc, argv);
 
-	MainWindow w(filenames, flags);
+    MainWindow w(filenames, show_left_only, show_right_only, show_identical);
 	w.show();
 
 	return a.exec();

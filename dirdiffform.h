@@ -50,7 +50,7 @@ public:
 	explicit DirDiffForm(QWidget* parent);
 	~DirDiffForm();
 	void changeDirectories(const QString& left, const QString& right);
-	void setFlags(int);
+	void setFlags(bool show_left_only, bool show_right_only, bool show_identical);
 private slots:
 	void on_copytoright_clicked();
 	void on_viewdiff_clicked();

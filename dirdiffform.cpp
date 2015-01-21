@@ -60,6 +60,9 @@ public:
 		return new FileCompare(*this);
 	}
 
+	/// @todo Don't unzip a file if we don't need to
+	/// @todo Don't read entire files into memory when doing the file compare
+	/// @todo Don't run cmp, write our own function
 	bool equal(
 		const QString& lfile,
 		const QString& rfile
@@ -79,21 +82,25 @@ public:
 		}
 		else
 		{
-			QStringList l;
+			if (QFileInfo(first).size() != QFileInfo(second).size())
+			{
+				return false;
+			}
+			else
+			{
+				QStringList l;
 
-			l << first << second;
+				l << first << second;
 
-			diff = ( QFileInfo(first).size() != QFileInfo(second).size() || QProcess::execute("/usr/bin/cmp", l) != 0 );
+				diff = ( QProcess::execute("/usr/bin/cmp", l) != 0 );
+			}
 		}
 
 		return !diff;
 	}
 
 private:
-	QDir left;
-	QDir right;
-
-	QByteArray gunzip(const QString& filename)
+	static QByteArray gunzip(const QString& filename)
 	{
 		if ( filename.endsWith(".gz"))
 		{
@@ -122,6 +129,9 @@ private:
 			return file.readAll();
 		}
 	}
+
+	QDir left;
+	QDir right;
 
 };
 
@@ -245,8 +255,12 @@ DirDiffForm::~DirDiffForm()
 	delete ui;
 }
 
-void DirDiffForm::setFlags(int f)
+void DirDiffForm::setFlags(bool show_left_only, bool show_right_only, bool show_identical)
 {
+	const int f = (show_left_only ? CompareWidget::ShowLeftOnly : 0)
+		| (show_right_only ? CompareWidget::ShowRightOnly : 0)
+		| (show_identical ? CompareWidget::ShowIdentical : 0);
+
 	ui->compareview->setFlags(f);
 }
 
