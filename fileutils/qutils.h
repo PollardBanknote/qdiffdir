@@ -29,8 +29,6 @@
 #ifndef QUTILS_H
 #define QUTILS_H
 
-#include <string>
-
 #include <QFileInfoList>
 #include <QDir>
 #include <QString>

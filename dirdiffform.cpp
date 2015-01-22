@@ -512,7 +512,7 @@ void DirDiffForm::copyFile(
 		}
 	}
 
-	if ( copyfile(file.toStdString(), destpath.toStdString()))
+	if ( pbl::file::copy(file.toStdString(), destpath.toStdString()))
 	{
 		fileChanged(destpath);
 	}

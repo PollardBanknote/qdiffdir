@@ -29,11 +29,18 @@
 #ifndef ABSPATH_H
 #define ABSPATH_H
 
+namespace pbl
+{
+namespace file
+{
+
 /** @brief Get an absolute path of a file
  * @param filepath The path of an (existing) file
  * @returns An absolute path that corresponds to the same file as filepath, or
  *   an empty string if there is an error.
  */
-std::string absolute_file_name(const std::string& filepath);
+std::string absolute_path(const std::string& filepath);
 
+}
+}
 #endif // ABSPATH_H

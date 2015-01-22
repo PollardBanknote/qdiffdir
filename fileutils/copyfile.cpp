@@ -42,12 +42,18 @@
 
 namespace
 {
+/// @todo This is a bad way to get file existence
 bool file_exists(const std::string& filename)
 {
-    return !absolute_file_name(filename).empty();
+    return !pbl::file::absolute_path(filename).empty();
 }
 
 }
+
+namespace pbl
+{
+namespace file
+{
 
 /** Try to do copy the file as safely as possible.
  *
@@ -55,8 +61,9 @@ bool file_exists(const std::string& filename)
  * permissions should probably be the same. But group might be a different
  * group.
  * @todo Relying so heavily on C, seems strange to use ifstream
+ * @todo What if dest is a directory?
  */
-bool copyfile(
+bool copy(
 	const std::string& source,
 	const std::string& dest
 )
@@ -163,4 +170,6 @@ bool copyfile(
 	::close(f);
 
 	return true;
+}
+}
 }

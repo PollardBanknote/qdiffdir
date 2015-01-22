@@ -29,6 +29,10 @@
 #ifndef COPYFILE_H
 #define COPYFILE_H
 
+namespace pbl
+{
+namespace file
+{
 /** @brief Copy the file at source to dest
  * @param source A file to copy
  * @param dest A file (including name) of the file to create
@@ -37,6 +41,8 @@
  * @note If source does not exist, dest is not created. Will overwrite an
  * existing file "dest". Dest has same permissions as source, if possible.
  */
-bool copyfile(const std::string& source, const std::string& dest);
+bool copy(const std::string& source, const std::string& dest);
+}
+}
 
 #endif // COPYFILE_H

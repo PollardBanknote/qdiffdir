@@ -37,7 +37,12 @@
 #include <fcntl.h>
 #endif
 
-std::string absolute_file_name(const std::string& filename)
+namespace pbl
+{
+namespace file
+{
+
+std::string absolute_path(const std::string& filename)
 {
 	if ( !filename.empty())
 	{
@@ -87,3 +92,5 @@ std::string absolute_file_name(const std::string& filename)
 	return std::string();
 }
 
+}
+}
