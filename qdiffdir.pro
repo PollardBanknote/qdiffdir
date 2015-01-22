@@ -16,14 +16,14 @@ SOURCES += main.cpp\
 		mainwindow.cpp \
 	comparewidget.cpp \
 	dirdiffform.cpp \
-	fileutils.cpp \
-	detach.cpp
+	detach.cpp \
+    fileutils/qutils.cpp
 
 HEADERS  += mainwindow.h \
 	dirdiffform.h \
-	fileutils.h \
 	comparewidget.h \
-	detach.h
+	detach.h \
+    fileutils/qutils.h
 
 FORMS    += mainwindow.ui \
 	dirdiffform.ui \
