@@ -26,18 +26,14 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef QUTILS_H
-#define QUTILS_H
+#ifndef ABSPATH_H
+#define ABSPATH_H
 
-#include <string>
+/** @brief Get an absolute path of a file
+ * @param filepath The path of an (existing) file
+ * @returns An absolute path that corresponds to the same file as filepath, or
+ *   an empty string if there is an error.
+ */
+std::string absolute_file_name(const std::string& filepath);
 
-#include <QFileInfoList>
-#include <QDir>
-#include <QString>
-
-QFileInfoList getRecursiveFileInfoList(const QDir& dir = QDir(), size_t depth = 0, const QString& nameFilters = QString(), QDir::Filters filters = QDir::Files);
-QStringList getRecursiveAbsoluteFilenames(const QDir& dir = QDir(), size_t depth = 0, const QString& nameFilters = QString(), const QDir::Filters& filters = QDir::Files);
-QStringList getRecursiveRelativeFilenames(const QDir& dir = QDir(), size_t depth = 0, const QString& nameFilters = QString(), const QDir::Filters& filters = QDir::Files);
-QStringList getRecursiveDirectories(const QDir& dir, size_t depth);
-QString lastPathComponent(const QString& s);
-#endif // QUTILS_H
+#endif // ABSPATH_H

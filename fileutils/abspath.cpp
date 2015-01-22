@@ -26,18 +26,64 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef QUTILS_H
-#define QUTILS_H
-
 #include <string>
+#include <climits>
+#include <cstdlib>
 
-#include <QFileInfoList>
-#include <QDir>
-#include <QString>
+#ifdef _POSIX_C_SOURCE
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#endif
 
-QFileInfoList getRecursiveFileInfoList(const QDir& dir = QDir(), size_t depth = 0, const QString& nameFilters = QString(), QDir::Filters filters = QDir::Files);
-QStringList getRecursiveAbsoluteFilenames(const QDir& dir = QDir(), size_t depth = 0, const QString& nameFilters = QString(), const QDir::Filters& filters = QDir::Files);
-QStringList getRecursiveRelativeFilenames(const QDir& dir = QDir(), size_t depth = 0, const QString& nameFilters = QString(), const QDir::Filters& filters = QDir::Files);
-QStringList getRecursiveDirectories(const QDir& dir, size_t depth);
-QString lastPathComponent(const QString& s);
-#endif // QUTILS_H
+std::string absolute_file_name(const std::string& filename)
+{
+	if ( !filename.empty())
+	{
+		#if (( defined( _POSIX_VERSION ) && _POSIX_VERSION >= 200809l ) || defined( __GLIBC__ ))
+		// Preferred - POSIX-2008 and glibc will allocate the path buffer
+		char* res = ::realpath(filename.c_str(), NULL);
+
+		if ( res )
+		{
+			std::string s = res;
+			::free(res);
+			return s;
+		}
+		else
+		{
+			return std::string();
+		}
+
+		#else
+		#ifdef _GNU_SOURCE
+		// Maybe we can rely on the GNU extension
+		char* res = ::canonicalize_file_name(filename.c_str());
+
+		if ( res )
+		{
+			std::string s = res;
+			::free(res);
+			return s;
+		}
+
+		#elif ((( defined( _POSIX_VERSION ) && _POSIX_VERSION >= 200112L ) || ( defined( _XOPEN_VERSION ) && _XOPEN_VERSION >= 500 )) && defined( PATH_MAX ))
+		/// @todo PATH_MAX may be huge or -1, according to man pages for realpath
+		char  resolved[PATH_MAX + 1];
+		char* res = ::realpath(filename.c_str(), resolved);
+
+		if ( res )
+		{
+			return resolved;
+		}
+
+		#else
+		#error "No way to get absolute file path!"
+		#endif // if 1
+		#endif // if ( defined( _POSIX_VERSION ) && _POSIX_VERSION >= 200809l )
+	}
+
+	return std::string();
+}
+

@@ -26,18 +26,10 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef QUTILS_H
-#define QUTILS_H
+#ifndef FILEUTILS_H
+#define FILEUTILS_H
 
-#include <string>
+#include "fileutils/abspath.h"
+#include "fileutils/copyfile.h"
 
-#include <QFileInfoList>
-#include <QDir>
-#include <QString>
-
-QFileInfoList getRecursiveFileInfoList(const QDir& dir = QDir(), size_t depth = 0, const QString& nameFilters = QString(), QDir::Filters filters = QDir::Files);
-QStringList getRecursiveAbsoluteFilenames(const QDir& dir = QDir(), size_t depth = 0, const QString& nameFilters = QString(), const QDir::Filters& filters = QDir::Files);
-QStringList getRecursiveRelativeFilenames(const QDir& dir = QDir(), size_t depth = 0, const QString& nameFilters = QString(), const QDir::Filters& filters = QDir::Files);
-QStringList getRecursiveDirectories(const QDir& dir, size_t depth);
-QString lastPathComponent(const QString& s);
-#endif // QUTILS_H
+#endif // FILEUTILS_H

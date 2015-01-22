@@ -26,18 +26,17 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef QUTILS_H
-#define QUTILS_H
+#ifndef COPYFILE_H
+#define COPYFILE_H
 
-#include <string>
+/** @brief Copy the file at source to dest
+ * @param source A file to copy
+ * @param dest A file (including name) of the file to create
+ * @returns true iff dest exists and is a copy of source
+ *
+ * @note If source does not exist, dest is not created. Will overwrite an
+ * existing file "dest". Dest has same permissions as source, if possible.
+ */
+bool copyfile(const std::string& source, const std::string& dest);
 
-#include <QFileInfoList>
-#include <QDir>
-#include <QString>
-
-QFileInfoList getRecursiveFileInfoList(const QDir& dir = QDir(), size_t depth = 0, const QString& nameFilters = QString(), QDir::Filters filters = QDir::Files);
-QStringList getRecursiveAbsoluteFilenames(const QDir& dir = QDir(), size_t depth = 0, const QString& nameFilters = QString(), const QDir::Filters& filters = QDir::Files);
-QStringList getRecursiveRelativeFilenames(const QDir& dir = QDir(), size_t depth = 0, const QString& nameFilters = QString(), const QDir::Filters& filters = QDir::Files);
-QStringList getRecursiveDirectories(const QDir& dir, size_t depth);
-QString lastPathComponent(const QString& s);
-#endif // QUTILS_H
+#endif // COPYFILE_H
