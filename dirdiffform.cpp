@@ -63,7 +63,6 @@ public:
 
 	/// @todo Don't unzip a file if we don't need to
 	/// @todo Don't read entire files into memory when doing the file compare
-	/// @todo Don't run cmp, write our own function
 	bool equal(
 		const QString& lfile,
 		const QString& rfile
@@ -83,18 +82,8 @@ public:
 		}
 		else
 		{
-			if (QFileInfo(first).size() != QFileInfo(second).size())
-			{
-				return false;
-			}
-			else
-			{
-				QStringList l;
-
-				l << first << second;
-
-				diff = ( QProcess::execute("/usr/bin/cmp", l) != 0 );
-			}
+			/// @todo qutils convenience wrapper
+			diff = (pbl::file::compare(first.toStdString(), second.toStdString()) != 1);
 		}
 
 		return !diff;

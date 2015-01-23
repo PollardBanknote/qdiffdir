@@ -38,7 +38,7 @@
 #include <fcntl.h>
 #endif
 
-#include "fileutils/abspath.h"
+#include "fileutils/fileutils.h"
 
 namespace
 {

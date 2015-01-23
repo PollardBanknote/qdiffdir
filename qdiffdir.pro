@@ -19,15 +19,14 @@ SOURCES += main.cpp\
 	detach.cpp \
     fileutils/qutils.cpp \
     fileutils/copyfile.cpp \
-    fileutils/abspath.cpp
+    fileutils/abspath.cpp \
+    fileutils/compare.cpp
 
 HEADERS  += mainwindow.h \
 	dirdiffform.h \
 	comparewidget.h \
 	detach.h \
     fileutils/qutils.h \
-    fileutils/copyfile.h \
-    fileutils/abspath.h \
     fileutils/fileutils.h
 
 FORMS    += mainwindow.ui \

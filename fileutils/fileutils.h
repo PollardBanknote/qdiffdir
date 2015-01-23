@@ -29,7 +29,35 @@
 #ifndef FILEUTILS_H
 #define FILEUTILS_H
 
-#include "fileutils/abspath.h"
-#include "fileutils/copyfile.h"
+#include <string>
+
+namespace pbl
+{
+namespace file
+{
+/** @brief Get an absolute path of a file
+ * @param filepath The path of an (existing) file
+ * @returns An absolute path that corresponds to the same file as filepath, or
+ *   an empty string if there is an error.
+ */
+std::string absolute_path(const std::string& filepath);
+
+/** @brief Copy the file at source to dest
+ * @param source A file to copy
+ * @param dest A file (including name) of the file to create
+ * @returns true iff dest exists and is a copy of source
+ *
+ * @note If source does not exist, dest is not created. Will overwrite an
+ * existing file "dest". Dest has same permissions as source, if possible.
+ */
+bool copy(const std::string& source, const std::string& dest);
+
+/** @brief Compare two files to see if they are exactly the same
+ * @returns 0 if not the same, 1 if the same, -1 if an error occurred
+ */
+int compare(const std::string& f, const std::string& g);
+
+}
+}
 
 #endif // FILEUTILS_H

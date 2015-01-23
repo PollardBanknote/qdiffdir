@@ -36,7 +36,7 @@
 
 #include <QDebug>
 
-#include "fileutils/abspath.h"
+#include "fileutils/fileutils.h"
 
 namespace
 {
