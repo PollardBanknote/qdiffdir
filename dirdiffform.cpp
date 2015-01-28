@@ -71,22 +71,17 @@ public:
 		const QString first  = left.absoluteFilePath(lfile);
 		const QString second = right.absoluteFilePath(rfile);
 
-		bool diff;
-
 		if ( first.endsWith(".gz") || second.endsWith(".gz"))
 		{
 			const QByteArray data1 = gunzip(first);
 			const QByteArray data2 = gunzip(second);
 
-			diff = ( data1 != data2 );
+			return ( data1 == data2 );
 		}
 		else
 		{
-			/// @todo qutils convenience wrapper
-			diff = (pbl::file::compare(first.toStdString(), second.toStdString()) != 1);
+			return (pbl::file::compare(first.toStdString(), second.toStdString()) == 1);
 		}
-
-		return !diff;
 	}
 
 private:
