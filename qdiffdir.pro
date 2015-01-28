@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     fileutils/qutils.cpp \
     fileutils/copyfile.cpp \
     fileutils/abspath.cpp \
-    fileutils/compare.cpp
+    fileutils/compare.cpp \
+    fileutils/basename.cpp
 
 HEADERS  += mainwindow.h \
 	dirdiffform.h \

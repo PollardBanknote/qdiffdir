@@ -57,6 +57,30 @@ bool copy(const std::string& source, const std::string& dest);
  */
 int compare(const std::string& f, const std::string& g);
 
+/** @brief Return the last component of a path
+ * @param path A file path
+ * @returns The name of the directory or file that the path points to, or the
+ * empty string if there's an error
+ *
+ * Ex., "/" -> "/"
+ *      "/usr/lib/" -> "lib"
+ *      "usr/lib" -> "lib"
+ *      "lib" -> "lib"
+ *      "usr/lib/" -> "lib"
+ *
+ * If the component cannot be determined for whatever reason, the string is
+ * considered malformed and the empty string is returned. Some examples of
+ * a "malformed" string are "", ".", "..", "usr/..". In particular, this
+ * function does not use the current working directory to resolve relative paths.
+ * If you need this functionality, pass it in yourself.
+ *
+ * It also does not go to the filesystem at all. It merely processes the string.
+ *
+ * @note This function handles "." and ".." if it can be inferred from the
+ * given path. Ex., "lib/.", "/usr/lib/..", "/../../"
+ */
+std::string basename(const std::string& path);
+
 }
 }
 

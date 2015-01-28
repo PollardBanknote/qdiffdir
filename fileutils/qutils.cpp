@@ -157,40 +157,5 @@ QStringList getRecursiveDirectories(
 
 QString lastPathComponent(const QString& s)
 {
-	int i = s.lastIndexOf('/');
-
-	// no slash, whole thing is the last component
-	if ( i == -1 )
-	{
-		return s;
-	}
-
-	if ( i < s.length() - 1 )
-	{
-		// string has the form "path/to/file"
-		return s.mid(i + 1);
-	}
-
-	// skip trailing slash
-	while ( i > 0 && s[i - 1] == '/' )
-	{
-		--i;
-	}
-
-	if ( i == 0 )
-	{
-		// path consists entirely of the / character
-		return QString();
-	}
-
-	int j = s.lastIndexOf('/', i - 1);
-
-	if ( j == -1 )
-	{
-		// string has the form "dir/"
-		return s.left(i);
-	}
-
-	// string has the form "path/to/dir/"
-	return s.mid(j + 1, i - ( j + 1 ));
+	return QString::fromStdString(pbl::file::basename(s.toStdString()));
 }
