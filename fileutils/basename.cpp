@@ -27,11 +27,11 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include <string>
-namespace pbl
+#include <stdexcept>
+
+namespace
 {
-namespace file
-{
-std::string basename(const std::string& s)
+std::string basename_posix(const std::string& s)
 {
 	// j points to the last character in a component
 	std::size_t j = s.find_last_not_of('/');
@@ -76,45 +76,70 @@ std::string basename(const std::string& s)
 	// can't find a component
 	return (s.empty() ? "" : "/");
 }
+}
+
+namespace pbl
+{
+namespace file
+{
+// Calls the basename_xxx appropriate for this platform
+std::string basename(const std::string& s)
+{
+#ifdef _POSIX_C_SOURCE
+	return basename_posix(s);
+#else
+#error "No implementation of basename is available for this platform"
+#endif
+}
 
 #if 0
-// some test strings
-// should be "/"
-std::cout << "'" << pbl::file::basename("/") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("////") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("/./") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("/../") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("/one/../") << "'" << std::endl;
 
-// should be "lib"
-std::cout << "'" << pbl::file::basename("lib") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("lib/") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("/lib") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("/lib/") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("usr/lib") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("/usr/lib") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("/usr/lib/") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("lib///") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("///lib") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("///lib///") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("usr///lib") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("///usr///lib") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("///usr///lib///") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("///usr///lib///") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("///usr///lib///") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("/lib/.") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("lib/.") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("lib/./") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("/lib/one/../") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("/lib/one/..") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("lib/one/..") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("lib/one/../") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("lib/one/two/../../") << "'" << std::endl;
+void test_basename()
+{
+	// (input, basename)
+	const char* const paths[][2] = {
+		{ "/", "/" },
+		{ "///", "/" },
+		{ "/./", "/" },
+		{ "/../", "/" },
+		{ "/one/../", "/" },
+		{ "lib", "lib" },
+		{ "lib/", "lib" },
+		{ "/lib", "lib" },
+		{ "/lib/", "lib" },
+		{ "usr/lib", "lib" },
+		{ "usr/lib", "lib" },
+		{ "/usr/lib", "lib" },
+		{ "/usr/lib/", "lib" },
+		{ "lib///", "lib" },
+		{ "///lib", "lib" },
+		{ "///lib///", "lib" },
+		{ "usr///lib", "lib" },
+		{ "///usr///lib", "lib" },
+		{ "///usr///lib///", "lib" },
+		{ "///usr///lib///", "lib" },
+		{ "///usr///lib///", "lib" },
+		{ "/lib/.", "lib" },
+		{ "lib/.", "lib" },
+		{ "lib/./", "lib" },
+		{ "/lib/one/../", "lib" },
+		{ "/lib/one/..", "lib" },
+		{ "lib/one/..", "lib" },
+		{ "lib/one/../", "lib" },
+		{ "lib/one/two/../../", "lib" },
+		{ "", "" },
+		{ "./", "" },
+		{ "usr/..", "" },
+	};
 
-// should be errors
-std::cout << "'" << pbl::file::basename("") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("./") << "'" << std::endl;
-std::cout << "'" << pbl::file::basename("usr/..") << "'" << std::endl;
+	const std::size_t n = sizeof(paths)/sizeof(paths[0]);
+	for (std::size_t i = 0; i < n; ++i)
+	{
+		if (basename_posix(paths[i][0]) != paths[i][1])
+			throw std::runtime_error("Bad implementation of basename_posix");
+	}
+}
+
 #endif
 
 }

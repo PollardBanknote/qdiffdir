@@ -57,27 +57,24 @@ bool copy(const std::string& source, const std::string& dest);
  */
 int compare(const std::string& f, const std::string& g);
 
-/** @brief Return the last component of a path
+/** @brief Return the name of the file system component indicated by path
  * @param path A file path
  * @returns The name of the directory or file that the path points to, or the
  * empty string if there's an error
  *
- * Ex., "/" -> "/"
- *      "/usr/lib/" -> "lib"
- *      "usr/lib" -> "lib"
- *      "lib" -> "lib"
- *      "usr/lib/" -> "lib"
+ * The exact behavior of this function is platform dependent, because paths are.
+ * However, whatever the platform, it should return the name of the file or
+ * directory pathed. Ex., on POSIX platforms it should return "readme.txt" for
+ * "/home/user/documents/readme.txt"; similarly it should return "readme.txt"
+ * for "C:\Windows\readme.txt" on Windows platforms.
  *
- * If the component cannot be determined for whatever reason, the string is
+ * This function does not access the file system. It merely parses the string.
+ * In particular, it does not check if the path is valid and/or accessible.
+ *
+ * If the last component cannot be determined for whatever reason, the string is
  * considered malformed and the empty string is returned. Some examples of
- * a "malformed" string are "", ".", "..", "usr/..". In particular, this
- * function does not use the current working directory to resolve relative paths.
- * If you need this functionality, pass it in yourself.
- *
- * It also does not go to the filesystem at all. It merely processes the string.
- *
- * @note This function handles "." and ".." if it can be inferred from the
- * given path. Ex., "lib/.", "/usr/lib/..", "/../../"
+ * a "malformed" string are "", ".", "..", "usr/..". (However, something like
+ * "usr/lib/.." should return "usr".)
  */
 std::string basename(const std::string& path);
 
