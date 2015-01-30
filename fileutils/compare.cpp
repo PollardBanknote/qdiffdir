@@ -30,9 +30,11 @@
 #include <cstdio>
 #include <cstring>
 
+#ifdef _POSIX_C_SOURCE
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#endif
 
 namespace
 {
@@ -45,6 +47,7 @@ namespace
  */
 bool different_sizes(const std::string& f, const std::string& g)
 {
+#ifdef _POSIX_C_SOURCE
 	struct stat buf1;
 	struct stat buf2;
 
@@ -53,6 +56,10 @@ bool different_sizes(const std::string& f, const std::string& g)
 		return buf1.st_size != buf2.st_size;
 	}
 	return false;
+#else
+#warning "No implementation of different_sizes for this platform"
+	return false;
+#endif
 }
 }
 
