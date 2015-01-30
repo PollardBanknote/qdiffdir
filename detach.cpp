@@ -35,15 +35,16 @@
 #include <unistd.h>
 #endif
 
+namespace pbl
+{
+namespace process
+{
+
 /* We use _Exit to avoid calling destructors, etc.
  */
 void detach()
 {
 	#if defined( _POSIX_VERSION )
-	// Close open files
-	close(STDIN_FILENO);
-	close(STDOUT_FILENO);
-	close(STDERR_FILENO);
 
 	// Detach process
 	pid_t res = fork();
@@ -71,7 +72,13 @@ void detach()
 				}
 			}
 		}
+
+		freopen("/dev/null","r",stdin);
+		freopen("/dev/null", "a", stdout);
+		freopen("/dev/null", "a", stderr);
 	}
 
 	#endif // if defined( _POSIX_VERSION )
+}
+}
 }

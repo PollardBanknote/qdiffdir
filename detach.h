@@ -29,6 +29,10 @@
 #ifndef DETACH_H
 #define DETACH_H
 
+namespace pbl
+{
+namespace process
+{
 /** @brief Try to detach from terminal
  *
  * This function tries to achieve two effects: allow the calling process to
@@ -42,5 +46,7 @@
  * will be closed.
  */
 void detach();
+}
+}
 
 #endif // DETACH_H

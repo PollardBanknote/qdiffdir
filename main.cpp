@@ -117,7 +117,7 @@ int main(
 	}
 
 	// Detach from the terminal and start up the GUI
-	detach();
+	pbl::process::detach();
 
 	QApplication a(argc, argv);
 
