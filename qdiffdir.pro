@@ -26,9 +26,9 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
 	dirdiffform.h \
 	comparewidget.h \
-	process/detach.h \
     fileutils/qutils.h \
-    fileutils/fileutils.h
+    fileutils/fileutils.h \
+    process/process.h
 
 FORMS    += mainwindow.ui \
 	dirdiffform.ui \
