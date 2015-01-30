@@ -32,7 +32,7 @@
 #include <QtGui/QApplication>
 
 #include "mainwindow.h"
-#include "detach.h"
+#include "process/detach.h"
 
 /** @brief Start the application based on command line arguments
  */

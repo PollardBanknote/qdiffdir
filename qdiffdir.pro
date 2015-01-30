@@ -16,7 +16,7 @@ SOURCES += main.cpp\
 		mainwindow.cpp \
 	comparewidget.cpp \
 	dirdiffform.cpp \
-	detach.cpp \
+	process/detach.cpp \
     fileutils/qutils.cpp \
     fileutils/copyfile.cpp \
     fileutils/abspath.cpp \
@@ -26,7 +26,7 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
 	dirdiffform.h \
 	comparewidget.h \
-	detach.h \
+	process/detach.h \
     fileutils/qutils.h \
     fileutils/fileutils.h
 
