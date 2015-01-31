@@ -154,8 +154,3 @@ QStringList getRecursiveDirectories(
 
 	return l;
 }
-
-QString lastPathComponent(const QString& s)
-{
-	return QString::fromStdString(pbl::file::basename(s.toStdString()));
-}

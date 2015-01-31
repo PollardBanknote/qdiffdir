@@ -222,6 +222,11 @@ private:
 
 };
 
+QString lastPathComponent(const QString& s)
+{
+	return QString::fromStdString(pbl::file::basename(s.toStdString()));
+}
+
 }
 
 DirDiffForm::DirDiffForm(QWidget* parent_) :

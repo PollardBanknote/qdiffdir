@@ -37,5 +37,4 @@ QFileInfoList getRecursiveFileInfoList(const QDir& dir = QDir(), size_t depth = 
 QStringList getRecursiveAbsoluteFilenames(const QDir& dir = QDir(), size_t depth = 0, const QString& nameFilters = QString(), const QDir::Filters& filters = QDir::Files);
 QStringList getRecursiveRelativeFilenames(const QDir& dir = QDir(), size_t depth = 0, const QString& nameFilters = QString(), const QDir::Filters& filters = QDir::Files);
 QStringList getRecursiveDirectories(const QDir& dir, size_t depth);
-QString lastPathComponent(const QString& s);
 #endif // QUTILS_H
