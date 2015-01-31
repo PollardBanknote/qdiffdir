@@ -49,6 +49,7 @@ std::string absolute_path(const std::string& filepath);
  *
  * @note If source does not exist, dest is not created. Will overwrite an
  * existing file "dest". Dest has same permissions as source, if possible.
+ * Directories are not copied.
  */
 bool copy(const std::string& source, const std::string& dest);
 
