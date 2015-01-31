@@ -41,7 +41,7 @@
 #include <QDebug>
 
 #include "qutils.h"
-#include "pbl/fileutils/fileutils.h"
+#include "fileutils/fileutils.h"
 
 namespace
 {

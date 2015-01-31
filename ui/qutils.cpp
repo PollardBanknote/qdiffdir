@@ -36,7 +36,7 @@
 
 #include <QDebug>
 
-#include "pbl/fileutils/fileutils.h"
+#include "fileutils/fileutils.h"
 
 namespace
 {
