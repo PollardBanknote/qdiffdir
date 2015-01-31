@@ -17,7 +17,7 @@ SOURCES += main.cpp\
 	comparewidget.cpp \
 	dirdiffform.cpp \
 	pbl/process/detach.cpp \
-    pbl/fileutils/qutils.cpp \
+    qutils.cpp \
     pbl/fileutils/copyfile.cpp \
     pbl/fileutils/abspath.cpp \
     pbl/fileutils/compare.cpp \
@@ -26,7 +26,7 @@ SOURCES += main.cpp\
 HEADERS  += mainwindow.h \
 	dirdiffform.h \
 	comparewidget.h \
-    pbl/fileutils/qutils.h \
+    qutils.h \
     pbl/fileutils/fileutils.h \
     pbl/process/process.h
 

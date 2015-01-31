@@ -40,7 +40,7 @@
 #include <QInputDialog>
 #include <QDebug>
 
-#include "pbl/fileutils/qutils.h"
+#include "qutils.h"
 #include "pbl/fileutils/fileutils.h"
 
 namespace
