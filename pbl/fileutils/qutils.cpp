@@ -26,7 +26,7 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "fileutils/qutils.h"
+#include "pbl/fileutils/qutils.h"
 
 #include <QFileInfoList>
 #include <QDir>
@@ -36,7 +36,7 @@
 
 #include <QDebug>
 
-#include "fileutils/fileutils.h"
+#include "pbl/fileutils/fileutils.h"
 
 namespace
 {

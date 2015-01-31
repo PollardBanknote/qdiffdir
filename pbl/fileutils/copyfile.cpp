@@ -38,7 +38,7 @@
 #include <fcntl.h>
 #endif
 
-#include "fileutils/fileutils.h"
+#include "pbl/fileutils/fileutils.h"
 
 namespace
 {
@@ -61,7 +61,7 @@ namespace file
  * permissions should probably be the same. But group might be a different
  * group.
  * @todo Relying so heavily on C, seems strange to use ifstream
- * @todo What if dest is a directory?
+ * @todo What if dest is a directory? What if source is a directory?
  */
 bool copy(
 	const std::string& source,
