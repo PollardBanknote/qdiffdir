@@ -144,13 +144,13 @@ bool copy_inner(int in, const std::string& dest)
 
 }
 
-bool is_regular_file(int in)
+bool is_file(int in)
 {
 	struct stat st;
 
 	if ( ::fstat(in, &st) == 0 )
 	{
-		return S_ISREG(st.st_mode);
+		return S_ISREG(st.st_mode) || S_ISLNK(st.st_mode);
 	}
 
 	return false;
@@ -178,7 +178,7 @@ bool copy(
 	{
 		bool res = false;
 
-		if (is_regular_file(in))
+		if (is_file(in))
 		{
 			res = copy_inner(in, dest);
 		}
