@@ -162,7 +162,8 @@ namespace pbl
 namespace file
 {
 
-/** Try to do copy the file as safely as possible.
+/** Try to do copy the file as safely as possible (esp., gracefully handle
+ * errors, avoid race conditions).
  *
  * @todo What if dest is a directory?
  */

@@ -47,9 +47,13 @@ std::string absolute_path(const std::string& filepath);
  * @param dest A file (including name) of the file to create
  * @returns true iff dest exists and is a copy of source
  *
- * @note If source does not exist, dest is not created. Will overwrite an
- * existing file "dest". Dest has same permissions as source, if possible.
- * Directories are not copied.
+ * If source does not exist or is not a file, the copy will fail.
+ *
+ * If dest exists, it will be overwritten. Dest will have the same file
+ * permissions of source, if possible (subject to umask).
+ *
+ * This function copies the source file "safely". That is, in the event of an
+ * error, dest is unaltered (or, if it didn't exist, continues to not exist).
  */
 bool copy(const std::string& source, const std::string& dest);
 
