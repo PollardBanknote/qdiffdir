@@ -16,19 +16,19 @@ SOURCES += main.cpp\
 		mainwindow.cpp \
 	comparewidget.cpp \
 	dirdiffform.cpp \
-	process/detach.cpp \
-    fileutils/qutils.cpp \
-    fileutils/copyfile.cpp \
-    fileutils/abspath.cpp \
-    fileutils/compare.cpp \
-    fileutils/basename.cpp
+	pbl/process/detach.cpp \
+    pbl/fileutils/qutils.cpp \
+    pbl/fileutils/copyfile.cpp \
+    pbl/fileutils/abspath.cpp \
+    pbl/fileutils/compare.cpp \
+    pbl/fileutils/basename.cpp
 
 HEADERS  += mainwindow.h \
 	dirdiffform.h \
 	comparewidget.h \
-    fileutils/qutils.h \
-    fileutils/fileutils.h \
-    process/process.h
+    pbl/fileutils/qutils.h \
+    pbl/fileutils/fileutils.h \
+    pbl/process/process.h
 
 FORMS    += mainwindow.ui \
 	dirdiffform.ui \
