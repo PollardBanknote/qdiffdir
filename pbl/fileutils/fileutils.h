@@ -33,7 +33,7 @@
 
 namespace pbl
 {
-namespace file
+namespace fs
 {
 /** @brief Get an absolute path of a file
  * @param filepath The path of an (existing) file

@@ -159,7 +159,7 @@ bool is_file(int in)
 
 namespace pbl
 {
-namespace file
+namespace fs
 {
 
 /** Try to do copy the file as safely as possible (esp., gracefully handle

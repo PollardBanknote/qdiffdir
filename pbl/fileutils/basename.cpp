@@ -80,7 +80,7 @@ std::string basename_posix(const std::string& s)
 
 namespace pbl
 {
-namespace file
+namespace fs
 {
 // Calls the basename_xxx appropriate for this platform
 std::string basename(const std::string& s)

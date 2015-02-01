@@ -39,7 +39,7 @@
 
 namespace pbl
 {
-namespace file
+namespace fs
 {
 
 std::string absolute_path(const std::string& filename)

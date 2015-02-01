@@ -65,7 +65,7 @@ bool different_sizes(const std::string& f, const std::string& g)
 
 namespace pbl
 {
-namespace file
+namespace fs
 {
 int compare(const std::string& f, const std::string& g)
 {

@@ -80,7 +80,7 @@ public:
 		}
 		else
 		{
-			return (pbl::file::compare(first.toStdString(), second.toStdString()) == 1);
+            return (pbl::fs::compare(first.toStdString(), second.toStdString()) == 1);
 		}
 	}
 
@@ -224,7 +224,7 @@ private:
 
 QString lastPathComponent(const QString& s)
 {
-	return QString::fromStdString(pbl::file::basename(s.toStdString()));
+    return QString::fromStdString(pbl::fs::basename(s.toStdString()));
 }
 
 }
@@ -501,7 +501,7 @@ void DirDiffForm::copyFile(
 		}
 	}
 
-	if ( pbl::file::copy(file.toStdString(), destpath.toStdString()))
+    if ( pbl::fs::copy(file.toStdString(), destpath.toStdString()))
 	{
 		fileChanged(destpath);
 	}
