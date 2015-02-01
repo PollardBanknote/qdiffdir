@@ -60,41 +60,41 @@ QStringList parseNameFilters(QString filters)
 	return parsed_filters;
 }
 
-}
-
 QFileInfoList getRecursiveFileInfoList(
-	const QDir&    dir,
-	size_t         depth,
-	const QString& nameFilters,
-	QDir::Filters  filters
+    const QDir&    dir,
+    size_t         depth,
+    const QString& nameFilters,
+    QDir::Filters  filters
 )
 {
-	// remove the . and .. folders
-	filters |= QDir::NoDotAndDotDot;
+    // remove the . and .. folders
+    filters |= QDir::NoDotAndDotDot;
 
-	QFileInfoList files;
+    QFileInfoList files;
 
-	if ( nameFilters.isEmpty())
-	{
-		files = dir.entryInfoList(filters);
-	}
-	else
-	{
-		files = dir.entryInfoList(parseNameFilters(nameFilters), filters);
-	}
+    if ( nameFilters.isEmpty())
+    {
+        files = dir.entryInfoList(filters);
+    }
+    else
+    {
+        files = dir.entryInfoList(parseNameFilters(nameFilters), filters);
+    }
 
-	if ( depth > 0 )
-	{
-		QFileInfoList directory_list = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+    if ( depth > 0 )
+    {
+        QFileInfoList directory_list = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
 
-		foreach(QFileInfo dir_info, directory_list)
-		{
-			files.append(getRecursiveFileInfoList(dir_info.absoluteFilePath(), depth - 1, nameFilters, filters));
-		}
-	}
+        foreach(QFileInfo dir_info, directory_list)
+        {
+            files.append(getRecursiveFileInfoList(dir_info.absoluteFilePath(), depth - 1, nameFilters, filters));
+        }
+    }
 
-	return files;
+    return files;
 }
+}
+
 
 QStringList getRecursiveAbsoluteFilenames(
 	const QDir&          dir,
