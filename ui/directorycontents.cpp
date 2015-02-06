@@ -77,7 +77,7 @@ bool DirectoryContents::cd(const QString& path)
 	return false;
 }
 
-void DirectoryContents::setDepth(int d)
+QStringList DirectoryContents::setDepth(int d)
 {
 	/// @todo if depth shrinks, might save some work
 	if ( d != maxdepth )
@@ -85,6 +85,7 @@ void DirectoryContents::setDepth(int d)
 		maxdepth = d;
 		refresh();
 	}
+    return getRelativeFileNames();
 }
 
 void DirectoryContents::refresh()

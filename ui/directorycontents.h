@@ -59,7 +59,7 @@ public:
 
 	bool cd(const QString& path);
 
-	void setDepth(int d);
+    QStringList setDepth(int d);
 
 	QStringList getRelativeFileNames() const;
 

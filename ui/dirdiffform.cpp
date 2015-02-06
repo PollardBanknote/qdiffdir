@@ -263,8 +263,8 @@ void DirDiffForm::setFlags(
 
 void DirDiffForm::on_viewdiff_clicked()
 {
-	QString s1 = ui->compareview->getSelectedLeft();
-	QString s2 = ui->compareview->getSelectedRight();
+    const QString s1 = ui->compareview->getSelectedLeft();
+    const QString s2 = ui->compareview->getSelectedRight();
 
 	if ( s1.isEmpty() && s2.isEmpty())
 	{
@@ -366,7 +366,7 @@ void DirDiffForm::on_renametoleft_clicked()
 
 void DirDiffForm::on_openleftdir_clicked()
 {
-	QString s = QFileDialog::getExistingDirectory(this, "Choose a directory", ldir.absolutePath());
+    const QString s = QFileDialog::getExistingDirectory(this, "Choose a directory", ldir.absolutePath());
 
 	if ( !s.isEmpty())
 	{
@@ -376,7 +376,7 @@ void DirDiffForm::on_openleftdir_clicked()
 
 void DirDiffForm::on_openrightdir_clicked()
 {
-	QString s = QFileDialog::getExistingDirectory(this, "Choose a directory", rdir.absolutePath());
+    const QString s = QFileDialog::getExistingDirectory(this, "Choose a directory", rdir.absolutePath());
 
 	if ( !s.isEmpty())
 	{
@@ -436,8 +436,7 @@ void DirDiffForm::on_depth_valueChanged(int d)
 {
 	{
 		QStringList rem = ldir.getRelativeFileNames();
-		ldir.setDepth(d);
-		QStringList files = ldir.getRelativeFileNames();
+        const QStringList files = ldir.setDepth(d);
 
 		for ( int i = 0; i < files.count(); ++i )
 		{
@@ -448,8 +447,7 @@ void DirDiffForm::on_depth_valueChanged(int d)
 	}
 	{
 		QStringList rem = rdir.getRelativeFileNames();
-		rdir.setDepth(d);
-		QStringList files = rdir.getRelativeFileNames();
+        const QStringList files = rdir.setDepth(d);
 
 		for ( int i = 0; i < files.count(); ++i )
 		{
@@ -483,16 +481,14 @@ void DirDiffForm::changeDirectories(
 
 	/// @bug Filters
 	const int depth_ = ui->depth->value();
-	ldir.setDepth(depth_);
-	rdir.setDepth(depth_);
+    const QStringList leftfiles = ldir.setDepth(depth_);
+    const QStringList rightfiles = rdir.setDepth(depth_);
 
 	{
 		/// @todo If left and right are the same, don't do both
 		/// @todo If a dir hasn't changed, don't go through it
 		/// @todo Get directories and files at the same time
 		// refresh the compareview
-		QStringList leftfiles  = ldir.getRelativeFileNames();
-		QStringList rightfiles = rdir.getRelativeFileNames();
 
 		when = QDateTime::currentDateTime();
 
@@ -550,11 +546,6 @@ void DirDiffForm::contentsChanged(QString dirname_)
 {
 	QDir          eventdir(dirname_);
 	const QString dirname = dirName(eventdir); // absolute path of dir
-
-	// if ldir.above(dirname)
-	// get old list of files
-	// get new list of files
-	// added, removed, changed
 
 	// absolute path of every file below dirname
 	if ( dirname.startsWith(ldir.absolutePath()))
