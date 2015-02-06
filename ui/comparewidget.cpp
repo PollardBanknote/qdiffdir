@@ -950,7 +950,10 @@ void CompareWidget::rematch()
 }
 
 // WorkerThread ================================================================
-WorkerThread::WorkerThread(Compare* cmp, const std::vector< items_t >& t)
+WorkerThread::WorkerThread(
+    Compare*                      cmp,
+    const std::vector< items_t >& t
+)
 	: QThread(0), compare(cmp ? cmp->clone() : 0), todo(t)
 {
 }

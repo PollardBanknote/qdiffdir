@@ -51,8 +51,8 @@ class FileCompare : public Compare
 {
 public:
 	FileCompare(
-        const QString& l,
-        const QString& r
+	    const QString& l,
+	    const QString& r
 	)
 		: left(l), right(r)
 	{
@@ -71,8 +71,8 @@ public:
 		const QString& rfile
 	)
 	{
-        const QString first  = left + "/" + lfile;
-        const QString second = right + "/" + rfile;
+		const QString first  = left + "/" + lfile;
+		const QString second = right + "/" + rfile;
 
 		if ( first.endsWith(".gz") || second.endsWith(".gz"))
 		{
@@ -118,8 +118,8 @@ private:
 		}
 	}
 
-    QString left;
-    QString right;
+	QString left;
+	QString right;
 
 };
 
@@ -291,8 +291,8 @@ void DirDiffForm::on_viewdiff_clicked()
 
 void DirDiffForm::saveAs(
 	const QString& original_filename, // a filename relative to source
-    const QString&    source,
-    const QString&    destination
+	const QString& source,
+	const QString& destination
 )
 {
 	if ( !original_filename.isEmpty())
@@ -300,7 +300,7 @@ void DirDiffForm::saveAs(
 		QStringList suggested_relative_path = original_filename.split(QDir::separator(), QString::SkipEmptyParts);
 		suggested_relative_path.pop_back(); // remove the filename
 
-        QDir suggested_save_directory(destination);
+		QDir suggested_save_directory(destination);
 
 		bool valid_dir = true;
 
@@ -311,7 +311,7 @@ void DirDiffForm::saveAs(
 
 		if ( !valid_dir )
 		{
-            suggested_save_directory.cd(destination);
+			suggested_save_directory.cd(destination);
 		}
 
 		QString suggested_filename = suggested_save_directory.absolutePath() + QDir::separator() + lastPathComponent(original_filename);
@@ -319,11 +319,11 @@ void DirDiffForm::saveAs(
 
 		if ( !save_file_name.isEmpty())
 		{
-            QString s = lastPathComponent(save_file_name);
-            QString t = save_file_name;
-            t.chop(s.length());
-            QDir src(source);
-            copyTo(src.absoluteFilePath(original_filename), t, s);
+			QString s = lastPathComponent(save_file_name);
+			QString t = save_file_name;
+			t.chop(s.length());
+			QDir src(source);
+			copyTo(src.absoluteFilePath(original_filename), t, s);
 		}
 	}
 }
@@ -356,12 +356,12 @@ void DirDiffForm::on_copytoleft_clicked()
 
 void DirDiffForm::on_renametoright_clicked()
 {
-    saveAs(ui->compareview->getSelectedLeft(), ldir.absolutePath(), rdir.absolutePath());
+	saveAs(ui->compareview->getSelectedLeft(), ldir.absolutePath(), rdir.absolutePath());
 }
 
 void DirDiffForm::on_renametoleft_clicked()
 {
-    saveAs(ui->compareview->getSelectedRight(), rdir.absolutePath(), ldir.absolutePath());
+	saveAs(ui->compareview->getSelectedRight(), rdir.absolutePath(), ldir.absolutePath());
 }
 
 void DirDiffForm::on_openleftdir_clicked()
@@ -497,7 +497,7 @@ void DirDiffForm::changeDirectories(
 		when = QDateTime::currentDateTime();
 
 		ui->compareview->setLeftAndRight(ldir.absolutePath(), rdir.absolutePath(), leftfiles, rightfiles);
-        ui->compareview->setComparison(FileCompare(ldir.absolutePath(), rdir.absolutePath()));
+		ui->compareview->setComparison(FileCompare(ldir.absolutePath(), rdir.absolutePath()));
 	}
 
 	// create new file system watcher
@@ -551,93 +551,97 @@ void DirDiffForm::contentsChanged(QString dirname_)
 	QDir          eventdir(dirname_);
 	const QString dirname = dirName(eventdir); // absolute path of dir
 
-    // if ldir.above(dirname)
-    //    get old list of files
-    //    get new list of files
-    //    added, removed, changed
+	// if ldir.above(dirname)
+	// get old list of files
+	// get new list of files
+	// added, removed, changed
 
 	// absolute path of every file below dirname
 	if ( dirname.startsWith(ldir.absolutePath()))
 	{
-        const QStringList old = ldir.getRelativeFileNames();
+		const QStringList old = ldir.getRelativeFileNames();
 
-        /// @todo Only need to search from changed directory and down
-        ldir.refresh();
+		/// @todo Only need to search from changed directory and down
+		ldir.refresh();
 
-        const QStringList curr = ldir.getRelativeFileNames();
+		const QStringList curr = ldir.getRelativeFileNames();
 
-        QStringList removed;
-        QStringList added_or_changed;
+		QStringList removed;
+		QStringList added_or_changed;
 
-        for (int i = 0, n = old.count(); i < n; ++i)
-        {
-            if (curr.contains(old.at(i)))
-            {
-                // changed
-                QFileInfo fi(ldir.absoluteFilePath(old.at(i)));
+		for ( int i = 0, n = old.count(); i < n; ++i )
+		{
+			if ( curr.contains(old.at(i)))
+			{
+				// changed
+				QFileInfo fi(ldir.absoluteFilePath(old.at(i)));
 
-                if ( fi.lastModified() > when )
-                {
-                    added_or_changed << old.at(i);
-                }
-            }
-            else
-            {
-                // removed
-                removed << old.at(i);
-            }
-        }
+				if ( fi.lastModified() > when )
+				{
+					added_or_changed << old.at(i);
+				}
+			}
+			else
+			{
+				// removed
+				removed << old.at(i);
+			}
+		}
 
-        for (int i = 0, n = curr.count(); i < n; ++i)
-        {
-            // added
-            if (!old.contains(curr.at(i)))
-                added_or_changed << curr.at(i);
-        }
+		for ( int i = 0, n = curr.count(); i < n; ++i )
+		{
+			// added
+			if ( !old.contains(curr.at(i)))
+			{
+				added_or_changed << curr.at(i);
+			}
+		}
 
-        ui->compareview->updateLeft(added_or_changed, removed);
+		ui->compareview->updateLeft(added_or_changed, removed);
 	}
 
 	if ( dirname.startsWith(rdir.absolutePath()))
 	{
 
-        const QStringList old = rdir.getRelativeFileNames();
+		const QStringList old = rdir.getRelativeFileNames();
 
-        /// @todo Only need to search from changed directory and down
-        rdir.refresh();
+		/// @todo Only need to search from changed directory and down
+		rdir.refresh();
 
-        const QStringList curr = rdir.getRelativeFileNames();
+		const QStringList curr = rdir.getRelativeFileNames();
 
-        QStringList removed;
-        QStringList added_or_changed;
+		QStringList removed;
+		QStringList added_or_changed;
 
-        for (int i = 0, n = old.count(); i < n; ++i)
-        {
-            if (curr.contains(old.at(i)))
-            {
-                // changed
-                QFileInfo fi(rdir.absoluteFilePath(old.at(i)));
+		for ( int i = 0, n = old.count(); i < n; ++i )
+		{
+			if ( curr.contains(old.at(i)))
+			{
+				// changed
+				QFileInfo fi(rdir.absoluteFilePath(old.at(i)));
 
-                if ( fi.lastModified() > when )
-                {
-                    added_or_changed << old.at(i);
-                }
-            }
-            else
-            {
-                // removed
-                removed << old.at(i);
-            }
-        }
+				if ( fi.lastModified() > when )
+				{
+					added_or_changed << old.at(i);
+				}
+			}
+			else
+			{
+				// removed
+				removed << old.at(i);
+			}
+		}
 
-        for (int i = 0, n = curr.count(); i < n; ++i)
-        {
-            // added
-            if (!old.contains(curr.at(i)))
-                added_or_changed << curr.at(i);
-        }
+		for ( int i = 0, n = curr.count(); i < n; ++i )
+		{
+			// added
+			if ( !old.contains(curr.at(i)))
+			{
+				added_or_changed << curr.at(i);
+			}
+		}
 
-        ui->compareview->updateRight(added_or_changed, removed);
+		ui->compareview->updateRight(added_or_changed, removed);
 	}
 }
 

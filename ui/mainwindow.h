@@ -47,9 +47,9 @@ class MainWindow : public QMainWindow
 public:
 	/** @brief Initialize the comparison tool with the command line arguments
 	 * @param directories One or two directories from the command line
-     * @param show_left_only Whether to show files that are on the left only
-     * @param show_right_only Whether to show files that are on the right only
-     * @param show_identical Whether to show files that are the same on the left and righ
+	 * @param show_left_only Whether to show files that are on the left only
+	 * @param show_right_only Whether to show files that are on the right only
+	 * @param show_identical Whether to show files that are the same on the left and righ
 	 *
 	 * If directories has no elements, both sides of the compare window will
 	 * be the current directory. If it has one element, the left will be the
@@ -57,7 +57,12 @@ public:
 	 * are two or more elements, the left will be the first entry and the
 	 * right will be the second.
 	 */
-    explicit MainWindow(const std::vector< std::string >& directories, bool show_left_only, bool show_right_only, bool show_identical);
+	explicit MainWindow(
+	    const std::vector< std::string >& directories,
+	    bool                              show_left_only,
+	    bool                              show_right_only,
+	    bool                              show_identical
+	);
 
 	/** @brief Destructor
 	 */

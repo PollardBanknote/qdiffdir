@@ -57,9 +57,9 @@ public:
 
 	QStringList getDirectories() const;
 
-    QStringList getAbsoluteFileNames() const;
+	QStringList getAbsoluteFileNames() const;
 
-    void refresh();
+	void refresh();
 private:
 	void descend(const QString& path, const QString& rel, int depth);
 

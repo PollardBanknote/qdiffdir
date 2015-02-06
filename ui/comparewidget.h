@@ -42,7 +42,10 @@ class CompareWidget;
 
 struct items_t
 {
-	items_t(const QString& l, const QString& r)
+	items_t(
+	    const QString& l,
+	    const QString& r
+	)
 		: left(l), right(r)
 	{
 
@@ -82,7 +85,10 @@ class WorkerThread : public QThread
 {
 	Q_OBJECT
 public:
-	explicit WorkerThread(Compare*, const std::vector< items_t >&);
+	explicit WorkerThread(
+	    Compare                     *,
+	    const std::vector< items_t >&
+	);
 	~WorkerThread();
 
 	void clear();

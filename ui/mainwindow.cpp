@@ -30,10 +30,10 @@
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(
-	const std::vector< std::string >& dirnames,
-	bool show_left_only,
-	bool show_right_only,
-	bool show_identical
+    const std::vector< std::string >& dirnames,
+    bool                              show_left_only,
+    bool                              show_right_only,
+    bool                              show_identical
 ) : QMainWindow(0), ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);

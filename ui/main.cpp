@@ -41,14 +41,14 @@ int main(
 	char* argv[]
 )
 {
-    // options for the application
+	// options for the application
 	std::vector< std::string > filenames;
 
-    bool show_left_only = true;
-    bool show_right_only = true;
-    bool show_identical = true;
+	bool show_left_only  = true;
+	bool show_right_only = true;
+	bool show_identical  = true;
 
-    // command line processing
+	// command line processing
 	bool no_more_switches = false;
 	bool help             = false;
 
@@ -64,27 +64,27 @@ int main(
 
 			if ( s == "--left=show" )
 			{
-                show_left_only = true;
+				show_left_only = true;
 			}
 			else if ( s == "--left=hide" )
 			{
-                show_left_only = false;
+				show_left_only = false;
 			}
 			else if ( s == "--right=show" )
 			{
-                show_right_only = true;
-            }
+				show_right_only = true;
+			}
 			else if ( s == "--right=hide" )
-            {
-                show_right_only = false;
+			{
+				show_right_only = false;
 			}
 			else if ( s == "--same=show" )
 			{
-                show_identical = true;
+				show_identical = true;
 			}
 			else if ( s == "--same=hide" )
 			{
-                show_identical = false;
+				show_identical = false;
 			}
 			else if ( s == "--help" )
 			{
@@ -121,7 +121,7 @@ int main(
 
 	QApplication a(argc, argv);
 
-    MainWindow w(filenames, show_left_only, show_right_only, show_identical);
+	MainWindow w(filenames, show_left_only, show_right_only, show_identical);
 	w.show();
 
 	return a.exec();

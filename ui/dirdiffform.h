@@ -68,18 +68,18 @@ private slots:
 
 	void on_swap_clicked();
 private:
-    void saveAs(const QString&, const QString& source, const QString& destination);
+	void saveAs(const QString&, const QString& source, const QString& destination);
 
-    void copyTo(const QString& file, const QString& destdir);
-    void copyTo(const QString& file, const QString& destdir, const QString& newname);
+	void copyTo(const QString& file, const QString& destdir);
+	void copyTo(const QString& file, const QString& destdir, const QString& newname);
 
 	void fileChanged(QString);
 	QString renumber(const QString& s_);
 	QString dirName(const QDir& dir);
 
 	Ui::DirDiffForm*    ui;
-    DirectoryContents ldir;
-    DirectoryContents rdir;
+	DirectoryContents   ldir;
+	DirectoryContents   rdir;
 	QDateTime           when;                  // last time directories were updated
 	QFileSystemWatcher* watcher;
 };

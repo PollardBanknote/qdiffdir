@@ -42,34 +42,45 @@
 namespace
 {
 // append contents of in to out. Both file descriptors must be valid
-bool copy_contents(int in, int out)
+bool copy_contents(
+	int in,
+	int out
+)
 {
 	// Copy the contents of the file
 	char buffer[4096];
 
-	while (true)
+	while ( true )
 	{
-		const ssize_t n = ::read(in, buffer, sizeof(buffer));
+		const ssize_t n = ::read(in, buffer, sizeof( buffer ));
 
-		if (n < 0)
+		if ( n < 0 )
 		{
 			// error
 			return false;
 		}
 
 		// eof
-		if (n == 0)
+		if ( n == 0 )
+		{
 			break;
+		}
 
 		// otherwise, copy what we got
 		ssize_t x = 0;
+
 		do
 		{
 			ssize_t m = ::write(out, buffer + x, n - x);
-			if (m == -1)
+
+			if ( m == -1 )
+			{
 				return false;
+			}
+
 			x += m;
-		} while(x < n);
+		}
+		while ( x < n );
 	}
 
 	// flush to disk
@@ -81,15 +92,18 @@ bool copy_contents(int in, int out)
  * @todo Linux 3.11 supports O_TMPFILE - an anonymous file that can be "made
  * real". See man open.
  */
-bool copy_inner(int in, const std::string& dest)
+bool copy_inner(
+	int                in,
+	const std::string& dest
+)
 {
 	// Create dest. Possibly in place, but might need a temp file.
 	int f = ::open(dest.c_str(), O_CREAT | O_EXCL | O_WRONLY, S_IWUSR | S_IRUSR);
 
-	if ( f != -1)
+	if ( f != -1 )
 	{
 		// Copy the file
-		if (!copy_contents(in, f))
+		if ( !copy_contents(in, f))
 		{
 			::unlink(dest.c_str());
 			::close(f);
@@ -99,12 +113,12 @@ bool copy_inner(int in, const std::string& dest)
 	else
 	{
 		// file already exists, so copy to a temp first then overwrite atomically
-		std::string temp_file_name = dest + "cpyXXXXXX";
-		const std::size_t n = temp_file_name.length();
-		char*             s = new char[n + 1];
+		std::string       temp_file_name = dest + "cpyXXXXXX";
+		const std::size_t n              = temp_file_name.length();
+		char*             s              = new char[n + 1];
 		temp_file_name.copy(s, n, 0);
-		s[n] = '\0';
-		f    = ::mkstemp(s);
+		s[n]           = '\0';
+		f              = ::mkstemp(s);
 		temp_file_name = s;
 		delete[] s;
 
@@ -113,7 +127,7 @@ bool copy_inner(int in, const std::string& dest)
 			::fchmod(f, S_IWUSR | S_IRUSR);
 
 			// Copy the file
-			if (!copy_contents(in, f) || (::rename(temp_file_name.c_str(), dest.c_str()) != 0))
+			if ( !copy_contents(in, f) || ( ::rename(temp_file_name.c_str(), dest.c_str()) != 0 ))
 			{
 				// error occurred. Remove the partial file
 				::unlink(temp_file_name.c_str());
@@ -135,7 +149,7 @@ bool copy_inner(int in, const std::string& dest)
 
 	if ( ::fstat(in, &st) == 0 )
 	{
-		::fchmod(f, st.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO));
+		::fchmod(f, st.st_mode & ( S_IRWXU | S_IRWXG | S_IRWXO ));
 	}
 
 	::close(f);
@@ -155,6 +169,7 @@ bool is_file(int in)
 
 	return false;
 }
+
 }
 
 namespace pbl
@@ -176,11 +191,11 @@ bool copy(
 	// Open the input file
 	int in = ::open(source.c_str(), O_RDONLY);
 
-	if ( in != -1)
+	if ( in != -1 )
 	{
 		bool res = false;
 
-		if (is_file(in))
+		if ( is_file(in))
 		{
 			res = copy_inner(in, dest);
 		}
@@ -188,7 +203,9 @@ bool copy(
 		::close(in);
 		return res;
 	}
+
 	return false;
 }
+
 }
 }

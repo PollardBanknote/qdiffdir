@@ -71,12 +71,13 @@ void detach()
 			}
 		}
 
-		freopen("/dev/null","r",stdin);
+		freopen("/dev/null", "r", stdin);
 		freopen("/dev/null", "a", stdout);
 		freopen("/dev/null", "a", stderr);
 	}
 
-	#endif // if defined( _POSIX_VERSION )
+	#endif  // if defined( _POSIX_VERSION )
 }
+
 }
 }

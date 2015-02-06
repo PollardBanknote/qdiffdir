@@ -40,65 +40,84 @@ directory_iterator::directory_iterator() : d(0), e(0)
 
 directory_iterator::directory_iterator(const std::string& path) : d(0), e(0)
 {
-    d = opendir(path.c_str());
-    if (d)
-    {
-        // get the absolute path of the directory
-        if (!path.empty() && path[0] == '/')
-            abspath = path;
-        else
-            abspath = absolute_path(path);
+	d = opendir(path.c_str());
 
-        next();
-    }
+	if ( d )
+	{
+		// get the absolute path of the directory
+		if ( !path.empty() && path[0] == '/' )
+		{
+			abspath = path;
+		}
+		else
+		{
+			abspath = absolute_path(path);
+		}
+
+		next();
+	}
 }
 
 directory_iterator::~directory_iterator()
 {
-    if (d)
-        closedir(d);
+	if ( d )
+	{
+		closedir(d);
+	}
 }
 
 bool directory_iterator::operator==(const directory_iterator& i) const
 {
-    // only equal if both are end iterators
-    return is_end() && i.is_end();
+	// only equal if both are end iterators
+	return is_end() && i.is_end();
 }
 
 bool directory_iterator::operator!=(const directory_iterator& i) const
 {
-    return !(is_end() && i.is_end());
+	return !( is_end() && i.is_end());
 }
+
 directory_iterator& directory_iterator::operator++()
 {
-    next();
-    return *this;
+	next();
+	return *this;
 }
+
 const fileinfo_t& directory_iterator::operator*() const
 {
-    return fi;
+	return fi;
 }
+
 const fileinfo_t* directory_iterator::operator->() const
 {
-    return &fi;
+	return &fi;
 }
+
 bool directory_iterator::is_end() const
 {
-    return !d || !e;
+	return !d || !e;
 }
+
 void directory_iterator::next()
 {
-    if (d)
-    {
-        do
-        {
-            e = readdir(d);
-        } while (e && (strcmp(e->d_name, ".") == 0 || strcmp(e->d_name, "..") == 0));
-        if (e)
-            fi = fileinfo_t(abspath,e);
-        else
-            fi = fileinfo_t();
-    }
+	if ( d )
+	{
+		do
+		{
+			e = readdir(d);
+		}
+		while ( e && ( strcmp(e->d_name, ".") == 0 || strcmp(e->d_name, "..") == 0 ));
+
+		if ( e )
+		{
+			fi = fileinfo_t(abspath, e);
+		}
+		else
+		{
+			fi = fileinfo_t();
+		}
+	}
 }
+
 }
 }

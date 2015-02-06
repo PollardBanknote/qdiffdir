@@ -41,35 +41,34 @@ namespace fs
 class directory_iterator
 {
 public:
-    // construct an end iterator
-    directory_iterator();
+	// construct an end iterator
+	directory_iterator();
 
-    explicit directory_iterator(const std::string& path);
+	explicit directory_iterator(const std::string& path);
 
-    ~directory_iterator();
+	~directory_iterator();
 
-    bool operator==(const directory_iterator& i) const;
+	bool operator==(const directory_iterator& i) const;
 
-    bool operator!=(const directory_iterator& i) const;
+	bool operator!=(const directory_iterator& i) const;
 
-    directory_iterator& operator++();
+	directory_iterator& operator++();
 
-    const fileinfo_t& operator*() const;
+	const fileinfo_t& operator*() const;
 
-    const fileinfo_t* operator->() const;
-
+	const fileinfo_t* operator->() const;
 private:
-    directory_iterator(const directory_iterator&);
-    directory_iterator& operator=(const directory_iterator&);
+	directory_iterator(const directory_iterator&);
+	directory_iterator& operator=(const directory_iterator&);
 
-    bool is_end() const;
+	bool is_end() const;
 
-    void next();
+	void next();
 
-    std::string abspath;
-    DIR* d;
-    dirent* e;
-    fileinfo_t fi;
+	std::string abspath;
+	DIR*        d;
+	dirent*     e;
+	fileinfo_t  fi;
 };
 
 }

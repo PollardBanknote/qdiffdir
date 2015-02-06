@@ -34,21 +34,21 @@ namespace
 std::string basename_posix(const std::string& s)
 {
 	// j points to the last character in a component
-	std::size_t j = s.find_last_not_of('/');
-	unsigned depth = 0;
+	std::size_t j     = s.find_last_not_of('/');
+	unsigned    depth = 0;
 
-	while (j != std::string::npos)
+	while ( j != std::string::npos )
 	{
 		std::size_t i = s.find_last_of('/', j);
 
 		// i points to first character of this component
-		i = (i == std::string::npos ? 0 : i + 1);
+		i = ( i == std::string::npos ? 0 : i + 1 );
 
-		if (j - i + 1 == 1 && s[i] == '.')
+		if ( j - i + 1 == 1 && s[i] == '.' )
 		{
 			// component is ".", basically ignore this component
 		}
-		else if (j - i + 1 == 2 && s[i] == '.' && s[i + 1] == '.')
+		else if ( j - i + 1 == 2 && s[i] == '.' && s[i + 1] == '.' )
 		{
 			// component is "..", ignore the next component
 			++depth;
@@ -56,7 +56,7 @@ std::string basename_posix(const std::string& s)
 		else
 		{
 			// found a "normal" path component
-			if (depth == 0)
+			if ( depth == 0 )
 			{
 				return s.substr(i, j - i + 1);
 			}
@@ -65,17 +65,19 @@ std::string basename_posix(const std::string& s)
 			--depth;
 		}
 
-		if (i == 0)
+		if ( i == 0 )
 		{
 			// error, path is malformed
 			return std::string();
 		}
+
 		j = s.find_last_not_of('/', i - 1);
 	}
 
 	// can't find a component
-	return (s.empty() ? "" : "/");
+	return s.empty() ? "" : "/";
 }
+
 }
 
 namespace pbl
@@ -85,11 +87,12 @@ namespace fs
 // Calls the basename_xxx appropriate for this platform
 std::string basename(const std::string& s)
 {
-#ifdef _POSIX_C_SOURCE
+	#ifdef _POSIX_C_SOURCE
 	return basename_posix(s);
-#else
-#error "No implementation of basename is available for this platform"
-#endif
+
+	#else
+	#error "No implementation of basename is available for this platform"
+	#endif
 }
 
 #if 0
@@ -97,7 +100,8 @@ std::string basename(const std::string& s)
 void test_basename()
 {
 	// (input, basename)
-	const char* const paths[][2] = {
+	const char* const paths[][2] =
+	{
 		{ "/", "/" },
 		{ "///", "/" },
 		{ "/./", "/" },
@@ -132,16 +136,18 @@ void test_basename()
 		{ "usr/..", "" },
 	};
 
-	const std::size_t n = sizeof(paths)/sizeof(paths[0]);
-	for (std::size_t i = 0; i < n; ++i)
+	const std::size_t n = sizeof( paths ) / sizeof( paths[0] );
+
+	for ( std::size_t i = 0; i < n; ++i )
 	{
-		if (basename_posix(paths[i][0]) != paths[i][1])
+		if ( basename_posix(paths[i][0]) != paths[i][1] )
+		{
 			throw std::runtime_error("Bad implementation of basename_posix");
+		}
 	}
 }
 
-#endif
+#endif // if 0
 
 }
 }
-

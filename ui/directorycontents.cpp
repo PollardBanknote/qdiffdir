@@ -79,19 +79,19 @@ bool DirectoryContents::cd(const QString& path)
 
 void DirectoryContents::setDepth(int d)
 {
-    /// @todo if depth shrinks, might save some work
-    if (d != maxdepth)
-    {
-        maxdepth = d;
-        refresh();
-    }
+	/// @todo if depth shrinks, might save some work
+	if ( d != maxdepth )
+	{
+		maxdepth = d;
+		refresh();
+	}
 }
 
 void DirectoryContents::refresh()
 {
-    files.clear();
-    subdirs.clear();
-    descend(dir.absolutePath(), QString(), 0);
+	files.clear();
+	subdirs.clear();
+	descend(dir.absolutePath(), QString(), 0);
 }
 
 QStringList DirectoryContents::getRelativeFileNames() const
@@ -101,14 +101,14 @@ QStringList DirectoryContents::getRelativeFileNames() const
 
 QStringList DirectoryContents::getAbsoluteFileNames() const
 {
-    QStringList l;
+	QStringList l;
 
-    for (int i = 0, n = files.count(); i < n; ++i)
-    {
-        l << dir.absoluteFilePath(files.at(i));
-    }
+	for ( int i = 0, n = files.count(); i < n; ++i )
+	{
+		l << dir.absoluteFilePath(files.at(i));
+	}
 
-    return l;
+	return l;
 }
 
 QStringList DirectoryContents::getDirectories() const

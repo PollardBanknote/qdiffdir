@@ -43,37 +43,41 @@ namespace fs
 /// @bug Paths passed in should be absolute, or appended to cwd
 class fileinfo_t
 {
-    typedef off_t size_type;
+	typedef off_t size_type;
 
-    enum flags_t {
-        MODE = 1,
-        ALL = 1
-    };
+	enum flags_t
+	{
+		MODE = 1,
+		ALL  = 1
+	};
 public:
-    fileinfo_t();
+	fileinfo_t();
 
-    explicit fileinfo_t(const std::string& path);
+	explicit fileinfo_t(const std::string& path);
 
-    // e cannot be NULL
-    fileinfo_t(const std::string& dir, const dirent* e);
+	// e cannot be NULL
+	fileinfo_t(
+	    const std::string& dir,
+	    const dirent*      e
+	);
 
-    fileinfo_t(const fileinfo_t& i);
+	fileinfo_t(const fileinfo_t& i);
 
-    fileinfo_t& operator=(const fileinfo_t& i);
+	fileinfo_t& operator=(const fileinfo_t& i);
 
-    std::string path() const;
+	std::string path() const;
 
-    std::string absolute_path() const;
+	std::string absolute_path() const;
 
-    std::string name() const;
+	std::string name() const;
 
-    bool is_directory() const;
+	bool is_directory() const;
 private:
 
-    std::string path_;
-    std::string name_;
-    mutable int flags;
-    mutable struct stat st;
+	std::string         path_;
+	std::string         name_;
+	mutable int         flags;
+	mutable struct stat st;
 };
 
 }
