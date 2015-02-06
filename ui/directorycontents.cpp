@@ -141,3 +141,39 @@ void DirectoryContents::descend(
 		}
 	}
 }
+
+/// @todo Only return files from the given directory and below
+DirectoryContents::update_t DirectoryContents::update(const QString &)
+{
+    update_t u;
+
+    const QStringList old = files;
+
+    /// @todo Only need to search from changed directory and down
+    refresh();
+
+    for ( int i = 0, n = old.count(); i < n; ++i )
+    {
+        if ( files.contains(old.at(i)))
+        {
+            // changed
+            u.changed << old.at(i);
+        }
+        else
+        {
+            // removed
+            u.removed << old.at(i);
+        }
+    }
+
+    for ( int i = 0, n = files.count(); i < n; ++i )
+    {
+        // added
+        if ( !old.contains(files.at(i)))
+        {
+            u.added << files.at(i);
+        }
+    }
+
+    return u;
+}

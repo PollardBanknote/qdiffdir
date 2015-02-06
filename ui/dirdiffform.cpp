@@ -559,89 +559,36 @@ void DirDiffForm::contentsChanged(QString dirname_)
 	// absolute path of every file below dirname
 	if ( dirname.startsWith(ldir.absolutePath()))
 	{
-		const QStringList old = ldir.getRelativeFileNames();
+		DirectoryContents::update_t u = ldir.update(dirname);
 
-		/// @todo Only need to search from changed directory and down
-		ldir.refresh();
-
-		const QStringList curr = ldir.getRelativeFileNames();
-
-		QStringList removed;
-		QStringList added_or_changed;
-
-		for ( int i = 0, n = old.count(); i < n; ++i )
+		for ( int i = 0, n = u.changed.count(); i < n; ++i )
 		{
-			if ( curr.contains(old.at(i)))
-			{
-				// changed
-				QFileInfo fi(ldir.absoluteFilePath(old.at(i)));
+			QFileInfo fi(ldir.absoluteFilePath(u.changed.at(i)));
 
-				if ( fi.lastModified() > when )
-				{
-					added_or_changed << old.at(i);
-				}
-			}
-			else
+			if ( fi.lastModified() > when )
 			{
-				// removed
-				removed << old.at(i);
+				u.added << u.changed.at(i);
 			}
 		}
 
-		for ( int i = 0, n = curr.count(); i < n; ++i )
-		{
-			// added
-			if ( !old.contains(curr.at(i)))
-			{
-				added_or_changed << curr.at(i);
-			}
-		}
-
-		ui->compareview->updateLeft(added_or_changed, removed);
+		ui->compareview->updateLeft(u.added, u.removed);
 	}
 
 	if ( dirname.startsWith(rdir.absolutePath()))
 	{
+		DirectoryContents::update_t u = rdir.update(dirname);
 
-		const QStringList old = rdir.getRelativeFileNames();
-
-		/// @todo Only need to search from changed directory and down
-		rdir.refresh();
-
-		const QStringList curr = rdir.getRelativeFileNames();
-
-		QStringList removed;
-		QStringList added_or_changed;
-
-		for ( int i = 0, n = old.count(); i < n; ++i )
+		for ( int i = 0, n = u.changed.count(); i < n; ++i )
 		{
-			if ( curr.contains(old.at(i)))
-			{
-				// changed
-				QFileInfo fi(rdir.absoluteFilePath(old.at(i)));
+			QFileInfo fi(rdir.absoluteFilePath(u.changed.at(i)));
 
-				if ( fi.lastModified() > when )
-				{
-					added_or_changed << old.at(i);
-				}
-			}
-			else
+			if ( fi.lastModified() > when )
 			{
-				// removed
-				removed << old.at(i);
+				u.added << u.changed.at(i);
 			}
 		}
 
-		for ( int i = 0, n = curr.count(); i < n; ++i )
-		{
-			// added
-			if ( !old.contains(curr.at(i)))
-			{
-				added_or_changed << curr.at(i);
-			}
-		}
-
-		ui->compareview->updateRight(added_or_changed, removed);
+		ui->compareview->updateRight(u.added, u.removed);
 	}
 }
 

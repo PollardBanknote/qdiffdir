@@ -32,6 +32,7 @@
 #include <QString>
 #include <QDir>
 
+
 /** Used to observe the files/subdirectories of a directory
  *
  * @todo Remove all traces of Qt
@@ -39,7 +40,14 @@
 class DirectoryContents
 {
 public:
-	DirectoryContents();
+    struct update_t
+    {
+        QStringList added;
+        QStringList removed;
+        QStringList changed;
+    };
+
+    DirectoryContents();
 
 	QString absolutePath() const;
 
@@ -59,9 +67,10 @@ public:
 
 	QStringList getAbsoluteFileNames() const;
 
-	void refresh();
+    update_t update(const QString& d);
 private:
 	void descend(const QString& path, const QString& rel, int depth);
+    void refresh();
 
 	QDir dir;
 
