@@ -15,11 +15,15 @@ SOURCES += \
     fileutils/abspath.cpp \
     fileutils/basename.cpp \
     fileutils/compare.cpp \
-    fileutils/copyfile.cpp
+    fileutils/copyfile.cpp \
+    fileutils/diriter.cpp \
+    fileutils/fileinfo.cpp
 
 HEADERS += \
     process/process.h \
-    fileutils/fileutils.h
+    fileutils/fileutils.h \
+    fileutils/diriter.h \
+    fileutils/fileinfo.h
 unix {
     target.path = /usr/lib
     INSTALLS += target
