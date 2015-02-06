@@ -127,7 +127,11 @@
         </widget>
        </item>
        <item>
-        <widget class="QSpinBox" name="depth"/>
+        <widget class="QSpinBox" name="depth">
+         <property name="minimum">
+          <number>1</number>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>

@@ -38,6 +38,8 @@
 class QListWidgetItem;
 class QString;
 
+#include "directorycontents.h"
+
 namespace Ui
 {
 class DirDiffForm;
@@ -66,17 +68,18 @@ private slots:
 
 	void on_swap_clicked();
 private:
-	void resetView();
-	void copyTo(const QString& s, const QDir& source, const QDir& destination);
-	void saveAs(const QString&, const QDir& source, const QDir& destination);
-	void copyFile(const QString&, const QDir&, const QString&);
+    void saveAs(const QString&, const QString& source, const QString& destination);
+
+    void copyTo(const QString& file, const QString& destdir);
+    void copyTo(const QString& file, const QString& destdir, const QString& newname);
+
 	void fileChanged(QString);
 	QString renumber(const QString& s_);
 	QString dirName(const QDir& dir);
 
 	Ui::DirDiffForm*    ui;
-	QDir                leftdir;
-	QDir                rightdir;
+    DirectoryContents ldir;
+    DirectoryContents rdir;
 	QDateTime           when;                  // last time directories were updated
 	QFileSystemWatcher* watcher;
 };

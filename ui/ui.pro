@@ -16,12 +16,12 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     comparewidget.cpp \
     dirdiffform.cpp \
-    qutils.cpp
+    directorycontents.cpp
 
 HEADERS  += mainwindow.h \
     comparewidget.h \
     dirdiffform.h \
-    qutils.h
+    directorycontents.h
 
 FORMS    += mainwindow.ui \
     comparewidget.ui \

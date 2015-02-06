@@ -26,14 +26,53 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef QUTILS_H
-#define QUTILS_H
+#ifndef DIRECTORYCONTENTS_H
+#define DIRECTORYCONTENTS_H
 
-#include <QFileInfoList>
-#include <QDir>
 #include <QString>
+#include <QDir>
 
-QStringList getRecursiveAbsoluteFilenames(const QDir& dir = QDir(), size_t depth = 0, const QString& nameFilters = QString(), const QDir::Filters& filters = QDir::Files);
-QStringList getRecursiveRelativeFilenames(const QDir& dir = QDir(), size_t depth = 0, const QString& nameFilters = QString(), const QDir::Filters& filters = QDir::Files);
-QStringList getRecursiveDirectories(const QDir& dir, size_t depth);
-#endif // QUTILS_H
+/** Used to observe the files/subdirectories of a directory
+ *
+ * @todo Remove all traces of Qt
+ */
+class DirectoryContents
+{
+public:
+	DirectoryContents();
+
+	QString absolutePath() const;
+
+	QString absoluteFilePath(const QString& s) const;
+
+	QString relativeFilePath(const QString& s) const;
+
+	QString name() const;
+
+	bool cd(const QString& path);
+
+	void setDepth(int d);
+
+	QStringList getRelativeFileNames() const;
+
+	QStringList getDirectories() const;
+
+    QStringList getAbsoluteFileNames() const;
+
+    void refresh();
+private:
+	void descend(const QString& path, const QString& rel, int depth);
+
+	QDir dir;
+
+	int maxdepth;
+
+	// relative paths of each file
+	QStringList files;
+
+	// absolute paths of directories that we should watch
+	QStringList subdirs;
+};
+
+
+#endif // DIRECTORYCONTENTS_H
