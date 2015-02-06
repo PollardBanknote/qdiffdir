@@ -12,18 +12,19 @@ CONFIG += staticlib
 
 SOURCES += \
     process/detach.cpp \
-    fileutils/abspath.cpp \
-    fileutils/basename.cpp \
-    fileutils/compare.cpp \
-    fileutils/copyfile.cpp \
-    fileutils/diriter.cpp \
-    fileutils/fileinfo.cpp
+    fs/abspath.cpp \
+    fs/basename.cpp \
+    fs/compare.cpp \
+    fs/copyfile.cpp \
+    fs/diriter.cpp \
+    fs/fileinfo.cpp
 
 HEADERS += \
     process/process.h \
-    fileutils/fileutils.h \
-    fileutils/diriter.h \
-    fileutils/fileinfo.h
+    fs/fileutils.h \
+    fs/diriter.h \
+    fs/fileinfo.h
+
 unix {
     target.path = /usr/lib
     INSTALLS += target

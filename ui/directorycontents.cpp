@@ -28,7 +28,7 @@
  */
 #include "directorycontents.h"
 
-#include "fileutils/diriter.h"
+#include "fs/diriter.h"
 
 QString lastPathComponent(const QString&);
 
