@@ -40,14 +40,14 @@
 class DirectoryContents
 {
 public:
-    struct update_t
-    {
-        QStringList added;
-        QStringList removed;
-        QStringList changed;
-    };
+	struct update_t
+	{
+		QStringList added;
+		QStringList removed;
+		QStringList changed;
+	};
 
-    DirectoryContents();
+	DirectoryContents();
 
 	QString absolutePath() const;
 
@@ -59,7 +59,7 @@ public:
 
 	bool cd(const QString& path);
 
-    QStringList setDepth(int d);
+	QStringList setDepth(int d);
 
 	QStringList getRelativeFileNames() const;
 
@@ -67,10 +67,10 @@ public:
 
 	QStringList getAbsoluteFileNames() const;
 
-    update_t update(const QString& d);
+	update_t update(const QString& d);
 private:
 	void descend(const QString& path, const QString& rel, int depth);
-    void refresh();
+	void refresh();
 
 	QDir dir;
 

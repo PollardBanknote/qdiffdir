@@ -30,13 +30,13 @@
 #define DIRDIFFFORM_H
 
 #include <QMap>
-#include <QFileSystemWatcher>
-#include <QDir>
 #include <QWidget>
 #include <QDateTime>
 
+class QDir;
 class QListWidgetItem;
 class QString;
+class QFileSystemWatcher;
 
 #include "directorycontents.h"
 
@@ -45,17 +45,36 @@ namespace Ui
 class DirDiffForm;
 }
 
+/** A widget for comparing two directories, with some file operations
+ *
+ */
 class DirDiffForm : public QWidget
 {
 	Q_OBJECT
 public:
+	/** Create the widget with both views set to the current directory
+	 */
 	explicit DirDiffForm(QWidget* parent);
+
+	/** Destroy the widget and free resources
+	 */
 	~DirDiffForm();
+
+	/** Change the current directories
+	 * @param left Path for the left directory
+	 * @param right Path for the right directory
+	 */
 	void changeDirectories(const QString& left, const QString& right);
+
+	/** Change view options
+	 * @param show_left_only Show files that appear on the left only
+	 * @param show_right_only Show files that appear on the right only
+	 * @param show_identical Show files that are equivalent on the left and right
+	 */
 	void setFlags(bool show_left_only, bool show_right_only, bool show_identical);
 private slots:
-	void on_copytoright_clicked();
 	void on_viewdiff_clicked();
+	void on_copytoright_clicked();
 	void on_copytoleft_clicked();
 	void on_renametoright_clicked();
 	void on_renametoleft_clicked();
@@ -63,13 +82,11 @@ private slots:
 	void on_openrightdir_clicked();
 	void on_depth_valueChanged(int arg1);
 	void viewfiles(QString, QString);
-	void contentsChanged(QString);
 	void on_refresh_clicked();
-
 	void on_swap_clicked();
+	void contentsChanged(QString);
 private:
 	void saveAs(const QString&, const QString& source, const QString& destination);
-
 	void copyTo(const QString& file, const QString& destdir);
 	void copyTo(const QString& file, const QString& destdir, const QString& newname);
 

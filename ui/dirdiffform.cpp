@@ -39,6 +39,7 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QDebug>
+#include <QFileSystemWatcher>
 
 #include "fs/fileutils.h"
 #include "fs/diriter.h"
@@ -263,8 +264,8 @@ void DirDiffForm::setFlags(
 
 void DirDiffForm::on_viewdiff_clicked()
 {
-    const QString s1 = ui->compareview->getSelectedLeft();
-    const QString s2 = ui->compareview->getSelectedRight();
+	const QString s1 = ui->compareview->getSelectedLeft();
+	const QString s2 = ui->compareview->getSelectedRight();
 
 	if ( s1.isEmpty() && s2.isEmpty())
 	{
@@ -366,7 +367,7 @@ void DirDiffForm::on_renametoleft_clicked()
 
 void DirDiffForm::on_openleftdir_clicked()
 {
-    const QString s = QFileDialog::getExistingDirectory(this, "Choose a directory", ldir.absolutePath());
+	const QString s = QFileDialog::getExistingDirectory(this, "Choose a directory", ldir.absolutePath());
 
 	if ( !s.isEmpty())
 	{
@@ -376,7 +377,7 @@ void DirDiffForm::on_openleftdir_clicked()
 
 void DirDiffForm::on_openrightdir_clicked()
 {
-    const QString s = QFileDialog::getExistingDirectory(this, "Choose a directory", rdir.absolutePath());
+	const QString s = QFileDialog::getExistingDirectory(this, "Choose a directory", rdir.absolutePath());
 
 	if ( !s.isEmpty())
 	{
@@ -435,8 +436,8 @@ QString DirDiffForm::renumber(const QString& s_)
 void DirDiffForm::on_depth_valueChanged(int d)
 {
 	{
-		QStringList rem = ldir.getRelativeFileNames();
-        const QStringList files = ldir.setDepth(d);
+		QStringList       rem   = ldir.getRelativeFileNames();
+		const QStringList files = ldir.setDepth(d);
 
 		for ( int i = 0; i < files.count(); ++i )
 		{
@@ -446,8 +447,8 @@ void DirDiffForm::on_depth_valueChanged(int d)
 		ui->compareview->updateLeft(files, rem);
 	}
 	{
-		QStringList rem = rdir.getRelativeFileNames();
-        const QStringList files = rdir.setDepth(d);
+		QStringList       rem   = rdir.getRelativeFileNames();
+		const QStringList files = rdir.setDepth(d);
 
 		for ( int i = 0; i < files.count(); ++i )
 		{
@@ -479,15 +480,13 @@ void DirDiffForm::changeDirectories(
 		ui->openrightdir->setText(rdir.name());
 	}
 
-	/// @bug Filters
-	const int depth_ = ui->depth->value();
-    const QStringList leftfiles = ldir.setDepth(depth_);
-    const QStringList rightfiles = rdir.setDepth(depth_);
+	const int         depth_     = ui->depth->value();
+	const QStringList leftfiles  = ldir.setDepth(depth_);
+	const QStringList rightfiles = rdir.setDepth(depth_);
 
 	{
 		/// @todo If left and right are the same, don't do both
 		/// @todo If a dir hasn't changed, don't go through it
-		/// @todo Get directories and files at the same time
 		// refresh the compareview
 
 		when = QDateTime::currentDateTime();

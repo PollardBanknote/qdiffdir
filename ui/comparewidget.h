@@ -127,6 +127,8 @@ public:
 	explicit CompareWidget(QWidget* parent = 0);
 	~CompareWidget();
 	void setFlags(int);
+
+	/// @todo Take a Filter object
 	void addFilter(const QString&, const QRegExp&);
 	QString getSelectedLeft() const;
 	QString getSelectedRight() const;
@@ -135,8 +137,6 @@ public:
 	void setMatcher(const Matcher&);
 	void updateLeft(const QStringList& added_or_changed, const QStringList& remove = QStringList());
 	void updateRight(const QStringList& added_or_changed, const QStringList& remove = QStringList());
-	QStringList getAllLeft() const;
-	QStringList getAllRight() const;
 signals:
 	void itemDoubleClicked(QString, QString);
 private slots:
@@ -178,6 +178,8 @@ private:
 
 	};
 
+	QStringList getAllLeft() const;
+	QStringList getAllRight() const;
 	std::vector< items_t > match(const QStringList&, const QStringList&) const;
 	void stopComparison();
 	void startComparison();

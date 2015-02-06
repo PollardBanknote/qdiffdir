@@ -64,6 +64,7 @@ QString DirectoryContents::name() const
 	return lastPathComponent(dir.absolutePath());
 }
 
+/// @bug A relative path will change relative to the last directory, not cwd
 bool DirectoryContents::cd(const QString& path)
 {
 	if ( dir.cd(path))
@@ -85,7 +86,8 @@ QStringList DirectoryContents::setDepth(int d)
 		maxdepth = d;
 		refresh();
 	}
-    return getRelativeFileNames();
+
+	return getRelativeFileNames();
 }
 
 void DirectoryContents::refresh()
@@ -123,7 +125,7 @@ void DirectoryContents::descend(
 	int            depth
 )
 {
-	if ( depth <= maxdepth )
+	if ( depth < maxdepth )
 	{
 		subdirs << path;
 
@@ -144,37 +146,37 @@ void DirectoryContents::descend(
 }
 
 /// @todo Only return files from the given directory and below
-DirectoryContents::update_t DirectoryContents::update(const QString &)
+DirectoryContents::update_t DirectoryContents::update(const QString&)
 {
-    update_t u;
+	update_t u;
 
-    const QStringList old = files;
+	const QStringList old = files;
 
-    /// @todo Only need to search from changed directory and down
-    refresh();
+	/// @todo Only need to search from changed directory and down
+	refresh();
 
-    for ( int i = 0, n = old.count(); i < n; ++i )
-    {
-        if ( files.contains(old.at(i)))
-        {
-            // changed
-            u.changed << old.at(i);
-        }
-        else
-        {
-            // removed
-            u.removed << old.at(i);
-        }
-    }
+	for ( int i = 0, n = old.count(); i < n; ++i )
+	{
+		if ( files.contains(old.at(i)))
+		{
+			// changed
+			u.changed << old.at(i);
+		}
+		else
+		{
+			// removed
+			u.removed << old.at(i);
+		}
+	}
 
-    for ( int i = 0, n = files.count(); i < n; ++i )
-    {
-        // added
-        if ( !old.contains(files.at(i)))
-        {
-            u.added << files.at(i);
-        }
-    }
+	for ( int i = 0, n = files.count(); i < n; ++i )
+	{
+		// added
+		if ( !old.contains(files.at(i)))
+		{
+			u.added << files.at(i);
+		}
+	}
 
-    return u;
+	return u;
 }
