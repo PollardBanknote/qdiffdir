@@ -166,6 +166,7 @@ namespace fs
  * errors, avoid race conditions).
  *
  * @todo What if dest is a directory?
+ * @todo Don't copy over self
  */
 bool copy(
 	const std::string& source,

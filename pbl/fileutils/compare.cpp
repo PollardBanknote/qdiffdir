@@ -67,6 +67,7 @@ namespace pbl
 {
 namespace fs
 {
+/// @todo Don't compare self
 int compare(const std::string& f, const std::string& g)
 {
 	if (different_sizes(f, g))
