@@ -118,23 +118,69 @@ public:
 	virtual int compare(const QString&, const QString&) const = 0;
 };
 
+/** A widget for comparing items in two lists
+ *
+ * This widget takes two lists of items, matches items between them, and
+ * compares each pair. Ex., the files of two different directories.
+ */
 class CompareWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	enum flags {ShowRightOnly = 1, ShowLeftOnly = 2, ShowIdentical = 4};
+    /** Display options
+     */
+    enum flags {
+        ShowRightOnly = 1, ///< Items on the right only will be shown
+        ShowLeftOnly = 2,  ///< Items on the left only will be shown
+        ShowIdentical = 4  ///< Items that are considered identical will be shown
+    };
 
+    /// Constructor
 	explicit CompareWidget(QWidget* parent = 0);
-	~CompareWidget();
-	void setFlags(int);
 
-	/// @todo Take a Filter object
-	void addFilter(const QString&, const QRegExp&);
+    /// Destructor
+	~CompareWidget();
+
+    /** Configure which items ar shown
+     * @param f A combination of "flags" values
+     */
+    void setFlags(int f);
+
+    /** Set the object used to match items between lists
+     *
+     * By default, items are matched if they have the exact same name. A
+     * matcher can override or extend that behavior. See the documentation for
+     * that class.
+     */
+    void setMatcher(const Matcher&);
+
+    /** Set the object used to compare matched items
+     *
+     * After items are matched, they are compared and the result is shown in
+     * the widget. This function allows one to control how items are considered
+     * to be "the same". By default, no items are considerd "the same".
+     */
+    void setComparison(const Compare&);
+
+    /** Add a filter to the combo box
+     * @param desc A description of the filter that will appear in the combo box
+     * @param r A regex to apply to the names of items
+     *
+     * Filters control which items are shown or not. Items whose name matches
+     * the regex will be shown.
+     *
+     * @todo Make a Filter class to encapsulate the test. Wrap the regex.
+     */
+    void addFilter(const QString& desc, const QRegExp& r);
+
+    /** Get a list of items that are selected in the left window
+     */
 	QString getSelectedLeft() const;
+
+    /** Get a list of items that are selected in the right window
+     */
 	QString getSelectedRight() const;
 	void setLeftAndRight(const QString& leftname, const QString& rightname, const QStringList& leftitems, const QStringList& rightitems);
-	void setComparison(const Compare&);
-	void setMatcher(const Matcher&);
 	void updateLeft(const QStringList& added_or_changed, const QStringList& remove = QStringList());
 	void updateRight(const QStringList& added_or_changed, const QStringList& remove = QStringList());
 signals:
