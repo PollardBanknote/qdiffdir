@@ -38,45 +38,75 @@ namespace pbl
 namespace fs
 {
 
-// Users should be aware that this represents a file at a certain
-// point in time and may not be current
-/// @bug Paths passed in should be absolute, or appended to cwd
+/** A class for accessing information about a file
+ *
+ * Users should be aware that this represents a file at a certain point in
+ * time and may not be current
+ *
+ * @bug Paths passed in should be absolute, or appended to cw
+ */
 class fileinfo_t
 {
-	typedef off_t size_type;
-
+	/** Tracks which pieces of information are available
+	 */
 	enum flags_t
 	{
-		MODE = 1,
-		ALL  = 1
+		MODE = 1, ///< file type
+		ALL  = 1  ///< Everything is available
 	};
 public:
 	fileinfo_t();
 
+	/** Get information about a file
+	 *
+	 * @param path Path to a file
+	 */
 	explicit fileinfo_t(const std::string& path);
 
-	// e cannot be NULL
+	/** Get information about a file
+	 *
+	 * @param dir Name of the file
+	 * @param e cannot be NULL
+	 *
+	 * This constructor is used by the directory_iterator to partially
+	 * initialize the fileinfo_t. This, hopefully, can save further disk
+	 * access.
+	 */
 	fileinfo_t(
 	    const std::string& dir,
 	    const dirent*      e
 	);
 
+	/** Copy constructor
+	 */
 	fileinfo_t(const fileinfo_t& i);
 
+	/** Copy assignment
+	 */
 	fileinfo_t& operator=(const fileinfo_t& i);
 
-	std::string path() const;
-
+	/** The absolute path of the file
+	 */
 	std::string absolute_path() const;
 
+	/** Name of the file
+	 */
 	std::string name() const;
 
+	/** Check if the file is a directory
+	 */
 	bool is_directory() const;
 private:
+	/// Full path to file
+	std::string path_;
 
-	std::string         path_;
-	std::string         name_;
-	mutable int         flags;
+	/// Name of the file
+	std::string name_;
+
+	/// Which values are set
+	mutable int flags;
+
+	/// Platform information for the file
 	mutable struct stat st;
 };
 

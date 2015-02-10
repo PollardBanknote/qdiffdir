@@ -76,11 +76,6 @@ fileinfo_t& fileinfo_t::operator=(const fileinfo_t& i)
 	return *this;
 }
 
-std::string fileinfo_t::path() const
-{
-	return path_;
-}
-
 std::string fileinfo_t::absolute_path() const
 {
 	return pbl::fs::absolute_path(path_);

@@ -65,7 +65,7 @@ CompareWidget::CompareWidget(QWidget* parent_) :
 	QWidget(parent_),
 	ui(new Ui::CompareWidget), compare(0), filter(".*"),
 	hide_left_only(false),
-	hide_right_only(false), hide_identical_files(false), hide_ignored(false),
+	hide_right_only(false), hide_identical_items(false), hide_ignored(false),
 	worker(0), matcher(new DefaultMatcher)
 {
 	ui->setupUi(this);
@@ -175,7 +175,7 @@ bool CompareWidget::hidden(std::size_t i) const
 	}
 
 	// Hide items that have compared identical
-	if ( hide_identical_files && list[i].compared && list[i].same )
+	if ( hide_identical_items && list[i].compared && list[i].same )
 	{
 		hideitem = true;
 	}
@@ -350,32 +350,6 @@ void CompareWidget::changesel(int row)
 	}
 }
 
-void CompareWidget::changesel(
-	const QString& leftsel,
-	const QString& rightsel
-)
-{
-	const std::size_t n = list.size();
-
-	std::size_t rdx = n;
-
-	for ( std::size_t i = 0; i < n; ++i )
-	{
-		if ( list[i].items.left == leftsel )
-		{
-			changesel(i);
-			return;
-		}
-
-		if ( list[i].items.right == rightsel )
-		{
-			rdx = i;
-		}
-	}
-
-	changesel(rdx == n ? -1 : (int) rdx);
-}
-
 void CompareWidget::sync_scroll(int val)
 {
 	if ( ui->leftdir->verticalScrollBar()->value() != val )
@@ -457,7 +431,7 @@ void CompareWidget::on_showIgnored_toggled(bool checked)
 
 void CompareWidget::on_showsame_toggled(bool checked)
 {
-	hide_identical_files = !checked;
+	hide_identical_items = !checked;
 	applyFilters();
 }
 
