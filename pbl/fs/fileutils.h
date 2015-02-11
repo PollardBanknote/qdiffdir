@@ -74,7 +74,9 @@ int compare(const std::string& f, const std::string& g);
  * for "C:\Windows\readme.txt" on Windows platforms.
  *
  * This function does not access the file system. It merely parses the string.
- * In particular, it does not check if the path is valid and/or accessible.
+ * In particular, it does not check if the path is valid and/or accessible. It
+ * also does not check that the component before "." or ".." is, in fact, a
+ * directory.
  *
  * If the last component cannot be determined for whatever reason, the string is
  * considered malformed and the empty string is returned. Some examples of
@@ -83,6 +85,9 @@ int compare(const std::string& f, const std::string& g);
  */
 std::string basename(const std::string& path);
 
+std::string dirname(const std::string& path);
+
+std::string cleanpath(const std::string& path);
 }
 }
 
