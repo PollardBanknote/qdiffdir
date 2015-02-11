@@ -52,8 +52,8 @@ class FileCompare : public Compare
 {
 public:
 	FileCompare(
-	    const QString& l,
-	    const QString& r
+		const QString& l,
+		const QString& r
 	)
 		: left(l), right(r)
 	{
@@ -233,6 +233,11 @@ QString lastPathComponent(const QString& s)
 	return QString::fromStdString(pbl::fs::basename(s.toStdString()));
 }
 
+QString directoryComponent(const QString& s)
+{
+	return QString::fromStdString(pbl::fs::dirname(s.toStdString()));
+}
+
 DirDiffForm::DirDiffForm(QWidget* parent_) :
 	QWidget(parent_),
 	ui(new Ui::DirDiffForm), watcher()
@@ -256,8 +261,8 @@ void DirDiffForm::setFlags(
 )
 {
 	const int f = ( show_left_only ? CompareWidget::ShowLeftOnly : 0 )
-	              | ( show_right_only ? CompareWidget::ShowRightOnly : 0 )
-	              | ( show_identical ? CompareWidget::ShowIdentical : 0 );
+				  | ( show_right_only ? CompareWidget::ShowRightOnly : 0 )
+				  | ( show_identical ? CompareWidget::ShowIdentical : 0 );
 
 	ui->compareview->setFlags(f);
 }
@@ -339,7 +344,7 @@ void DirDiffForm::on_copytoright_clicked()
 		return;
 	}
 
-	copyTo(ldir.absoluteFilePath(s), rdir.absolutePath());
+	copyTo(ldir.absoluteFilePath(s), directoryComponent(rdir.absolutePath() + "/" + s));
 }
 
 void DirDiffForm::on_copytoleft_clicked()
@@ -352,7 +357,7 @@ void DirDiffForm::on_copytoleft_clicked()
 		return;
 	}
 
-	copyTo(rdir.absoluteFilePath(s), ldir.absolutePath());
+	copyTo(rdir.absoluteFilePath(s), directoryComponent(ldir.absolutePath() + "/" + s));
 }
 
 void DirDiffForm::on_renametoright_clicked()
@@ -498,7 +503,7 @@ void DirDiffForm::changeDirectories(
 	// create new file system watcher
 	QStringList dirlist;
 	dirlist << ldir.getDirectories()
-	        << rdir.getDirectories();
+			<< rdir.getDirectories();
 
 	// Note: there is a bug that causes a crash if QFileSystemWatcher gets the
 	// same path twice
