@@ -29,20 +29,32 @@
 #include <string>
 #include <stdexcept>
 
+#include "fileutils.h"
+
 namespace
 {
-std::string basename_posix(const std::string& s)
+std::size_t after_last(const std::string& s, char c, std::size_t j)
 {
+	std::size_t i = s.find_last_of(c, j);
+	return i == std::string::npos ? 0 : i + 1;
+}
+
+// (first character, length) of last path component in s
+// or (npos, 0) if error
+std::pair< std::size_t, std::size_t > locate_last_path_component(const std::string& s)
+{
+	if (s.empty())
+		return std::pair< std::size_t, std::size_t >(std::string::npos, 0);
+
 	// j points to the last character in a component
 	std::size_t j     = s.find_last_not_of('/');
 	unsigned    depth = 0;
 
 	while ( j != std::string::npos )
 	{
-		std::size_t i = s.find_last_of('/', j);
-
-		// i points to first character of this component
-		i = ( i == std::string::npos ? 0 : i + 1 );
+		// i points to first character of a component
+		// i <= j, because j never points to a '/'
+		const std::size_t i = after_last(s, '/', j);
 
 		if ( j - i + 1 == 1 && s[i] == '.' )
 		{
@@ -58,7 +70,7 @@ std::string basename_posix(const std::string& s)
 			// found a "normal" path component
 			if ( depth == 0 )
 			{
-				return s.substr(i, j - i + 1);
+				return std::pair< std::size_t, std::size_t >(i, j - i + 1);
 			}
 
 			// ..but we're ignoring it
@@ -68,14 +80,45 @@ std::string basename_posix(const std::string& s)
 		if ( i == 0 )
 		{
 			// error, path is malformed
-			return std::string();
+			return std::pair< std::size_t, std::size_t >(std::string::npos, 0);
 		}
 
 		j = s.find_last_not_of('/', i - 1);
 	}
 
-	// can't find a component
-	return s.empty() ? "" : "/";
+	// all slashes
+	return std::pair< std::size_t, std::size_t >(0, 1);
+}
+
+std::string basename_posix(const std::string& s)
+{
+	const std::pair< std::size_t, std::size_t > range = locate_last_path_component(s);
+
+	if (range.first == std::string::npos)
+		return std::string();
+	return s.substr(range.first, range.second);
+}
+
+std::string dirname_posix(const std::string& s)
+{
+	const std::pair< std::size_t, std::size_t > range = locate_last_path_component(s);
+
+	// path was malformed
+	if (range.first == std::string::npos)
+		return std::string();
+
+	if (range.first == 0)
+	{
+		// could be '/', or could be a unpathed filename
+		if (s[0] == '/')
+			return "/";
+		return ".";
+	}
+	else
+	{
+		// leading directory
+		return s.substr(0, range.first);
+	}
 }
 
 }
@@ -92,6 +135,15 @@ std::string basename(const std::string& s)
 
 	#else
 	#error "No implementation of basename is available for this platform"
+	#endif
+}
+
+std::string dirname(const std::string& s)
+{
+	#ifdef _POSIX_C_SOURCE
+	return cleanpath(dirname_posix(s));
+	#else
+	#error "No implementation of dirname is available for this platform"
 	#endif
 }
 
