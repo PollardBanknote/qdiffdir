@@ -17,7 +17,8 @@ SOURCES += \
     fs/compare.cpp \
     fs/copyfile.cpp \
     fs/diriter.cpp \
-    fs/fileinfo.cpp
+    fs/fileinfo.cpp \
+    fs/cleanpath.cpp
 
 HEADERS += \
     process/process.h \
