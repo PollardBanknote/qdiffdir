@@ -33,9 +33,14 @@
 
 namespace
 {
-std::size_t after_last(const std::string& s, char c, std::size_t j)
+std::size_t after_last(
+	const std::string& s,
+	char               c,
+	std::size_t        j
+)
 {
 	std::size_t i = s.find_last_of(c, j);
+
 	return i == std::string::npos ? 0 : i + 1;
 }
 
@@ -43,8 +48,10 @@ std::size_t after_last(const std::string& s, char c, std::size_t j)
 // or (npos, 0) if error
 std::pair< std::size_t, std::size_t > locate_last_path_component(const std::string& s)
 {
-	if (s.empty())
+	if ( s.empty())
+	{
 		return std::pair< std::size_t, std::size_t >(std::string::npos, 0);
+	}
 
 	// j points to the last character in a component
 	std::size_t j     = s.find_last_not_of('/');
@@ -94,8 +101,11 @@ std::string basename_posix(const std::string& s)
 {
 	const std::pair< std::size_t, std::size_t > range = locate_last_path_component(s);
 
-	if (range.first == std::string::npos)
+	if ( range.first == std::string::npos )
+	{
 		return std::string();
+	}
+
 	return s.substr(range.first, range.second);
 }
 
@@ -104,14 +114,19 @@ std::string dirname_posix(const std::string& s)
 	const std::pair< std::size_t, std::size_t > range = locate_last_path_component(s);
 
 	// path was malformed
-	if (range.first == std::string::npos)
+	if ( range.first == std::string::npos )
+	{
 		return std::string();
+	}
 
-	if (range.first == 0)
+	if ( range.first == 0 )
 	{
 		// could be '/', or could be a unpathed filename
-		if (s[0] == '/')
+		if ( s[0] == '/' )
+		{
 			return "/";
+		}
+
 		return ".";
 	}
 	else
@@ -142,6 +157,7 @@ std::string dirname(const std::string& s)
 {
 	#ifdef _POSIX_C_SOURCE
 	return cleanpath(dirname_posix(s));
+
 	#else
 	#error "No implementation of dirname is available for this platform"
 	#endif

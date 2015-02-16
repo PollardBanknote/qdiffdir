@@ -1,4 +1,4 @@
-/* Copyright (c) 2014, Pollard Banknote Limited
+/* Copyright (c) 2015, Pollard Banknote Limited
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without modification,
@@ -26,61 +26,41 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DIRECTORYCONTENTS_H
-#define DIRECTORYCONTENTS_H
+#ifndef PERMS_H
+#define PERMS_H
 
-#include <QString>
-#include <QDir>
-
-
-/** Used to observe the files/subdirectories of a directory
- *
- * @todo Remove all traces of Qt
- */
-class DirectoryContents
+namespace pbl
 {
-public:
-	struct update_t
-	{
-		QStringList added;
-		QStringList removed;
-		QStringList changed;
-	};
-
-	DirectoryContents();
-
-	QString absolutePath() const;
-
-	QString absoluteFilePath(const QString& s) const;
-
-	QString relativeFilePath(const QString& s) const;
-
-	QString name() const;
-
-	bool cd(const QString& path);
-
-	QStringList setDepth(int d);
-
-	QStringList getRelativeFileNames() const;
-
-	QStringList getDirectories() const;
-
-	QStringList getAbsoluteFileNames() const;
-
-	update_t update(const QString& d);
-private:
-	void refresh();
-
-	QDir dir;
-
-	int maxdepth;
-
-	// relative paths of each file
-	QStringList files;
-
-	// absolute paths of directories that we should watch
-	QStringList subdirs;
+namespace fs
+{
+namespace perms
+{
+enum perms
+{
+	none             = 0,
+	owner_read       = 0400,
+	owner_write      = 0200,
+	owner_exec       = 0100,
+	owner_all        = 0700,
+	group_read       = 040,
+	group_write      = 020,
+	group_exec       = 010,
+	group_all        = 070,
+	others_read      = 04,
+	others_write     = 02,
+	others_exec      = 01,
+	others_all       = 07,
+	all              = 0777,
+	set_uid          = 04000,
+	set_gid          = 02000,
+	sticky_bit       = 01000,
+	mask             = 07777,
+	unknown          = 0xffff,
+	add_perms        = 0x10000,
+	remove_perms     = 0x20000,
+	resolve_symlinks = 0x40000
 };
-
-
-#endif // DIRECTORYCONTENTS_H
+}
+}
+}
+#endif // PERMS_H

@@ -30,6 +30,87 @@
 
 #include "fs/diriter.h"
 
+namespace
+{
+/// @todo Turn into a find-like function
+void descend(
+	QStringList&         files,
+	QStringList&         subdirs,
+	const pbl::fs::path& path,
+	unsigned             depth,
+	unsigned             maxdepth
+)
+{
+	if ( depth < maxdepth )
+	{
+		subdirs << QString::fromStdString(path.native());
+
+		for ( pbl::fs::directory_iterator it(path), last; it != last; ++it )
+		{
+			if ( it->status().type() == pbl::fs::file_type::directory )
+			{
+				descend(files, subdirs, it->path(), depth + 1, maxdepth);
+			}
+			else
+			{
+				std::string s = it->path().native();
+
+				// keep only last (depth + 1) components
+				// points to first character of last (depth + 1) components
+				std::size_t i = std::string::npos;
+
+				for ( unsigned n = 0; n < depth + 1; ++n )
+				{
+					std::size_t k = std::string::npos;
+
+					if ( i != std::string::npos )
+					{
+						k = s.find_last_not_of('/', i - 1);
+
+						if ( k == std::string::npos )
+						{
+							i = 0;
+							break;
+						}
+					}
+
+					std::size_t j = s.find_last_of('/', k);
+
+					if ( j == std::string::npos )
+					{
+						i = 0;
+						break;
+					}
+
+					i = j + 1;
+				}
+
+				files << QString::fromStdString(s.substr(i));
+			}
+		}
+	}
+}
+
+std::pair< QStringList, QStringList > descend(
+	const QDir& dir,
+	int         maxdepth
+)
+{
+	std::pair< QStringList, QStringList > res;
+
+	if ( maxdepth >= 0 )
+	{
+		pbl::fs::path p(dir.absolutePath().toStdString());
+
+		descend(res.first, res.second, p, 0, maxdepth);
+	}
+
+	return res;
+}
+
+}
+
+
 QString lastPathComponent(const QString&);
 
 DirectoryContents::DirectoryContents() : maxdepth(0)
@@ -90,13 +171,6 @@ QStringList DirectoryContents::setDepth(int d)
 	return getRelativeFileNames();
 }
 
-void DirectoryContents::refresh()
-{
-	files.clear();
-	subdirs.clear();
-	descend(dir.absolutePath(), QString(), 0);
-}
-
 QStringList DirectoryContents::getRelativeFileNames() const
 {
 	return files;
@@ -119,30 +193,12 @@ QStringList DirectoryContents::getDirectories() const
 	return subdirs;
 }
 
-void DirectoryContents::descend(
-	const QString& path,
-	const QString& rel,
-	int            depth
-)
+void DirectoryContents::refresh()
 {
-	if ( depth < maxdepth )
-	{
-		subdirs << path;
+	const std::pair< QStringList, QStringList > res = descend(dir, maxdepth);
 
-		for ( pbl::fs::directory_iterator it(path.toStdString()), last; it != last; ++it )
-		{
-			const QString t = rel + QString::fromStdString(it->name());
-
-			if ( it->is_directory())
-			{
-				descend(QString::fromStdString(it->absolute_path()), t + "/", depth + 1);
-			}
-			else
-			{
-				files << t;
-			}
-		}
-	}
+	files   = res.first;
+	subdirs = res.second;
 }
 
 /// @todo Only return files from the given directory and below

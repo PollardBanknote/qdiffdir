@@ -1,4 +1,4 @@
-/* Copyright (c) 2014, Pollard Banknote Limited
+/* Copyright (c) 2015, Pollard Banknote Limited
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without modification,
@@ -26,61 +26,53 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DIRECTORYCONTENTS_H
-#define DIRECTORYCONTENTS_H
+#include "filestatus.h"
 
-#include <QString>
-#include <QDir>
-
-
-/** Used to observe the files/subdirectories of a directory
- *
- * @todo Remove all traces of Qt
- */
-class DirectoryContents
+namespace pbl
 {
-public:
-	struct update_t
-	{
-		QStringList added;
-		QStringList removed;
-		QStringList changed;
-	};
+namespace fs
+{
+file_status::file_status(const file_status& s)
+	: t(s.t), p(s.p)
+{
 
-	DirectoryContents();
+}
 
-	QString absolutePath() const;
+file_status::file_status(
+    file_type::file_type t_,
+    perms::perms         p_
+)
+	: t(t_), p(p_)
+{
 
-	QString absoluteFilePath(const QString& s) const;
+}
 
-	QString relativeFilePath(const QString& s) const;
+file_status& file_status::operator=(const file_status& s)
+{
+	t = s.t;
+	p = s.p;
+	return *this;
+}
 
-	QString name() const;
+file_type::file_type file_status::type() const
+{
+	return t;
+}
 
-	bool cd(const QString& path);
+void file_status::type(file_type::file_type t_)
+{
+	t = t_;
+}
 
-	QStringList setDepth(int d);
+perms::perms file_status::permissions() const
+{
+	return p;
+}
 
-	QStringList getRelativeFileNames() const;
+void file_status::permissions(perms::perms p_)
+{
+	p = p_;
+}
 
-	QStringList getDirectories() const;
-
-	QStringList getAbsoluteFileNames() const;
-
-	update_t update(const QString& d);
-private:
-	void refresh();
-
-	QDir dir;
-
-	int maxdepth;
-
-	// relative paths of each file
-	QStringList files;
-
-	// absolute paths of directories that we should watch
-	QStringList subdirs;
-};
-
-
-#endif // DIRECTORYCONTENTS_H
+}
+}

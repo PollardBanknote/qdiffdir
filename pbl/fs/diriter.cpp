@@ -38,21 +38,13 @@ directory_iterator::directory_iterator() : d(0), e(0)
 {
 }
 
-directory_iterator::directory_iterator(const std::string& path) : d(0), e(0)
+directory_iterator::directory_iterator(const path& path_) : d(0), e(0)
 {
-	d = opendir(path.c_str());
+	d = opendir(path_.c_str());
 
 	if ( d )
 	{
-		// get the absolute path of the directory
-		if ( !path.empty() && path[0] == '/' )
-		{
-			abspath = path;
-		}
-		else
-		{
-			abspath = absolute_path(path);
-		}
+		dirpath = path_;
 
 		next();
 	}
@@ -83,12 +75,12 @@ directory_iterator& directory_iterator::operator++()
 	return *this;
 }
 
-const fileinfo_t& directory_iterator::operator*() const
+const directory_entry& directory_iterator::operator*() const
 {
 	return fi;
 }
 
-const fileinfo_t* directory_iterator::operator->() const
+const directory_entry* directory_iterator::operator->() const
 {
 	return &fi;
 }
@@ -110,11 +102,45 @@ void directory_iterator::next()
 
 		if ( e )
 		{
-			fi = fileinfo_t(abspath, e);
+			file_status s;
+			file_status ss;
+
+			switch ( e->d_type )
+			{
+			case DT_UNKNOWN:
+				break;
+			case DT_FIFO:
+				s.type(file_type::fifo);
+				break;
+			case DT_CHR:
+				s.type(file_type::character);
+				break;
+			case DT_DIR:
+				s.type(file_type::directory);
+				break;
+			case DT_BLK:
+				s.type(file_type::block);
+				break;
+			case DT_REG:
+				s.type(file_type::regular);
+				break;
+			case DT_LNK:
+				/// @todo fill in ss
+				s.type(file_type::symlink);
+				break;
+			case DT_SOCK:
+				s.type(file_type::socket);
+				break;
+			default:
+				break;
+			} // switch
+
+			/// @todo Relative path?
+			fi = directory_entry(dirpath / path(e->d_name), s, ss);
 		}
 		else
 		{
-			fi = fileinfo_t();
+			fi = directory_entry();
 		}
 	}
 }

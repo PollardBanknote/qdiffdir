@@ -38,5 +38,6 @@ std::string cleanpath(const std::string& s)
 {
 	return s;
 }
+
 }
 }

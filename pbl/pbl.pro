@@ -17,14 +17,20 @@ SOURCES += \
     fs/compare.cpp \
     fs/copyfile.cpp \
     fs/diriter.cpp \
-    fs/fileinfo.cpp \
-    fs/cleanpath.cpp
+    fs/cleanpath.cpp \
+    fs/filestatus.cpp \
+    fs/path.cpp \
+    fs/direntry.cpp
 
 HEADERS += \
     process/process.h \
     fs/fileutils.h \
     fs/diriter.h \
-    fs/fileinfo.h
+    fs/filetype.h \
+    fs/filestatus.h \
+    fs/perms.h \
+    fs/path.h \
+    fs/direntry.h
 
 unix {
     target.path = /usr/lib

@@ -1,4 +1,4 @@
-/* Copyright (c) 2014, Pollard Banknote Limited
+/* Copyright (c) 2015, Pollard Banknote Limited
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without modification,
@@ -26,61 +26,39 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DIRECTORYCONTENTS_H
-#define DIRECTORYCONTENTS_H
+#ifndef DIRENTRY_H
+#define DIRENTRY_H
 
-#include <QString>
-#include <QDir>
+#include "path.h"
+#include "filestatus.h"
 
+namespace pbl
+{
+namespace fs
+{
 
-/** Used to observe the files/subdirectories of a directory
- *
- * @todo Remove all traces of Qt
- */
-class DirectoryContents
+class directory_entry
 {
 public:
-	struct update_t
-	{
-		QStringList added;
-		QStringList removed;
-		QStringList changed;
-	};
-
-	DirectoryContents();
-
-	QString absolutePath() const;
-
-	QString absoluteFilePath(const QString& s) const;
-
-	QString relativeFilePath(const QString& s) const;
-
-	QString name() const;
-
-	bool cd(const QString& path);
-
-	QStringList setDepth(int d);
-
-	QStringList getRelativeFileNames() const;
-
-	QStringList getDirectories() const;
-
-	QStringList getAbsoluteFileNames() const;
-
-	update_t update(const QString& d);
+	directory_entry();
+	directory_entry(const directory_entry&);
+	explicit directory_entry(
+	    const path&,
+	    file_status = file_status(),
+	    file_status = file_status()
+	);
+	directory_entry& operator=(const directory_entry&);
+	void assign(const path &, file_status = file_status(), file_status = file_status());
+	const pbl::fs::path& path() const;
+	file_status status() const;
+	file_status symbolic_status() const;
 private:
-	void refresh();
+	pbl::fs::path path_;
+	file_status   mstatus;
+	file_status   sym_status;
 
-	QDir dir;
-
-	int maxdepth;
-
-	// relative paths of each file
-	QStringList files;
-
-	// absolute paths of directories that we should watch
-	QStringList subdirs;
 };
 
-
-#endif // DIRECTORYCONTENTS_H
+}
+}
+#endif // DIRENTRY_H

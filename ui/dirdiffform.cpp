@@ -52,8 +52,8 @@ class FileCompare : public Compare
 {
 public:
 	FileCompare(
-		const QString& l,
-		const QString& r
+	    const QString& l,
+	    const QString& r
 	)
 		: left(l), right(r)
 	{
@@ -261,8 +261,8 @@ void DirDiffForm::setFlags(
 )
 {
 	const int f = ( show_left_only ? CompareWidget::ShowLeftOnly : 0 )
-				  | ( show_right_only ? CompareWidget::ShowRightOnly : 0 )
-				  | ( show_identical ? CompareWidget::ShowIdentical : 0 );
+	              | ( show_right_only ? CompareWidget::ShowRightOnly : 0 )
+	              | ( show_identical ? CompareWidget::ShowIdentical : 0 );
 
 	ui->compareview->setFlags(f);
 }
@@ -503,7 +503,7 @@ void DirDiffForm::changeDirectories(
 	// create new file system watcher
 	QStringList dirlist;
 	dirlist << ldir.getDirectories()
-			<< rdir.getDirectories();
+	        << rdir.getDirectories();
 
 	// Note: there is a bug that causes a crash if QFileSystemWatcher gets the
 	// same path twice

@@ -1,4 +1,4 @@
-/* Copyright (c) 2014, Pollard Banknote Limited
+/* Copyright (c) 2015, Pollard Banknote Limited
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without modification,
@@ -26,61 +26,104 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DIRECTORYCONTENTS_H
-#define DIRECTORYCONTENTS_H
+#include "path.h"
 
-#include <QString>
-#include <QDir>
-
-
-/** Used to observe the files/subdirectories of a directory
- *
- * @todo Remove all traces of Qt
- */
-class DirectoryContents
+namespace pbl
 {
-public:
-	struct update_t
+namespace fs
+{
+path::path()
+{
+}
+
+path::path(const string_type& s_) : s(s_)
+{
+
+}
+
+path::path(const path& p) : s(p.s)
+{
+
+}
+
+path& path::operator=(const path& p)
+{
+	s = p.s;
+	return *this;
+}
+
+path& path::operator=(const string_type& s_)
+{
+	s = s_;
+	return *this;
+}
+
+void path::clear()
+{
+	s.clear();
+}
+
+void path::swap(path& p)
+{
+	s.swap(p.s);
+}
+
+std::string path::string() const
+{
+	return s;
+}
+
+const char* path::c_str() const
+{
+	return s.c_str();
+}
+
+bool path::empty() const
+{
+	return s.empty();
+}
+
+path& path::append(const path& p)
+{
+	bool sep = true;
+
+	if ( !s.empty() && s[s.length() - 1] == preferred_separator )
 	{
-		QStringList added;
-		QStringList removed;
-		QStringList changed;
-	};
+		sep = false;
+	}
+	else if ( s.empty())
+	{
+		sep = false;
+	}
+	else if ( p.empty() || p.s[0] == preferred_separator )
+	{
+		sep = false;
+	}
 
-	DirectoryContents();
+	if ( sep )
+	{
+		s += preferred_separator;
+	}
 
-	QString absolutePath() const;
+	s.append(p.native());
+	return *this;
+}
 
-	QString absoluteFilePath(const QString& s) const;
+const std::string& path::native() const
+{
+	return s;
+}
 
-	QString relativeFilePath(const QString& s) const;
+path operator/(
+	const path& lhs,
+	const path& rhs
+)
+{
+	path res = lhs;
 
-	QString name() const;
+	res.append(rhs);
+	return res;
+}
 
-	bool cd(const QString& path);
-
-	QStringList setDepth(int d);
-
-	QStringList getRelativeFileNames() const;
-
-	QStringList getDirectories() const;
-
-	QStringList getAbsoluteFileNames() const;
-
-	update_t update(const QString& d);
-private:
-	void refresh();
-
-	QDir dir;
-
-	int maxdepth;
-
-	// relative paths of each file
-	QStringList files;
-
-	// absolute paths of directories that we should watch
-	QStringList subdirs;
-};
-
-
-#endif // DIRECTORYCONTENTS_H
+}
+}

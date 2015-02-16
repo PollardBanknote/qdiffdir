@@ -1,4 +1,4 @@
-/* Copyright (c) 2014, Pollard Banknote Limited
+/* Copyright (c) 2015, Pollard Banknote Limited
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without modification,
@@ -26,61 +26,65 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DIRECTORYCONTENTS_H
-#define DIRECTORYCONTENTS_H
+#include "direntry.h"
 
-#include <QString>
-#include <QDir>
-
-
-/** Used to observe the files/subdirectories of a directory
- *
- * @todo Remove all traces of Qt
- */
-class DirectoryContents
+namespace pbl
 {
-public:
-	struct update_t
-	{
-		QStringList added;
-		QStringList removed;
-		QStringList changed;
-	};
+namespace fs
+{
+directory_entry::directory_entry()
+{
+}
 
-	DirectoryContents();
+directory_entry::directory_entry(const directory_entry& e)
+	: path_(e.path_), mstatus(e.mstatus), sym_status(e.sym_status)
+{
 
-	QString absolutePath() const;
+}
 
-	QString absoluteFilePath(const QString& s) const;
+directory_entry::directory_entry(
+    const pbl::fs::path& p,
+    file_status          status_,
+    file_status          sym_status_
+)
+	: path_(p), mstatus(status_), sym_status(sym_status_)
+{
 
-	QString relativeFilePath(const QString& s) const;
+}
 
-	QString name() const;
+directory_entry& directory_entry::operator=(const directory_entry& e)
+{
+	path_      = e.path_;
+	mstatus    = e.mstatus;
+	sym_status = e.sym_status;
+	return *this;
+}
 
-	bool cd(const QString& path);
+void directory_entry::assign(
+	const pbl::fs::path& p,
+	file_status          status_,
+	file_status          sym_status_
+)
+{
+	path_      = p;
+	mstatus    = status_;
+	sym_status = sym_status_;
+}
 
-	QStringList setDepth(int d);
+const path& directory_entry::path() const
+{
+	return path_;
+}
 
-	QStringList getRelativeFileNames() const;
+file_status directory_entry::status() const
+{
+	return mstatus;
+}
 
-	QStringList getDirectories() const;
+file_status directory_entry::symbolic_status() const
+{
+	return sym_status;
+}
 
-	QStringList getAbsoluteFileNames() const;
-
-	update_t update(const QString& d);
-private:
-	void refresh();
-
-	QDir dir;
-
-	int maxdepth;
-
-	// relative paths of each file
-	QStringList files;
-
-	// absolute paths of directories that we should watch
-	QStringList subdirs;
-};
-
-
-#endif // DIRECTORYCONTENTS_H
+}
+}

@@ -31,7 +31,8 @@
 
 #include <dirent.h>
 
-#include "fileinfo.h"
+#include "path.h"
+#include "direntry.h"
 
 namespace pbl
 {
@@ -74,7 +75,7 @@ public:
 	 * After construction, the iterator will point to the first file in the
 	 * directory.
 	 */
-	explicit directory_iterator(const std::string& path);
+	explicit directory_iterator(const path& path_);
 
 	/** Destructor
 	 */
@@ -98,11 +99,11 @@ public:
 
 	/** Get information for the file
 	 */
-	const fileinfo_t& operator*() const;
+	const directory_entry& operator*() const;
 
 	/** Get information for the file
 	 */
-	const fileinfo_t* operator->() const;
+	const directory_entry* operator->() const;
 private:
 	// non-copyable
 	directory_iterator(const directory_iterator&);
@@ -117,7 +118,7 @@ private:
 	void next();
 
 	/// Path to the directory
-	std::string abspath;
+	path dirpath;
 
 	/// Platform information
 	DIR* d;
@@ -126,7 +127,7 @@ private:
 	dirent* e;
 
 	/// Information about the file/subdirectory
-	fileinfo_t fi;
+	directory_entry fi;
 };
 
 }
