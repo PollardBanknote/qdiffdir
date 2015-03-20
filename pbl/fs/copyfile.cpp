@@ -26,154 +26,7 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/** @todo This file would benefit from a "file" class that is closer to the
- *  system calls
- */
-#include <string>
-#include <cstdlib>
-#include <cstdio>
-
-#ifdef _POSIX_C_SOURCE
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#endif
-
-#include "fileutils.h"
-
-namespace
-{
-// append contents of in to out. Both file descriptors must be valid
-bool copy_contents(
-	int in,
-	int out
-)
-{
-	// Copy the contents of the file
-	char buffer[4096];
-
-	while ( true )
-	{
-		const ssize_t n = ::read(in, buffer, sizeof( buffer ));
-
-		if ( n < 0 )
-		{
-			// error
-			return false;
-		}
-
-		// eof
-		if ( n == 0 )
-		{
-			break;
-		}
-
-		// otherwise, copy what we got
-		ssize_t x = 0;
-
-		do
-		{
-			ssize_t m = ::write(out, buffer + x, n - x);
-
-			if ( m == -1 )
-			{
-				return false;
-			}
-
-			x += m;
-		}
-		while ( x < n );
-	}
-
-	// flush to disk
-	::fsync(out);
-	return true;
-}
-
-/* in - an open file descriptor for the input data
- * @todo Linux 3.11 supports O_TMPFILE - an anonymous file that can be "made
- * real". See man open.
- */
-bool copy_inner(
-	int                in,
-	const std::string& dest
-)
-{
-	// Create dest. Possibly in place, but might need a temp file.
-	int f = ::open(dest.c_str(), O_CREAT | O_EXCL | O_WRONLY, S_IWUSR | S_IRUSR);
-
-	if ( f != -1 )
-	{
-		// Copy the file
-		if ( !copy_contents(in, f))
-		{
-			::unlink(dest.c_str());
-			::close(f);
-			return false;
-		}
-	}
-	else
-	{
-		// file already exists, so copy to a temp first then overwrite atomically
-		std::string       temp_file_name = dest + "cpyXXXXXX";
-		const std::size_t n              = temp_file_name.length();
-		char*             s              = new char[n + 1];
-		temp_file_name.copy(s, n, 0);
-		s[n]           = '\0';
-		f              = ::mkstemp(s);
-		temp_file_name = s;
-		delete[] s;
-
-		if ( f != -1 )
-		{
-			::fchmod(f, S_IWUSR | S_IRUSR);
-
-			// Copy the file
-			if ( !copy_contents(in, f) || ( ::rename(temp_file_name.c_str(), dest.c_str()) != 0 ))
-			{
-				// error occurred. Remove the partial file
-				::unlink(temp_file_name.c_str());
-
-				::close(f);
-				return false;
-			}
-		}
-		else
-		{
-			// couldn't even make temporary
-			return false;
-		}
-	}
-
-	// File copy completed successfully. Fix file permissions.
-	// change the permissions to match the original file
-	struct stat st;
-
-	if ( ::fstat(in, &st) == 0 )
-	{
-		::fchmod(f, st.st_mode & ( S_IRWXU | S_IRWXG | S_IRWXO ));
-	}
-
-	::close(f);
-
-	return true;
-
-}
-
-bool is_file(int in)
-{
-	struct stat st;
-
-	if ( ::fstat(in, &st) == 0 )
-	{
-		return S_ISREG(st.st_mode) || S_ISLNK(st.st_mode);
-	}
-
-	return false;
-}
-
-}
+#include "file.h"
 
 namespace pbl
 {
@@ -183,6 +36,7 @@ namespace fs
 /** Try to do copy the file as safely as possible (esp., gracefully handle
  * errors, avoid race conditions).
  *
+ * @todo What if source is a device? /dev/random, /dev/null
  * @todo What if dest is a directory?
  * @todo Don't copy over self
  */
@@ -192,19 +46,40 @@ bool copy(
 )
 {
 	// Open the input file
-	int in = ::open(source.c_str(), O_RDONLY);
+    file in(source, file::readonly);
 
-	if ( in != -1 )
+	if ( in.is_open() && in.is_file())
 	{
-		bool res = false;
+        file out(dest, file::create | file::writeonly, perms::owner_read | perms::owner_write);
 
-		if ( is_file(in))
+		if ( out.is_open())
 		{
-			res = copy_inner(in, dest);
+			// Copy the file to the newly created file
+			if ( out.copy(in))
+			{
+                out.chmod(in);
+				return true;
+			}
+			else
+			{
+				// remove the incomplete copy
+				out.remove();
+				return false;
+			}
+		}
+		else
+		{
+            file tmp; /// @todo pbl::fs::tempfile
+
+			/// @bug if(errno == EEXIST)
+			if ( tmp.mkstemp(dest) && tmp.copy(in) && tmp.realize(dest))
+			{
+                tmp.chmod(in);
+				return true;
+			}
 		}
 
-		::close(in);
-		return res;
+		return false;
 	}
 
 	return false;

@@ -20,7 +20,8 @@ SOURCES += \
     fs/cleanpath.cpp \
     fs/filestatus.cpp \
     fs/path.cpp \
-    fs/direntry.cpp
+    fs/direntry.cpp \
+    fs/file.cpp
 
 HEADERS += \
     process/process.h \
@@ -30,7 +31,8 @@ HEADERS += \
     fs/filestatus.h \
     fs/perms.h \
     fs/path.h \
-    fs/direntry.h
+    fs/direntry.h \
+    fs/file.h
 
 unix {
     target.path = /usr/lib

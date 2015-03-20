@@ -39,8 +39,8 @@ file_status::file_status(const file_status& s)
 }
 
 file_status::file_status(
-    file_type::file_type t_,
-    perms::perms         p_
+    file_type t_,
+    perms         p_
 )
 	: t(t_), p(p_)
 {
@@ -54,22 +54,22 @@ file_status& file_status::operator=(const file_status& s)
 	return *this;
 }
 
-file_type::file_type file_status::type() const
+file_type file_status::type() const
 {
 	return t;
 }
 
-void file_status::type(file_type::file_type t_)
+void file_status::type(file_type t_)
 {
 	t = t_;
 }
 
-perms::perms file_status::permissions() const
+perms file_status::permissions() const
 {
 	return p;
 }
 
-void file_status::permissions(perms::perms p_)
+void file_status::permissions(perms p_)
 {
 	p = p_;
 }

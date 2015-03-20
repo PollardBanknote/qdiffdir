@@ -110,26 +110,26 @@ void directory_iterator::next()
 			case DT_UNKNOWN:
 				break;
 			case DT_FIFO:
-				s.type(file_type::fifo);
+                s.type(file_type::fifo);
 				break;
 			case DT_CHR:
-				s.type(file_type::character);
+                s.type(file_type::character);
 				break;
 			case DT_DIR:
-				s.type(file_type::directory);
+                s.type(file_type::directory);
 				break;
 			case DT_BLK:
-				s.type(file_type::block);
+                s.type(file_type::block);
 				break;
 			case DT_REG:
-				s.type(file_type::regular);
+                s.type(file_type::regular);
 				break;
 			case DT_LNK:
 				/// @todo fill in ss
-				s.type(file_type::symlink);
+                s.type(file_type::symlink);
 				break;
 			case DT_SOCK:
-				s.type(file_type::socket);
+                s.type(file_type::socket);
 				break;
 			default:
 				break;

@@ -47,7 +47,7 @@ void descend(
 
 		for ( pbl::fs::directory_iterator it(path), last; it != last; ++it )
 		{
-			if ( it->status().type() == pbl::fs::file_type::directory )
+            if ( it->status().type() == file_type::directory )
 			{
 				descend(files, subdirs, it->path(), depth + 1, maxdepth);
 			}

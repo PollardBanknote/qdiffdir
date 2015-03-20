@@ -36,22 +36,27 @@ namespace pbl
 {
 namespace fs
 {
+/** Information about a file's type and permissions
+ *
+ * Due to the nature of the file system, the information may not be exactly
+ * current.
+ */
 class file_status
 {
 public:
 	file_status(const file_status&);
 	explicit file_status(
-	    file_type::file_type = file_type::none,
-	    perms::    perms = perms::unknown
+        file_type = file_type::none,
+        perms = perms::unknown
 	);
 	file_status& operator=(const file_status&);
-	file_type::file_type type() const;
-	void type(file_type::file_type);
-	perms::perms permissions() const;
-	void permissions(perms::perms);
+    file_type type() const;
+    void type(file_type);
+    perms permissions() const;
+    void permissions(perms);
 private:
-	file_type::file_type t;
-	perms::perms         p;
+    file_type t;
+    perms         p;
 };
 }
 }
