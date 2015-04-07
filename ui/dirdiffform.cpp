@@ -537,7 +537,7 @@ void DirDiffForm::copyTo(
 		}
 	}
 
-	if ( pbl::fs::copy(file.toStdString(), s.toStdString()))
+    if ( pbl::fs::copy_file(file.toStdString(), s.toStdString()))
 	{
 		fileChanged(s);
 	}

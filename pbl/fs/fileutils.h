@@ -55,7 +55,7 @@ std::string absolute_path(const std::string& filepath);
  * This function copies the source file "safely". That is, in the event of an
  * error, dest is unaltered (or, if it didn't exist, continues to not exist).
  */
-bool copy(const std::string& source, const std::string& dest);
+bool copy_file(const std::string& source, const std::string& dest);
 
 /** @brief Compare two files to see if they are exactly the same
  * @returns 0 if not the same, 1 if the same, -1 if an error occurred

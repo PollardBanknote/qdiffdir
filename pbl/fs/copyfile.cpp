@@ -40,7 +40,7 @@ namespace fs
  * @todo What if dest is a directory?
  * @todo Don't copy over self
  */
-bool copy(
+bool copy_file(
 	const std::string& source,
 	const std::string& dest
 )
