@@ -85,6 +85,10 @@ private slots:
 	void on_refresh_clicked();
 	void on_swap_clicked();
 	void contentsChanged(QString);
+    void on_openright_clicked();
+
+    void on_openleft_clicked();
+
 private:
 	void saveAs(const QString&, const QString& source, const QString& destination);
 	void copyTo(const QString& file, const QString& destdir);

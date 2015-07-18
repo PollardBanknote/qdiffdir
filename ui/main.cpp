@@ -29,7 +29,7 @@
 #include <iostream>
 #include <cstdlib>
 
-#include <QtGui/QApplication>
+#include <QApplication>
 
 #include "mainwindow.h"
 #include "process/process.h"

@@ -16,16 +16,21 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     comparewidget.cpp \
     dirdiffform.cpp \
-    directorycontents.cpp
+    directorycontents.cpp \
+    mysettings.cpp \
+    settingsdialog.cpp
 
 HEADERS  += mainwindow.h \
     comparewidget.h \
     dirdiffform.h \
-    directorycontents.h
+    directorycontents.h \
+    mysettings.h \
+    settingsdialog.h
 
 FORMS    += mainwindow.ui \
     comparewidget.ui \
-    dirdiffform.ui
+    dirdiffform.ui \
+    settingsdialog.ui
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../pbl/release/ -lpbl
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../pbl/debug/ -lpbl

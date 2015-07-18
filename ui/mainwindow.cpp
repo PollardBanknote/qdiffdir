@@ -29,6 +29,8 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+#include "settingsdialog.h"
+
 MainWindow::MainWindow(
     const std::vector< std::string >& dirnames,
     bool                              show_left_only,
@@ -52,4 +54,10 @@ MainWindow::MainWindow(
 MainWindow::~MainWindow()
 {
 	delete ui;
+}
+
+void MainWindow::on_actionSettings_triggered()
+{
+    SettingsDialog dlg(this);
+    dlg.exec();
 }

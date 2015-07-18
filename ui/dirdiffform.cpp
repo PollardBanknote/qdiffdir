@@ -43,6 +43,7 @@
 
 #include "fs/fileutils.h"
 #include "fs/diriter.h"
+#include "mysettings.h"
 
 namespace
 {
@@ -291,7 +292,7 @@ void DirDiffForm::on_viewdiff_clicked()
 		QStringList l;
 		l << ldir.absoluteFilePath(s1)
 		  << rdir.absoluteFilePath(s2);
-		QProcess::startDetached("gvimdiff", l);
+        QProcess::startDetached(MySettings::instance().getDiffTool(), l);
 	}
 }
 
@@ -410,7 +411,7 @@ void DirDiffForm::viewfiles(
 		QStringList l;
 		l << ldir.absoluteFilePath(s1)
 		  << rdir.absoluteFilePath(s2);
-		QProcess::startDetached("gvimdiff", l);
+        QProcess::startDetached(MySettings::instance().getDiffTool(), l);
 	}
 }
 
@@ -424,7 +425,7 @@ QString DirDiffForm::renumber(const QString& s_)
 		QString t  = r.cap(1);
 		bool    ok = false;
 		int     x_ = t.toInt();
-		int     n  = QInputDialog::getInteger(this, "Renumber", "Please enter the new file number", x_, 1, INT_MAX, 1, &ok);
+        int     n  = QInputDialog::getInt(this, "Renumber", "Please enter the new file number", x_, 1, INT_MAX, 1, &ok);
 
 		if ( !ok )
 		{
@@ -625,4 +626,18 @@ void DirDiffForm::on_swap_clicked()
 {
 	/// @todo does a lot of work unnecessarily
 	changeDirectories(rdir.absolutePath(), ldir.absolutePath());
+}
+
+void DirDiffForm::on_openright_clicked()
+{
+    QStringList args;
+    args << rdir.absolutePath();
+    QProcess::startDetached(MySettings::instance().getFileManager(), args);
+}
+
+void DirDiffForm::on_openleft_clicked()
+{
+    QStringList args;
+    args << ldir.absolutePath();
+    QProcess::startDetached(MySettings::instance().getFileManager(), args);
 }
