@@ -73,6 +73,8 @@ public:
     /// Is the path empty (i.e., "")
 	bool empty() const;
 	const std::string& native() const;
+
+    path filename() const;
 private:
 	std::string s;
 };

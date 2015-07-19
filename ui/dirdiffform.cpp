@@ -38,7 +38,6 @@
 #include <QProcess>
 #include <QFileDialog>
 #include <QInputDialog>
-#include <QDebug>
 #include <QFileSystemWatcher>
 
 #include "fs/fileutils.h"
@@ -270,8 +269,8 @@ void DirDiffForm::setFlags(
 
 void DirDiffForm::on_viewdiff_clicked()
 {
-	const QString s1 = ui->compareview->getSelectedLeft();
-	const QString s2 = ui->compareview->getSelectedRight();
+    const QString s1 = ui->compareview->getCurrentLeft();
+    const QString s2 = ui->compareview->getCurrentRight();
 
 	if ( s1.isEmpty() && s2.isEmpty())
 	{
@@ -295,6 +294,13 @@ void DirDiffForm::on_viewdiff_clicked()
         QProcess::startDetached(MySettings::instance().getDiffTool(), l);
 	}
 }
+
+void DirDiffForm::saveAs(const QStringList& filenames, const QString& source, const QString& dest)
+{
+    for (int i = 0; i < filenames.count(); ++i)
+        saveAs(filenames.at(i), source, dest);
+}
+
 
 void DirDiffForm::saveAs(
 	const QString& original_filename, // a filename relative to source
@@ -337,7 +343,7 @@ void DirDiffForm::saveAs(
 
 void DirDiffForm::on_copytoright_clicked()
 {
-	const QString s = ui->compareview->getSelectedLeft();
+    const QStringList s = ui->compareview->getSelectedLeft();
 
 	if ( s.isEmpty())
 	{
@@ -345,12 +351,15 @@ void DirDiffForm::on_copytoright_clicked()
 		return;
 	}
 
-	copyTo(ldir.absoluteFilePath(s), directoryComponent(rdir.absolutePath() + "/" + s));
+    for (int i = 0; i< s.count(); ++i)
+    {
+        copyTo(ldir.absoluteFilePath(s.at(i)), directoryComponent(rdir.absolutePath() + "/" + s.at(i)));
+    }
 }
 
 void DirDiffForm::on_copytoleft_clicked()
 {
-	const QString s = ui->compareview->getSelectedRight();
+    const QStringList s = ui->compareview->getSelectedRight();
 
 	if ( s.isEmpty())
 	{
@@ -358,7 +367,10 @@ void DirDiffForm::on_copytoleft_clicked()
 		return;
 	}
 
-	copyTo(rdir.absoluteFilePath(s), directoryComponent(ldir.absolutePath() + "/" + s));
+    for (int i = 0; i< s.count(); ++i)
+    {
+        copyTo(rdir.absoluteFilePath(s.at(i)), directoryComponent(ldir.absolutePath() + "/" + s.at(i)));
+    }
 }
 
 void DirDiffForm::on_renametoright_clicked()
@@ -371,9 +383,30 @@ void DirDiffForm::on_renametoleft_clicked()
 	saveAs(ui->compareview->getSelectedRight(), rdir.absolutePath(), ldir.absolutePath());
 }
 
+QString DirDiffForm::getDirectory(const QString& dir)
+{
+#if 1
+    return QFileDialog::getExistingDirectory(this, "Choose a directory", dir);
+#else
+    QFileDialog dlg(this, dir, dir);
+    dlg.setFileMode(QFileDialog::Directory);
+    dlg.setOptions(QFileDialog::ShowDirsOnly);
+    int x = dlg.exec();
+    if (x == QDialog::Accepted)
+    {
+        QStringList l = dlg.selectedFiles();
+        if (!l.isEmpty())
+        {
+            return l.at(0);
+        }
+    }
+    return QString();
+#endif
+}
+
 void DirDiffForm::on_openleftdir_clicked()
 {
-	const QString s = QFileDialog::getExistingDirectory(this, "Choose a directory", ldir.absolutePath());
+    const QString s = getDirectory(ldir.absolutePath());
 
 	if ( !s.isEmpty())
 	{
@@ -383,7 +416,7 @@ void DirDiffForm::on_openleftdir_clicked()
 
 void DirDiffForm::on_openrightdir_clicked()
 {
-	const QString s = QFileDialog::getExistingDirectory(this, "Choose a directory", rdir.absolutePath());
+    const QString s = getDirectory(rdir.absolutePath());
 
 	if ( !s.isEmpty())
 	{

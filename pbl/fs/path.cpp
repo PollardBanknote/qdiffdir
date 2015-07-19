@@ -28,6 +28,8 @@
  */
 #include "path.h"
 
+#include "fileutils.h"
+
 namespace pbl
 {
 namespace fs
@@ -114,6 +116,11 @@ const std::string& path::native() const
 	return s;
 }
 
+path path::filename() const
+{
+    return path(basename(s));
+}
+
 path operator/(
 	const path& lhs,
 	const path& rhs
@@ -124,6 +131,7 @@ path operator/(
 	res.append(rhs);
 	return res;
 }
+
 
 }
 }

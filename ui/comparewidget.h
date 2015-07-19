@@ -183,11 +183,14 @@ public:
 
 	/** Get the item selected in the left window
 	 */
-	QString getSelectedLeft() const;
+    QString getCurrentLeft() const;
 
 	/** Get the item selected in the right window
 	 */
-	QString getSelectedRight() const;
+    QString getCurrentRight() const;
+
+    QStringList getSelectedLeft() const;
+    QStringList getSelectedRight() const;
 
 	void setLeftAndRight(const QString& leftname, const QString& rightname, const QStringList& leftitems, const QStringList& rightitems);
 	void updateLeft(const QStringList& added_or_changed, const QStringList& remove = QStringList());
@@ -246,6 +249,9 @@ private slots:
 	/** Change the currently selected item in both lists. Scroll to it
 	 */
 	void changesel(int);
+
+    void copy_selection_to_left();
+    void copy_selection_to_right();
 
 	/** Respond to the worker when it has finished comparing two items
 	 * @param l The identifier of the left item

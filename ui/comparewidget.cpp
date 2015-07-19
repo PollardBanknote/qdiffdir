@@ -36,7 +36,6 @@
 
 #include <QTextStream>
 #include <QClipboard>
-#include <QDebug>
 
 #include <QProcess>
 #include <QFileInfo>
@@ -82,7 +81,6 @@ CompareWidget::CompareWidget(QWidget* parent_) :
 	ui->rightdir->addAction(ui->actionCopy_To_Clipboard);
 
 	syncWindows();
-
 }
 
 CompareWidget::~CompareWidget()
@@ -133,8 +131,8 @@ void CompareWidget::syncWindows()
 
 	connect(ui->leftdir->verticalScrollBar(), SIGNAL(valueChanged(int)), ui->verticalScrollBar, SLOT(setValue(int)));
 	connect(ui->rightdir->verticalScrollBar(), SIGNAL(valueChanged(int)), ui->verticalScrollBar, SLOT(setValue(int)));
-	connect(ui->leftdir, SIGNAL(currentRowChanged(int)), SLOT(changesel(int)));
-	connect(ui->rightdir, SIGNAL(currentRowChanged(int)), SLOT(changesel(int)));
+    connect(ui->leftdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_right()));
+    connect(ui->rightdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_left()));
 
 	ui->verticalScrollBar->setValue(0);
 
@@ -318,36 +316,62 @@ void CompareWidget::on_filter_activated(int index)
 
 void CompareWidget::clearSelection()
 {
-	changesel(-1);
+    ui->leftdir->setCurrentItem(0);
+    ui->rightdir->setCurrentItem(0);
+}
+
+void copy_selection(QListWidget* from, QListWidget* to)
+{
+    const int m = from->count();
+
+    for (int i = 0; i < m; ++i)
+    {
+        if (QListWidgetItem* item = from->item(i))
+        {
+            if (QListWidgetItem* jtem = to->item(i))
+            {
+                const bool sel = item->isSelected();
+
+                if (jtem->isSelected() != sel)
+                    jtem->setSelected(sel);
+            }
+        }
+    }
+}
+
+void CompareWidget::copy_selection_to_left()
+{
+    ui->leftdir->disconnect(SIGNAL(itemSelectionChanged()),this, SLOT(copy_selection_to_right()));
+    copy_selection(ui->rightdir, ui->leftdir);
+    connect(ui->leftdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_right()));
+}
+
+void CompareWidget::copy_selection_to_right()
+{
+    ui->rightdir->disconnect(SIGNAL(itemSelectionChanged()), this, SLOT(copy_selection_to_left()));
+    copy_selection(ui->leftdir, ui->rightdir);
+    connect(ui->rightdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_left()));
 }
 
 void CompareWidget::changesel(int row)
 {
-	if ( row != -1 )
-	{
-		if ( ui->leftdir->currentRow() != row )
-		{
-			if ( QListWidgetItem * item = ui->leftdir->item(row))
-			{
-				ui->leftdir->setCurrentItem(item, QItemSelectionModel::ClearAndSelect);
-				ui->leftdir->scrollToItem(item);
-			}
-		}
+    if ( ui->leftdir->currentRow() != row )
+    {
+        if ( QListWidgetItem * item = ui->leftdir->item(row))
+        {
+            ui->leftdir->setCurrentItem(item, QItemSelectionModel::ClearAndSelect);
+            ui->leftdir->scrollToItem(item);
+        }
+    }
 
-		if ( ui->rightdir->currentRow() != row )
-		{
-			if ( QListWidgetItem * item = ui->rightdir->item(row))
-			{
-				ui->rightdir->setCurrentItem(item, QItemSelectionModel::ClearAndSelect);
-				ui->rightdir->scrollToItem(item);
-			}
-		}
-	}
-	else
-	{
-		ui->leftdir->setCurrentItem(0);
-		ui->rightdir->setCurrentItem(0);
-	}
+    if ( ui->rightdir->currentRow() != row )
+    {
+        if ( QListWidgetItem * item = ui->rightdir->item(row))
+        {
+            ui->rightdir->setCurrentItem(item, QItemSelectionModel::ClearAndSelect);
+            ui->rightdir->scrollToItem(item);
+        }
+    }
 }
 
 void CompareWidget::sync_scroll(int val)
@@ -371,7 +395,7 @@ void CompareWidget::setScrollBarRange(
 	ui->verticalScrollBar->setRange(min_, max_);
 }
 
-QString CompareWidget::getSelectedLeft() const
+QString CompareWidget::getCurrentLeft() const
 {
 	if ( QListWidgetItem * item = ui->leftdir->currentItem())
 	{
@@ -386,7 +410,7 @@ QString CompareWidget::getSelectedLeft() const
 	return QString();
 }
 
-QString CompareWidget::getSelectedRight() const
+QString CompareWidget::getCurrentRight() const
 {
 	if ( QListWidgetItem * item = ui->rightdir->currentItem())
 	{
@@ -400,6 +424,46 @@ QString CompareWidget::getSelectedRight() const
 
 	return QString();
 }
+
+QStringList CompareWidget::getSelectedLeft() const
+{
+    QStringList l;
+
+    QList< QListWidgetItem* > items = ui->leftdir->selectedItems();
+    for (int j = 0; j < items.count(); ++j)
+    {
+        if (QListWidgetItem* item = items.at(j))
+        {
+            const int i = ui->leftdir->row(item);
+            if ( i >= 0)
+            {
+                l << list[i].items.left;
+            }
+        }
+    }
+
+    return l;
+}
+QStringList CompareWidget::getSelectedRight() const
+{
+    QStringList l;
+
+    QList< QListWidgetItem* > items = ui->rightdir->selectedItems();
+    for (int j = 0; j < items.count(); ++j)
+    {
+        if (QListWidgetItem* item = items.at(j))
+        {
+            const int i = ui->rightdir->row(item);
+            if ( i >= 0)
+            {
+                l << list[i].items.right;
+            }
+        }
+    }
+
+    return l;
+}
+
 
 void CompareWidget::do_action(QListWidgetItem* item)
 {

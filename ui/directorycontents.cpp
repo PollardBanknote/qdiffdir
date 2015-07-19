@@ -32,6 +32,12 @@
 
 namespace
 {
+bool is_hidden(const pbl::fs::path& p)
+{
+    const std::string s = p.filename().native();
+    return (!s.empty() && s[0] == '.');
+}
+
 /// @todo Turn into a find-like function
 void descend(
 	QStringList&         files,
@@ -41,51 +47,60 @@ void descend(
 	unsigned             maxdepth
 )
 {
+    const bool hidden_dirs = false;
+    const bool hidden_files = false;
+
 	if ( depth < maxdepth )
 	{
 		subdirs << QString::fromStdString(path.native());
 
 		for ( pbl::fs::directory_iterator it(path), last; it != last; ++it )
 		{
-            if ( it->status().type() == file_type::directory )
+            if (it->status().type() == file_type::directory )
 			{
-				descend(files, subdirs, it->path(), depth + 1, maxdepth);
+                if ( hidden_dirs || !is_hidden(it->path()))
+                {
+                    descend(files, subdirs, it->path(), depth + 1, maxdepth);
+                }
 			}
 			else
 			{
-				std::string s = it->path().native();
+                if ( hidden_files || !is_hidden(it->path()))
+                {
+                    std::string s = it->path().native();
 
-				// keep only last (depth + 1) components
-				// points to first character of last (depth + 1) components
-				std::size_t i = std::string::npos;
+                    // keep only last (depth + 1) components
+                    // points to first character of last (depth + 1) components
+                    std::size_t i = std::string::npos;
 
-				for ( unsigned n = 0; n < depth + 1; ++n )
-				{
-					std::size_t k = std::string::npos;
+                    for ( unsigned n = 0; n < depth + 1; ++n )
+                    {
+                        std::size_t k = std::string::npos;
 
-					if ( i != std::string::npos )
-					{
-						k = s.find_last_not_of('/', i - 1);
+                        if ( i != std::string::npos )
+                        {
+                            k = s.find_last_not_of('/', i - 1);
 
-						if ( k == std::string::npos )
-						{
-							i = 0;
-							break;
-						}
-					}
+                            if ( k == std::string::npos )
+                            {
+                                i = 0;
+                                break;
+                            }
+                        }
 
-					std::size_t j = s.find_last_of('/', k);
+                        std::size_t j = s.find_last_of('/', k);
 
-					if ( j == std::string::npos )
-					{
-						i = 0;
-						break;
-					}
+                        if ( j == std::string::npos )
+                        {
+                            i = 0;
+                            break;
+                        }
 
-					i = j + 1;
-				}
+                        i = j + 1;
+                    }
 
-				files << QString::fromStdString(s.substr(i));
+                    files << QString::fromStdString(s.substr(i));
+                }
 			}
 		}
 	}

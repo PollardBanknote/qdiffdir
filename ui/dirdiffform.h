@@ -91,12 +91,14 @@ private slots:
 
 private:
 	void saveAs(const QString&, const QString& source, const QString& destination);
+    void saveAs(const QStringList&, const QString&, const QString&);
 	void copyTo(const QString& file, const QString& destdir);
 	void copyTo(const QString& file, const QString& destdir, const QString& newname);
 
 	void fileChanged(QString);
 	QString renumber(const QString& s_);
 	QString dirName(const QDir& dir);
+    QString getDirectory(const QString& dir);
 
 	Ui::DirDiffForm*    ui;
 	DirectoryContents   ldir;
