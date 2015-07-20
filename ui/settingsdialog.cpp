@@ -11,7 +11,6 @@ SettingsDialog::SettingsDialog(QWidget *parent) :
 
     MySettings& settings = MySettings::instance();
     ui->diffToolLineEdit->setText(settings.getDiffToolSetting());
-    ui->fileManagerLineEdit->setText(settings.getFileManagerSetting());
 }
 
 SettingsDialog::~SettingsDialog()
@@ -23,7 +22,6 @@ void SettingsDialog::on_save_clicked()
 {
     MySettings& settings = MySettings::instance();
     settings.setDiffTool(ui->diffToolLineEdit->text());
-    settings.setFileManager(ui->fileManagerLineEdit->text());
 
     accept();
 }
