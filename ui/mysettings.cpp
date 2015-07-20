@@ -4,7 +4,6 @@
 #include <QString>
 
 const char difftool_key[] = "difftool";
-const char filemanager_key[] = "filemanager";
 
 MySettings& MySettings::instance()
 {
@@ -28,24 +27,6 @@ QString MySettings::getDiffToolSetting() const
 void MySettings::setDiffTool(const QString & s)
 {
     setValue(difftool_key, s);
-}
-
-QString MySettings::getFileManager() const
-{
-    QString s = getFileManagerSetting();
-    if (s.isEmpty())
-        s = "dolphin";
-    return s;
-}
-
-QString MySettings::getFileManagerSetting() const
-{
-    return store->value(filemanager_key).toString();
-}
-
-void MySettings::setFileManager(const QString & s)
-{
-    setValue(filemanager_key, s);
 }
 
 MySettings::MySettings()
