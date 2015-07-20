@@ -12,10 +12,6 @@ public:
     QString getDiffTool() const;
     QString getDiffToolSetting() const;
     void setDiffTool(const QString&);
-
-    QString getFileManager() const;
-    QString getFileManagerSetting() const;
-    void setFileManager(const QString&);
 private:
     MySettings();
     ~MySettings();
