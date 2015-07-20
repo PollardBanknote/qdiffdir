@@ -58,16 +58,16 @@ void descend(
 		{
             if (it->status().type() == file_type::directory )
 			{
-                if ( hidden_dirs || !is_hidden(it->path()))
+                if ( hidden_dirs || !is_hidden(it->get_path()))
                 {
-                    descend(files, subdirs, it->path(), depth + 1, maxdepth);
+                    descend(files, subdirs, it->get_path(), depth + 1, maxdepth);
                 }
 			}
 			else
 			{
-                if ( hidden_files || !is_hidden(it->path()))
+                if ( hidden_files || !is_hidden(it->get_path()))
                 {
-                    std::string s = it->path().native();
+                    std::string s = it->get_path().native();
 
                     // keep only last (depth + 1) components
                     // points to first character of last (depth + 1) components
