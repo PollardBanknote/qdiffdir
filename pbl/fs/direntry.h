@@ -49,7 +49,7 @@ public:
 	);
 	directory_entry& operator=(const directory_entry&);
 	void assign(const path &, file_status = file_status(), file_status = file_status());
-	const pbl::fs::path& path() const;
+	const pbl::fs::path& get_path() const;
 	file_status status() const;
 	file_status symbolic_status() const;
 private:
