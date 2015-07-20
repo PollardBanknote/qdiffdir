@@ -71,7 +71,7 @@ void directory_entry::assign(
 	sym_status = sym_status_;
 }
 
-const path& directory_entry::path() const
+const path& directory_entry::get_path() const
 {
 	return path_;
 }
