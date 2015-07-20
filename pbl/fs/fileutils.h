@@ -57,11 +57,6 @@ std::string absolute_path(const std::string& filepath);
  */
 bool copy_file(const std::string& source, const std::string& dest);
 
-/** @brief Compare two files to see if they are exactly the same
- * @returns 0 if not the same, 1 if the same, -1 if an error occurred
- */
-int compare(const std::string& f, const std::string& g);
-
 /** @brief Return the name of the file system component indicated by path
  * @param path A file path
  * @returns The name of the directory or file that the path points to, or the
