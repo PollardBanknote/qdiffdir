@@ -89,6 +89,18 @@ private slots:
 
     void on_openleft_clicked();
 
+    void on_showleftonly_toggled(bool checked);
+
+    void on_showrightonly_toggled(bool checked);
+
+    void on_showignored_toggled(bool checked);
+
+    void on_showsame_toggled(bool checked);
+
+    void on_filter_activated(int index);
+
+    void on_filter_editTextChanged(const QString &arg1);
+
 private:
 	void saveAs(const QString&, const QString& source, const QString& destination);
     void saveAs(const QStringList&, const QString&, const QString&);

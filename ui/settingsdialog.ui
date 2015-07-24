@@ -32,6 +32,20 @@
     </layout>
    </item>
    <item>
+    <widget class="QTableWidget" name="tableWidget">
+     <column>
+      <property name="text">
+       <string>Label</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Filter</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>

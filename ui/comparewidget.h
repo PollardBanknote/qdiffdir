@@ -134,25 +134,11 @@ class CompareWidget : public QWidget
 {
 	Q_OBJECT
 public:
-	/** Display options
-	 */
-	enum flags
-	{
-		ShowRightOnly = 1, ///< Items on the right only will be shown
-		ShowLeftOnly  = 2, ///< Items on the left only will be shown
-		ShowIdentical = 4  ///< Items that are considered identical will be shown
-	};
-
 	/// Constructor
 	explicit CompareWidget(QWidget* parent = 0);
 
 	/// Destructor
 	~CompareWidget();
-
-	/** Configure which items ar shown
-	 * @param f A combination of "flags" values
-	 */
-	void setFlags(int f);
 
 	/** Set the object used to match items between lists
 	 *
@@ -170,17 +156,6 @@ public:
 	 */
 	void setComparison(const Compare&);
 
-	/** Add a filter to the combo box
-	 * @param desc A description of the filter that will appear in the combo box
-	 * @param r A regex to apply to the names of items
-	 *
-	 * Filters control which items are shown or not. Items whose name matches
-	 * the regex will be shown.
-	 *
-	 * @todo Make a Filter class to encapsulate the test. Wrap the regex.
-	 */
-	void addFilter(const QString& desc, const QRegExp& r);
-
 	/** Get the item selected in the left window
 	 */
     QString getCurrentLeft() const;
@@ -195,6 +170,27 @@ public:
 	void setLeftAndRight(const QString& leftname, const QString& rightname, const QStringList& leftitems, const QStringList& rightitems);
 	void updateLeft(const QStringList& added_or_changed, const QStringList& remove = QStringList());
 	void updateRight(const QStringList& added_or_changed, const QStringList& remove = QStringList());
+
+public slots:
+    /** The "show left only" checkbox was toggled
+     */
+    void showOnlyLeft(bool checked);
+
+    /** The "show ignored" checkbox was toggled
+     */
+    void showIgnored(bool checked);
+
+    /** The "show identical items" checkbox was toggled
+     */
+    void showSame(bool checked);
+
+    /** The "show right only" checkbox was toggled
+     */
+    void showOnlyRight(bool checked);
+
+    void setFilter(const QRegExp&);
+
+    void clearFilter();
 signals:
 	/** Notify connected objects that the user double clicked an item
 	 * @param l The left item
@@ -203,10 +199,6 @@ signals:
 	void itemDoubleClicked(QString l, QString r);
 private slots:
 	void applyFilters();
-
-	/** The user has changed the filter
-	 */
-	void on_filter_activated(int);
 
 	/** Scroll the left and right lists to the same point
 	 */
@@ -229,22 +221,6 @@ private slots:
 	 * The summary will be something like "Left item\tRight Item\tSame\n"
 	 */
 	void on_actionCopy_To_Clipboard_triggered();
-
-	/** The "show left only" checkbox was toggled
-	 */
-	void on_showonlyleft_toggled(bool checked);
-
-	/** The "show ignored" checkbox was toggled
-	 */
-	void on_showIgnored_toggled(bool checked);
-
-	/** The "show identical items" checkbox was toggled
-	 */
-	void on_showsame_toggled(bool checked);
-
-	/** The "show right only" checkbox was toggled
-	 */
-	void on_showonlyright_toggled(bool checked);
 
 	/** Change the currently selected item in both lists. Scroll to it
 	 */

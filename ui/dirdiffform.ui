@@ -35,7 +35,7 @@
      <item>
       <widget class="QPushButton" name="swap">
        <property name="text">
-        <string>&lt;- Swap -&gt;</string>
+        <string>⟺</string>
        </property>
       </widget>
      </item>
@@ -58,11 +58,89 @@
     <widget class="CompareWidget" name="compareview" native="true"/>
    </item>
    <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QCheckBox" name="showleftonly">
+       <property name="text">
+        <string>Show left-only items</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="showignored">
+       <property name="text">
+        <string>Show ignored items</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="showsame">
+       <property name="text">
+        <string>Show identical items</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="showrightonly">
+       <property name="text">
+        <string>Show right-only items</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <widget class="Line" name="line">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Regex Filter</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="filter">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+       <item>
+        <property name="text">
+         <string>All Items</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Source Files (*.cpp, *.h)</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <layout class="QGridLayout" name="fileactions">

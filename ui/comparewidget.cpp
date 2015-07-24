@@ -62,17 +62,12 @@ const std::size_t NOT_FOUND = std::size_t(-1);
 
 CompareWidget::CompareWidget(QWidget* parent_) :
 	QWidget(parent_),
-	ui(new Ui::CompareWidget), compare(0), filter(".*"),
+    ui(new Ui::CompareWidget), compare(0), filter(),
 	hide_left_only(false),
 	hide_right_only(false), hide_identical_items(false), hide_ignored(false),
 	worker(0), matcher(new DefaultMatcher)
 {
 	ui->setupUi(this);
-
-	connect(ui->showonlyleft, SIGNAL(toggled(bool)), SLOT(applyFilters()));
-	connect(ui->showsame, SIGNAL(toggled(bool)), SLOT(applyFilters()));
-	connect(ui->showonlyright, SIGNAL(toggled(bool)), SLOT(applyFilters()));
-	connect(ui->showIgnored, SIGNAL(toggled(bool)), SLOT(applyFilters()));
 
 	ui->leftdir->addAction(ui->actionIgnore);
 	ui->leftdir->addAction(ui->actionCopy_To_Clipboard);
@@ -104,23 +99,6 @@ void CompareWidget::stopComparison()
 {
 	delete worker;
 	worker = 0;
-}
-
-void CompareWidget::setFlags(int f)
-{
-	/// @todo Each of these will trigger applyFilters. Should only be
-	/// called once.
-	ui->showonlyleft->setChecked(( f & ShowLeftOnly ) != 0);
-	ui->showonlyright->setChecked(( f & ShowRightOnly ) != 0);
-	ui->showsame->setChecked(( f & ShowIdentical ) != 0);
-}
-
-void CompareWidget::addFilter(
-	const QString& s,
-	const QRegExp& r
-)
-{
-	ui->filter->addItem(s, r);
 }
 
 void CompareWidget::syncWindows()
@@ -179,7 +157,7 @@ bool CompareWidget::hidden(std::size_t i) const
 	}
 
 	// Hide items that don't match the current filter
-	if ( filter.isValid() && !filter.exactMatch(list[i].items.left) && !filter.exactMatch(list[i].items.right))
+    if ( !filter.isEmpty() && !filter.exactMatch(list[i].items.left) && !filter.exactMatch(list[i].items.right))
 	{
 		hideitem = true;
 	}
@@ -298,20 +276,15 @@ void CompareWidget::style(
 	item->setTextColor(font_colour);
 }
 
-void CompareWidget::on_filter_activated(int index)
+void CompareWidget::clearFilter()
 {
-	QVariant v = ui->filter->itemData(index);
+    setFilter(QRegExp());
+}
 
-	if ( v.type() == QVariant::RegExp )
-	{
-		filter = v.toRegExp();
-	}
-	else
-	{
-		filter = QRegExp(".*");
-	}
-
-	applyFilters();
+void CompareWidget::setFilter(const QRegExp & r)
+{
+    filter = r;
+    applyFilters();
 }
 
 void CompareWidget::clearSelection()
@@ -481,25 +454,25 @@ void CompareWidget::do_action(QListWidgetItem* item)
 	}
 }
 
-void CompareWidget::on_showonlyleft_toggled(bool checked)
+void CompareWidget::showOnlyLeft(bool checked)
 {
 	hide_left_only = !checked;
 	applyFilters();
 }
 
-void CompareWidget::on_showIgnored_toggled(bool checked)
+void CompareWidget::showIgnored(bool checked)
 {
 	hide_ignored = !checked;
 	applyFilters();
 }
 
-void CompareWidget::on_showsame_toggled(bool checked)
+void CompareWidget::showSame(bool checked)
 {
 	hide_identical_items = !checked;
 	applyFilters();
 }
 
-void CompareWidget::on_showonlyright_toggled(bool checked)
+void CompareWidget::showOnlyRight(bool checked)
 {
 	hide_right_only = !checked;
 	applyFilters();

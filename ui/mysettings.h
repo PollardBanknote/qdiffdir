@@ -31,6 +31,8 @@
 
 class QString;
 class QSettings;
+class QRegExp;
+#include <QMap>
 
 class MySettings
 {
@@ -40,6 +42,7 @@ public:
     QString getDiffTool() const;
     QString getDiffToolSetting() const;
     void setDiffTool(const QString&);
+
 private:
     MySettings();
     ~MySettings();

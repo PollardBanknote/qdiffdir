@@ -246,7 +246,6 @@ DirDiffForm::DirDiffForm(QWidget* parent_) :
 {
 	ui->setupUi(this);
 	ui->compareview->setMatcher(FileNameMatcher());
-	ui->compareview->addFilter("Source Files (*.cpp, *.h)", QRegExp(".*(cpp|h)"));
 	connect(ui->compareview, SIGNAL(itemDoubleClicked(QString, QString)), SLOT(viewfiles(QString, QString)));
 	changeDirectories(ldir.absolutePath(), rdir.absolutePath());
 }
@@ -262,11 +261,9 @@ void DirDiffForm::setFlags(
 	bool show_identical
 )
 {
-	const int f = ( show_left_only ? CompareWidget::ShowLeftOnly : 0 )
-	              | ( show_right_only ? CompareWidget::ShowRightOnly : 0 )
-	              | ( show_identical ? CompareWidget::ShowIdentical : 0 );
-
-	ui->compareview->setFlags(f);
+    ui->showleftonly->setChecked(show_left_only);
+    ui->showrightonly->setChecked(show_right_only);
+    ui->showsame->setChecked(show_identical);
 }
 
 void DirDiffForm::on_viewdiff_clicked()
@@ -681,4 +678,44 @@ void DirDiffForm::on_openright_clicked()
 void DirDiffForm::on_openleft_clicked()
 {
 	QDesktopServices::openUrl(QUrl("file://" + ldir.absolutePath()));
+}
+
+void DirDiffForm::on_showleftonly_toggled(bool checked)
+{
+    ui->compareview->showOnlyLeft(checked);
+}
+
+void DirDiffForm::on_showrightonly_toggled(bool checked)
+{
+    ui->compareview->showOnlyRight(checked);
+}
+
+void DirDiffForm::on_showignored_toggled(bool checked)
+{
+    ui->compareview->showIgnored(checked);
+}
+
+void DirDiffForm::on_showsame_toggled(bool checked)
+{
+    ui->compareview->showSame(checked);
+}
+
+void DirDiffForm::on_filter_activated(int index)
+{
+    switch (index)
+    {
+    case 0:
+        ui->compareview->clearFilter();
+        break;
+    case 1:
+        ui->compareview->setFilter(QRegExp(".*(cpp|h)"));
+        break;
+    }
+}
+
+void DirDiffForm::on_filter_editTextChanged(const QString &arg1)
+{
+    QRegExp rx(arg1);
+
+    ui->compareview->setFilter(rx);
 }

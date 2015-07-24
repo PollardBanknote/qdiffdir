@@ -13,116 +13,53 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="margin">
+  <layout class="QHBoxLayout" name="horizontalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
     <number>0</number>
    </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
-     <property name="spacing">
-      <number>0</number>
+    <widget class="QListWidget" name="leftdir">
+     <property name="contextMenuPolicy">
+      <enum>Qt::ActionsContextMenu</enum>
      </property>
-     <item>
-      <widget class="QListWidget" name="leftdir">
-       <property name="contextMenuPolicy">
-        <enum>Qt::ActionsContextMenu</enum>
-       </property>
-       <property name="verticalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="selectionMode">
-        <enum>QAbstractItemView::ExtendedSelection</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QScrollBar" name="verticalScrollBar">
-       <property name="orientation">
-        <enum>Qt::Vertical</enum>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QListWidget" name="rightdir">
-       <property name="contextMenuPolicy">
-        <enum>Qt::ActionsContextMenu</enum>
-       </property>
-       <property name="verticalScrollBarPolicy">
-        <enum>Qt::ScrollBarAlwaysOff</enum>
-       </property>
-       <property name="selectionMode">
-        <enum>QAbstractItemView::ExtendedSelection</enum>
-       </property>
-      </widget>
-     </item>
-    </layout>
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
+     </property>
+    </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="showhide">
-     <item>
-      <widget class="QCheckBox" name="showonlyleft">
-       <property name="text">
-        <string>Show left-only items</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="showIgnored">
-       <property name="text">
-        <string>Show Ignored items</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="showsame">
-       <property name="text">
-        <string>Show identical files</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QCheckBox" name="showonlyright">
-       <property name="text">
-        <string>Show right-only items</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
+    <widget class="QScrollBar" name="verticalScrollBar">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
    </item>
    <item>
-    <widget class="QComboBox" name="filter">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+    <widget class="QListWidget" name="rightdir">
+     <property name="contextMenuPolicy">
+      <enum>Qt::ActionsContextMenu</enum>
      </property>
-     <property name="toolTip">
-      <string>semi-colon separated list</string>
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
      </property>
-     <property name="editable">
-      <bool>false</bool>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ExtendedSelection</enum>
      </property>
-     <property name="insertPolicy">
-      <enum>QComboBox::InsertAtBottom</enum>
-     </property>
-     <item>
-      <property name="text">
-       <string>All Items</string>
-      </property>
-     </item>
     </widget>
    </item>
   </layout>
