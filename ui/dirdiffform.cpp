@@ -268,8 +268,9 @@ void DirDiffForm::setFlags(
 
 void DirDiffForm::on_viewdiff_clicked()
 {
-	const QString s1 = ui->compareview->getCurrentLeft();
-	const QString s2 = ui->compareview->getCurrentRight();
+    QStringList ss = ui->compareview->currentText();
+    const QString s1 = ss.at(0);
+    const QString s2 = ss.at(1);
 
 	if ( s1.isEmpty() && s2.isEmpty())
 	{

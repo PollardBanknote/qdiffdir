@@ -69,13 +69,9 @@ CompareWidget::CompareWidget(QWidget* parent_) :
 {
 	ui->setupUi(this);
 
-	ui->leftdir->addAction(ui->actionIgnore);
-	ui->leftdir->addAction(ui->actionCopy_To_Clipboard);
-
-	ui->rightdir->addAction(ui->actionIgnore);
-	ui->rightdir->addAction(ui->actionCopy_To_Clipboard);
-
-	syncWindows();
+    ui->multilistview->addAction(ui->actionIgnore);
+    ui->multilistview->addAction(ui->actionCopy_To_Clipboard);
+    connect(ui->multilistview, SIGNAL(itemDoubleClicked(int)), SLOT(do_action(int)));
 }
 
 CompareWidget::~CompareWidget()
@@ -99,33 +95,6 @@ void CompareWidget::stopComparison()
 {
 	delete worker;
 	worker = 0;
-}
-
-void CompareWidget::syncWindows()
-{
-	ui->verticalScrollBar->setRange(ui->leftdir->verticalScrollBar()->minimum(), ui->leftdir->verticalScrollBar()->maximum());
-	connect(ui->leftdir->verticalScrollBar(), SIGNAL(rangeChanged(int, int)), SLOT(setScrollBarRange(int, int)));
-	connect(ui->verticalScrollBar, SIGNAL(valueChanged(int)), SLOT(sync_scroll(int)));
-
-	connect(ui->leftdir->verticalScrollBar(), SIGNAL(valueChanged(int)), ui->verticalScrollBar, SLOT(setValue(int)));
-	connect(ui->rightdir->verticalScrollBar(), SIGNAL(valueChanged(int)), ui->verticalScrollBar, SLOT(setValue(int)));
-    connect(ui->leftdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_right()));
-    connect(ui->rightdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_left()));
-
-	ui->verticalScrollBar->setValue(0);
-
-	connect(ui->leftdir, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(do_action(QListWidgetItem*)));
-	connect(ui->rightdir, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(do_action(QListWidgetItem*)));
-}
-
-void CompareWidget::unsyncWindows()
-{
-	ui->leftdir->disconnect(this);
-	ui->rightdir->disconnect(this);
-	ui->leftdir->verticalScrollBar()->disconnect(ui->verticalScrollBar);
-	ui->rightdir->verticalScrollBar()->disconnect(ui->verticalScrollBar);
-	ui->verticalScrollBar->disconnect(this);
-	ui->leftdir->verticalScrollBar()->disconnect(this);
 }
 
 bool CompareWidget::hidden(std::size_t i) const
@@ -168,7 +137,7 @@ bool CompareWidget::hidden(std::size_t i) const
 void CompareWidget::applyFilters()
 {
 	// save the currently selected item
-	const int   sel              = ui->leftdir->currentRow();
+    const int   sel              = ui->multilistview->currentRow();
 	std::size_t last_low_shown   = NOT_FOUND;
 	std::size_t first_high_shown = NOT_FOUND;
 
@@ -177,15 +146,7 @@ void CompareWidget::applyFilters()
 	{
 		const bool hideitem = hidden(i);
 
-		if ( QListWidgetItem * l = ui->leftdir->item(i))
-		{
-			style(l, hideitem, i);
-		}
-
-		if ( QListWidgetItem * r = ui->rightdir->item(i))
-		{
-			style(r, hideitem, i);
-		}
+        ui->multilistview->style(i, hideitem, list[i].ignore, list[i].unmatched(), list[i].compared, list[i].same);
 
 		// find the shown items before and after the selected
 		if ( sel >= 0 && !hideitem )
@@ -205,15 +166,15 @@ void CompareWidget::applyFilters()
 	// select the correct item
 	if ( first_high_shown != NOT_FOUND )
 	{
-		changesel(first_high_shown);
+        ui->multilistview->changesel(first_high_shown);
 	}
 	else if ( last_low_shown != NOT_FOUND )
 	{
-		changesel(last_low_shown);
+        ui->multilistview->changesel(last_low_shown);
 	}
 	else
 	{
-		clearSelection();
+        ui->multilistview->clearSelection();
 	}
 }
 
@@ -235,47 +196,6 @@ void CompareWidget::items_compared(
 	}
 }
 
-void CompareWidget::style(
-	QListWidgetItem* item,
-	bool             hidden_,
-	std::size_t      i
-) const
-{
-	item->setHidden(hidden_);
-
-	// strike out ignored items
-	QFont f = item->font();
-	f.setStrikeOut(list[i].ignore);
-	f.setItalic(list[i].ignore);
-	item->setFont(f);
-
-	// set font colour
-	QColor font_colour = Qt::gray;
-
-	// green for unmatched items
-	if ( list[i].unmatched())
-	{
-		font_colour = QColor(0x40, 0xA0, 0x40);
-	}
-	else
-	{
-		// matched items are gray for uncompared, black for the same, red for different
-		if ( list[i].compared )
-		{
-			if ( list[i].same )
-			{
-				font_colour = Qt::black;
-			}
-			else
-			{
-				font_colour = QColor(0xD0, 0x40, 0x40);
-			}
-		}
-	}
-
-	item->setTextColor(font_colour);
-}
-
 void CompareWidget::clearFilter()
 {
     setFilter(QRegExp());
@@ -287,171 +207,22 @@ void CompareWidget::setFilter(const QRegExp & r)
     applyFilters();
 }
 
-void CompareWidget::clearSelection()
-{
-    ui->leftdir->setCurrentItem(0);
-    ui->rightdir->setCurrentItem(0);
-}
-
-void copy_selection(QListWidget* from, QListWidget* to)
-{
-    const int m = from->count();
-
-    for (int i = 0; i < m; ++i)
-    {
-        if (QListWidgetItem* item = from->item(i))
-        {
-            if (QListWidgetItem* jtem = to->item(i))
-            {
-                const bool sel = item->isSelected();
-
-                if (jtem->isSelected() != sel)
-                    jtem->setSelected(sel);
-            }
-        }
-    }
-}
-
-void CompareWidget::copy_selection_to_left()
-{
-    ui->leftdir->disconnect(SIGNAL(itemSelectionChanged()),this, SLOT(copy_selection_to_right()));
-    copy_selection(ui->rightdir, ui->leftdir);
-    connect(ui->leftdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_right()));
-}
-
-void CompareWidget::copy_selection_to_right()
-{
-    ui->rightdir->disconnect(SIGNAL(itemSelectionChanged()), this, SLOT(copy_selection_to_left()));
-    copy_selection(ui->leftdir, ui->rightdir);
-    connect(ui->rightdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_left()));
-}
-
-void CompareWidget::changesel(int row)
-{
-    if ( ui->leftdir->currentRow() != row )
-    {
-        if ( QListWidgetItem * item = ui->leftdir->item(row))
-        {
-            ui->leftdir->setCurrentItem(item, QItemSelectionModel::ClearAndSelect);
-            ui->leftdir->scrollToItem(item);
-        }
-    }
-
-    if ( ui->rightdir->currentRow() != row )
-    {
-        if ( QListWidgetItem * item = ui->rightdir->item(row))
-        {
-            ui->rightdir->setCurrentItem(item, QItemSelectionModel::ClearAndSelect);
-            ui->rightdir->scrollToItem(item);
-        }
-    }
-}
-
-void CompareWidget::sync_scroll(int val)
-{
-	if ( ui->leftdir->verticalScrollBar()->value() != val )
-	{
-		ui->leftdir->verticalScrollBar()->setValue(val);
-	}
-
-	if ( ui->rightdir->verticalScrollBar()->value() != val )
-	{
-		ui->rightdir->verticalScrollBar()->setValue(val);
-	}
-}
-
-void CompareWidget::setScrollBarRange(
-	int min_,
-	int max_
-)
-{
-	ui->verticalScrollBar->setRange(min_, max_);
-}
-
-QString CompareWidget::getCurrentLeft() const
-{
-	if ( QListWidgetItem * item = ui->leftdir->currentItem())
-	{
-		const int i = ui->leftdir->row(item);
-
-		if ( i >= 0 )
-		{
-			return list[i].items.left;
-		}
-	}
-
-	return QString();
-}
-
-QString CompareWidget::getCurrentRight() const
-{
-	if ( QListWidgetItem * item = ui->rightdir->currentItem())
-	{
-		const int i = ui->rightdir->row(item);
-
-		if ( i >= 0 )
-		{
-			return list[i].items.right;
-		}
-	}
-
-	return QString();
-}
-
 QStringList CompareWidget::getSelectedLeft() const
 {
-    QStringList l;
-
-    QList< QListWidgetItem* > items = ui->leftdir->selectedItems();
-    for (int j = 0; j < items.count(); ++j)
-    {
-        if (QListWidgetItem* item = items.at(j))
-        {
-            const int i = ui->leftdir->row(item);
-            if ( i >= 0)
-            {
-                l << list[i].items.left;
-            }
-        }
-    }
-
-    return l;
+    return ui->multilistview->getSelectedLeft();
 }
 QStringList CompareWidget::getSelectedRight() const
 {
-    QStringList l;
-
-    QList< QListWidgetItem* > items = ui->rightdir->selectedItems();
-    for (int j = 0; j < items.count(); ++j)
-    {
-        if (QListWidgetItem* item = items.at(j))
-        {
-            const int i = ui->rightdir->row(item);
-            if ( i >= 0)
-            {
-                l << list[i].items.right;
-            }
-        }
-    }
-
-    return l;
+    return ui->multilistview->getSelectedRight();
 }
 
 
-void CompareWidget::do_action(QListWidgetItem* item)
+void CompareWidget::do_action(int x_)
 {
-	if ( item )
-	{
-		if ( QListWidget * w = item->listWidget())
-		{
-			const int x_ = w->row(item);
-
-			if ( x_ >= 0 )
-			{
-				emit itemDoubleClicked(list[x_].items.left, list[x_].items.right);
-			}
-		}
-	}
+    if ( x_ >= 0 )
+    {
+        emit itemDoubleClicked(list[x_].items.left, list[x_].items.right);
+    }
 }
 
 void CompareWidget::showOnlyLeft(bool checked)
@@ -480,12 +251,7 @@ void CompareWidget::showOnlyRight(bool checked)
 
 void CompareWidget::on_actionIgnore_triggered()
 {
-	int idx = ui->leftdir->currentRow();
-
-	if ( idx < 0 )
-	{
-		idx = ui->rightdir->currentRow();
-	}
+    int idx = ui->multilistview->currentRow();
 
 	if ( idx >= 0 )
 	{
@@ -599,40 +365,16 @@ void CompareWidget::setLeftAndRight(
 		rightname = rightname_;
 	}
 
-	// Update display
-	unsyncWindows();
+    QList< QPair< QString, QString > > items;
 
-	ui->leftdir->clear();
-	ui->rightdir->clear();
+    for ( std::size_t i = 0, n = list.size(); i < n; ++i )
+    {
+        items.append(qMakePair(list[i].items.left, list[i].items.right));
+    }
 
-	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
-	{
-		const QString leftfile  = list[i].items.left;
-		const QString rightfile = list[i].items.right;
+    ui->multilistview->setItems(items);
 
-		// create items
-		if ( leftfile.isEmpty())
-		{
-			new QListWidgetItem(ui->leftdir);
-		}
-		else
-		{
-			new QListWidgetItem(leftfile, ui->leftdir);
-		}
-
-		if ( rightfile.isEmpty())
-		{
-			new QListWidgetItem(ui->rightdir);
-		}
-		else
-		{
-			new QListWidgetItem(rightfile, ui->rightdir);
-		}
-	}
-
-	applyFilters();
-
-	syncWindows();
+    applyFilters();
 }
 
 std::vector< items_t > CompareWidget::match(
@@ -781,8 +523,7 @@ void CompareWidget::updateLeft(
 				list[i].items.left = QString();
 				list[i].compared   = false;
 				list[i].same       = false;
-				QListWidgetItem* item = ui->leftdir->item(i);
-				item->setText(QString());
+                ui->multilistview->clearLeft(i);
 			}
 			else if ( added_or_changed.contains(list[i].items.left))
 			{
@@ -815,8 +556,7 @@ void CompareWidget::updateLeft(
 			// insert into the list
 			list.insert(list.begin() + j, y);
 
-			ui->leftdir->insertItem(j, new QListWidgetItem(item));
-			ui->rightdir->insertItem(j, new QListWidgetItem());
+            ui->multilistview->insert(j, item, QString());
 		}
 	}
 
@@ -825,10 +565,7 @@ void CompareWidget::updateLeft(
 	{
 		if ( list[i].items.right.isEmpty() && list[i].items.left.isEmpty())
 		{
-			QListWidgetItem* rightitem = ui->rightdir->takeItem(i);
-			delete rightitem;
-			QListWidgetItem* leftitem = ui->leftdir->takeItem(i);
-			delete leftitem;
+            ui->multilistview->remove(i);
 			list.erase(list.begin() + i);
 		}
 		else
@@ -856,8 +593,7 @@ void CompareWidget::updateRight(
 				list[i].items.right = QString();
 				list[i].compared    = false;
 				list[i].same        = false;
-				QListWidgetItem* item = ui->rightdir->item(i);
-				item->setText(QString());
+                ui->multilistview->clearRight(i);
 			}
 			else if ( added_or_changed.contains(list[i].items.right))
 			{
@@ -890,8 +626,7 @@ void CompareWidget::updateRight(
 			// insert into the list
 			list.insert(list.begin() + j, y);
 
-			ui->rightdir->insertItem(j, new QListWidgetItem(item));
-			ui->leftdir->insertItem(j, new QListWidgetItem());
+            ui->multilistview->insert(j, QString(), item);
 		}
 	}
 
@@ -900,10 +635,7 @@ void CompareWidget::updateRight(
 	{
 		if ( list[i].items.left.isEmpty() && list[i].items.right.isEmpty())
 		{
-			QListWidgetItem* leftitem = ui->leftdir->takeItem(i);
-			delete leftitem;
-			QListWidgetItem* rightitem = ui->rightdir->takeItem(i);
-			delete rightitem;
+            ui->multilistview->remove(i);
 			list.erase(list.begin() + i);
 		}
 		else
@@ -932,8 +664,7 @@ void CompareWidget::rematch()
 
 		if ( j == matching.size())
 		{
-			delete ui->leftdir->takeItem(i);
-			delete ui->rightdir->takeItem(i);
+            ui->multilistview->remove(i);
 			list.erase(list.begin() + i);
 		}
 		else
@@ -950,14 +681,18 @@ void CompareWidget::rematch()
 			comparison_t c = { matching[i] };
 			list.insert(list.begin() + i, c);
 
-			ui->rightdir->insertItem(i, new QListWidgetItem(matching[i].right));
-			ui->leftdir->insertItem(i, new QListWidgetItem(matching[i].left));
+            ui->multilistview->insert(i, matching[i].left, matching[i].right);
 		}
 	}
 
 	startComparison();
 	applyFilters();
 
+}
+
+QStringList CompareWidget::currentText() const
+{
+    return ui->multilistview->currentText();
 }
 
 // WorkerThread ================================================================
@@ -1007,3 +742,5 @@ void WorkerThread::run()
 		}
 	}
 }
+
+

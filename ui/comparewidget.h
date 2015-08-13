@@ -156,13 +156,7 @@ public:
 	 */
 	void setComparison(const Compare&);
 
-	/** Get the item selected in the left window
-	 */
-    QString getCurrentLeft() const;
-
-	/** Get the item selected in the right window
-	 */
-    QString getCurrentRight() const;
+    QStringList currentText() const;
 
     QStringList getSelectedLeft() const;
     QStringList getSelectedRight() const;
@@ -200,17 +194,9 @@ signals:
 private slots:
 	void applyFilters();
 
-	/** Scroll the left and right lists to the same point
-	 */
-	void sync_scroll(int);
-
-	/** Change the scroll bar range to match the list widgets
-	 */
-	void setScrollBarRange(int, int);
-
 	/** Responds to QListWidget::itemDoubleClicked
 	 */
-	void do_action(QListWidgetItem*);
+    void do_action(int);
 
 	/** Mark an item as ignored
 	 */
@@ -221,13 +207,6 @@ private slots:
 	 * The summary will be something like "Left item\tRight Item\tSame\n"
 	 */
 	void on_actionCopy_To_Clipboard_triggered();
-
-	/** Change the currently selected item in both lists. Scroll to it
-	 */
-	void changesel(int);
-
-    void copy_selection_to_left();
-    void copy_selection_to_right();
 
 	/** Respond to the worker when it has finished comparing two items
 	 * @param l The identifier of the left item
@@ -280,21 +259,6 @@ private:
 	 */
 	void startComparison();
 
-	/** Setup signals for keeping the two list widgets scrolled to the same point
-	 */
-	void syncWindows();
-
-	/** Stop the synchronization between the list widgets
-	 *
-	 * This function is necessary so that the GUI doesn't go wild as many
-	 * changes are made to the lists. It seems like a bit of a workaround.
-	 */
-	void unsyncWindows();
-
-	/** Deselect all items
-	 */
-	void clearSelection();
-
 	/** Match left and right items, restart the comparisons
 	 */
 	void rematch();
@@ -302,13 +266,6 @@ private:
 	/** Check if an item should be hidden, according to current view options
 	 */
 	bool hidden(std::size_t) const;
-
-	/** Apply styling to a list item so we can quickly see the comparison
-	 *
-	 * Ex., red for "not the same"; grey for "not yet compared"; green for
-	 * "doesn't have a match"; strike through for "ignore it"
-	 */
-	void style(QListWidgetItem* item, bool hidden, std::size_t i) const;
 
 	/// Pointer to UI class c/o Qt Creator
 	Ui::CompareWidget* ui;
