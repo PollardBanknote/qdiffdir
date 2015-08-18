@@ -101,12 +101,15 @@ private slots:
 
     void on_filter_editTextChanged(const QString &arg1);
 
+	void on_autoRefresh_stateChanged(int state);
+
 private:
 	void saveAs(const QString&, const QString& source, const QString& destination);
     void saveAs(const QStringList&, const QString&, const QString&);
 	void copyTo(const QString& file, const QString& destdir);
 	void copyTo(const QString& file, const QString& destdir, const QString& newname);
-
+	void stopDirectoryWatcher();
+	void startDirectoryWatcher();
 	void fileChanged(QString);
 	QString renumber(const QString& s_);
 	QString dirName(const QDir& dir);

@@ -514,7 +514,7 @@ void DirDiffForm::changeDirectories(
 )
 {
 	// stop the watcher, and clear the comparisons we know
-	delete watcher;
+	stopDirectoryWatcher();
 
 	// change to the new directories
 	if ( !left.isEmpty())
@@ -544,17 +544,12 @@ void DirDiffForm::changeDirectories(
 		ui->compareview->setComparison(FileCompare(ldir.absolutePath(), rdir.absolutePath()));
 	}
 
-	// create new file system watcher
-	QStringList dirlist;
-	dirlist << ldir.getDirectories()
-	        << rdir.getDirectories();
+	startDirectoryWatcher();
 
-	// Note: there is a bug that causes a crash if QFileSystemWatcher gets the
-	// same path twice
-	dirlist.removeDuplicates();
-
-	watcher = new QFileSystemWatcher(dirlist, this);
-	connect(watcher, SIGNAL(directoryChanged(QString)), SLOT(contentsChanged(QString)));
+	if( !ui->autoRefresh->isChecked())
+	{
+		stopDirectoryWatcher();
+	}
 }
 
 void DirDiffForm::copyTo(
@@ -585,6 +580,32 @@ void DirDiffForm::copyTo(
 	{
 		fileChanged(s);
 	}
+}
+
+void DirDiffForm::stopDirectoryWatcher()
+{
+	if( watcher != NULL)
+	{
+		delete watcher;
+		watcher = NULL;
+	}
+}
+
+void DirDiffForm::startDirectoryWatcher()
+{
+	stopDirectoryWatcher();
+
+	// create new file system watcher
+	QStringList dirlist;
+	dirlist << ldir.getDirectories()
+			<< rdir.getDirectories();
+
+	// Note: there is a bug that causes a crash if QFileSystemWatcher gets the
+	// same path twice
+	dirlist.removeDuplicates();
+
+	watcher = new QFileSystemWatcher(dirlist, this);
+	connect(watcher, SIGNAL(directoryChanged(QString)), SLOT(contentsChanged(QString)));
 }
 
 // File system has notified us of a change in one of our directories
@@ -719,4 +740,17 @@ void DirDiffForm::on_filter_editTextChanged(const QString &arg1)
     QRegExp rx(arg1);
 
     ui->compareview->setFilter(rx);
+}
+
+void DirDiffForm::on_autoRefresh_stateChanged(int state)
+{
+	if( state == Qt::Checked)
+	{
+		startDirectoryWatcher();
+	}
+	else
+	{
+		stopDirectoryWatcher();
+	}
+
 }
