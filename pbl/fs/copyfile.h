@@ -26,47 +26,36 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef FILESTATUS_H
-#define FILESTATUS_H
+#ifndef COPYFILE_H
+#define COPYFILE_H
 
-#include <iosfwd>
-#include "filetype.h"
-#include "perms.h"
+#include <string>
 
 namespace pbl
 {
 namespace fs
 {
-class path;
 
-/** Information about a file's type and permissions
+/** Copy the file at source to dest
  *
- * Due to the nature of the file system, the information may not be exactly
- * current.
+ * @param source A file to copy
+ * @param dest A file (including name) of the file to create
+ * @returns true iff dest exists and is a copy of source
+ *
+ * If source does not exist or is not a file, the copy will fail.
+ *
+ * If dest exists, it will be overwritten. Dest will have the same file
+ * permissions of source, if possible (subject to umask).
+ *
+ * This function copies the source file "safely". That is, in the event of an
+ * error, dest is unaltered (or, if it didn't exist, continues to not exist).
+ *
+ * @todo The std::experimental::fs namespace defines copy and copy_file. This
+ * function should be renamed accordingly.
  */
-class file_status
-{
-public:
-	file_status(const file_status&);
-	explicit file_status(file_type = file_type::none, perms = perms::unknown);
+bool copy(const std::string& source, const std::string& dest);
 
-	file_status& operator=(const file_status&);
-	file_type type() const;
-	void type(file_type);
-	perms permissions() const;
-	void permissions(perms);
-private:
-	file_type t;
-	perms     p;
-};
-
-file_status status(const path&);
-file_status symlink_status(const path&);
-
-bool is_symlink(file_status);
-
-std::ostream& operator<<(std::ostream&, const file_status&);
 }
 }
 
-#endif // FILESTATUS_H
+#endif // COPYFILE_H

@@ -26,6 +26,8 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "detach.h"
+
 #include <cstdlib>
 #include <cstdio>
 
@@ -57,10 +59,10 @@ void detach()
 
 		// in first child. Try to fork again to avoid zombies and the
 		// possibility of regaining a controlling terminal
-		if ( setsid() != -1 )
+		if ( ::setsid() != -1 )
 		{
 			// try to create grandchild
-			res = fork();
+			res = ::fork();
 
 			if ( res != -1 )
 			{
@@ -71,9 +73,9 @@ void detach()
 			}
 		}
 
-		freopen("/dev/null", "r", stdin);
-		freopen("/dev/null", "a", stdout);
-		freopen("/dev/null", "a", stderr);
+		std::freopen("/dev/null", "r", stdin);
+		std::freopen("/dev/null", "a", stdout);
+		std::freopen("/dev/null", "a", stderr);
 	}
 
 	#endif  // if defined( _POSIX_VERSION )

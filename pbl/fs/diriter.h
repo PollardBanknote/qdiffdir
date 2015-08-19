@@ -26,27 +26,23 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DIRITER_H
-#define DIRITER_H
+#ifndef PBL_FS_DIRITER_H
+#define PBL_FS_DIRITER_H
 
-#include <dirent.h>
-
-#include "path.h"
+#include <stack>
 #include "direntry.h"
 
 namespace pbl
 {
 namespace fs
 {
+
 /** An iterator for traversing directory contents
  *
  * This class can be used for iterating over the contents of a directory. The
  * parameterized constructor will make a "begin" iterator, and the default
  * constructor will make an "end" iterator. One can dereference an iterator
- * to get a fileinfo_t describing the file/subdirectory.
- *
- * This class may not be very useful to a user, as it has several limitations
- * due to the asynchronous nature of the file system (and platform details).
+ * to get a directory_entry describing the file/subdirectory.
  *
  * @note The "." and ".." 'files' are ignored by this iterator, since they are
  * not 'in' the directory.
@@ -57,25 +53,21 @@ namespace fs
  * directory_iterator-s constructed with the same argument may not point to the
  * same file.
  *
- * As a point of interest, this is not meant as a re-implementation of
- * boost::directory_iterator. It is largely meant for internal use by other fs
- * classes and functions. The similarities to boost are actually coincidental.
- *
  * @todo recursive_directory_iterator
  */
 class directory_iterator
 {
 public:
-	/** Construct an end iterator
-	 */
-	directory_iterator();
-
 	/** Construct an iterator for a directory
 	 *
 	 * After construction, the iterator will point to the first file in the
 	 * directory.
 	 */
 	explicit directory_iterator(const path& path_);
+
+	/** Construct an end iterator
+	 */
+	directory_iterator();
 
 	/** Destructor
 	 */
@@ -97,39 +89,56 @@ public:
 	 */
 	directory_iterator& operator++();
 
-	/** Get information for the file
+	/** Get information for the file system object
+	 *
+	 * @note Causes a stat. If all you need is the type of the file system object,
+	 * use the cheaper type() member
 	 */
 	const directory_entry& operator*() const;
 
-	/** Get information for the file
+	/** Get information for the file system object
+	 *
+	 * @note Causes a stat. If all you need is the type of the file system object,
+	 * use the cheaper type() member
 	 */
 	const directory_entry* operator->() const;
+
+	file_type type() const;
+
+	void swap(directory_iterator&);
 private:
+	class impl;
+
 	// non-copyable
 	directory_iterator(const directory_iterator&);
 	directory_iterator& operator=(const directory_iterator&);
 
-	/** Test if this is an end iterator
-	 */
-	bool is_end() const;
+	impl* pimpl;
+};
 
-	/** Move to the next file/subdirectory
-	 */
-	void next();
+class recursive_directory_iterator
+{
+public:
+	recursive_directory_iterator();
+	explicit recursive_directory_iterator(const path& p);
+	~recursive_directory_iterator();
 
-	/// Path to the directory
-	path dirpath;
+	recursive_directory_iterator& operator++();
+	const directory_entry&        operator*() const;
+	const directory_entry* operator->() const;
+	bool operator==(const recursive_directory_iterator& i) const;
+	bool operator!=(const recursive_directory_iterator& i) const;
+private:
+	// non-copyable
+	recursive_directory_iterator(const recursive_directory_iterator&);
+	recursive_directory_iterator& operator=(const recursive_directory_iterator&);
 
-	/// Platform information
-	DIR* d;
+	bool descend(const path& p);
+	void ascend();
 
-	/// Platform information
-	dirent* e;
-
-	/// Information about the file/subdirectory
-	directory_entry fi;
+	std::stack< directory_iterator* > stack;
 };
 
 }
 }
-#endif // DIRITER_H
+#endif // PBL_FS_DIRITER_H

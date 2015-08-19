@@ -1,4 +1,4 @@
-/* Copyright (c) 2014, Pollard Banknote Limited
+/* Copyright (c) 2015, Pollard Banknote Limited
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without modification,
@@ -26,8 +26,8 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef FILEUTILS_H
-#define FILEUTILS_H
+#ifndef BASENAME_H
+#define BASENAME_H
 
 #include <string>
 
@@ -35,29 +35,9 @@ namespace pbl
 {
 namespace fs
 {
-/** @brief Get an absolute path of a file
- * @param filepath The path of an (existing) file
- * @returns An absolute path that corresponds to the same file as filepath, or
- *   an empty string if there is an error.
- */
-std::string absolute_path(const std::string& filepath);
 
-/** @brief Copy the file at source to dest
- * @param source A file to copy
- * @param dest A file (including name) of the file to create
- * @returns true iff dest exists and is a copy of source
+/** Return the name of the file system component indicated by path
  *
- * If source does not exist or is not a file, the copy will fail.
- *
- * If dest exists, it will be overwritten. Dest will have the same file
- * permissions of source, if possible (subject to umask).
- *
- * This function copies the source file "safely". That is, in the event of an
- * error, dest is unaltered (or, if it didn't exist, continues to not exist).
- */
-bool copy_file(const std::string& source, const std::string& dest);
-
-/** @brief Return the name of the file system component indicated by path
  * @param path A file path
  * @returns The name of the directory or file that the path points to, or the
  * empty string if there's an error
@@ -74,16 +54,32 @@ bool copy_file(const std::string& source, const std::string& dest);
  * directory.
  *
  * If the last component cannot be determined for whatever reason, the string is
- * considered malformed and the empty string is returned. Some examples of
- * a "malformed" string are "", ".", "..", "usr/..". (However, something like
- * "usr/lib/.." should return "usr".)
+ * considered malformed and the empty string is returned.
+ *
+ * @note Although the empty string is considered a malformed path, "." (and
+ * anything equivalent) will return ".".
  */
 std::string basename(const std::string& path);
 
+/** Return the directory which has the last path component
+ *
+ * @param path A file path
+ *
+ * Determines the last path component as in basename, then returns directory
+ * which contains that file system object. Ex., the dirname of
+ * "/home/user/documents/readme.txt" is "/home/user/documents".
+ *
+ * As special cases, the dirname of a bare filename is "."; the dirname of
+ * "." (or equivalent) is ".."; the dirname of the root directory is still the
+ * root.
+ *
+ * If the path is malformed, the empty string is returned.
+ *
+ * @sa basename
+ */
 std::string dirname(const std::string& path);
 
-std::string cleanpath(const std::string& path);
 }
 }
 
-#endif // FILEUTILS_H
+#endif // BASENAME_H

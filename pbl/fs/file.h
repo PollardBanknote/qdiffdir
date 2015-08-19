@@ -62,7 +62,7 @@ public:
 
 	file();
 	file(const std::string& name, int flags);
-	file(const std::string& name, int flags, pbl::fs::perms);
+	file(const std::string& name, int flags, ::pbl::fs::perms);
 	~file();
 
 	bool is_open() const;
@@ -74,13 +74,13 @@ public:
 
 	size_type write(const char* buffer, std::size_t n);
 
-	pbl::fs::perms permissions() const;
+	::pbl::fs::perms permissions() const;
 
 	void flush();
 
 	void remove();
 
-	void chmod(pbl::fs::perms m);
+	void chmod(::pbl::fs::perms m);
 
 	void chmod(const file&);
 

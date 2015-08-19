@@ -26,27 +26,36 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef PROCESS_H
-#define PROCESS_H
+#ifndef PBL_FS_CLEANPATH_H
+#define PBL_FS_CLEANPATH_H
+
+#include <string>
 
 namespace pbl
 {
-namespace process
+namespace fs
 {
-/** @brief Try to detach from terminal
+/** Return a simplified version of path
  *
- * This function tries to achieve two effects: allow the calling process to
- * continue, and allow this process to continue to run if the calling process
- * ends. In particular, on *nix, the program will not block the terminal and
- * will continue to run if the terminal closes.
+ * @param path A file system path
  *
- * This function may (silently) fail.
+ * Collapses multiple path separators (ex., as in "/home//user"); replaces
+ * "name/." with "name" and "parent/child/.." with "parent"; removes trailing
+ * slashes.
  *
- * @note On *nix this function results in a new process ID, and stdin/out/err
- * will be closed.
+ * The returned path is equivalent to the original path in the sense that it
+ * identifies the same file system object. Specifically, relative paths are
+ * preserved (ex., no simplification is done to the dot-dot in "../here").
+ *
+ * If the path is malformed, the empty string is returned. For this function,
+ * really only the empty string itself is "malformed".
+ *
+ * @note This is a textual operation. It does not validate the string against
+ * the file system or otherwise touch the file system.
+ * @bug foo/bar/../baz may not point to /foo/baz if bar symlinks to flip/flop
  */
-void detach();
+std::string cleanpath(const std::string& path);
 }
 }
 
-#endif // PROCESS_H
+#endif // PBL_FS_CLEANPATH_H

@@ -20,18 +20,23 @@ SOURCES += \
     fs/filestatus.cpp \
     fs/path.cpp \
     fs/direntry.cpp \
-    fs/file.cpp
+    fs/file.cpp \
+    fs/perms.cpp \
+    fs/filetype.cpp
 
 HEADERS += \
-    process/process.h \
-    fs/fileutils.h \
     fs/diriter.h \
     fs/filetype.h \
     fs/filestatus.h \
     fs/perms.h \
     fs/path.h \
     fs/direntry.h \
-    fs/file.h
+    fs/file.h \
+    fs/abspath.h \
+    fs/basename.h \
+    fs/copyfile.h \
+    fs/cleanpath.h \
+    process/detach.h
 
 unix {
     target.path = /usr/lib

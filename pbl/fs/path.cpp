@@ -28,8 +28,6 @@
  */
 #include "path.h"
 
-#include "fileutils.h"
-
 namespace pbl
 {
 namespace fs
@@ -41,6 +39,10 @@ path::path()
 path::path(const string_type& s_) : s(s_)
 {
 
+}
+
+path::path(const char* s_) : s(s_)
+{
 }
 
 path::path(const path& p) : s(p.s)
@@ -85,6 +87,30 @@ bool path::empty() const
 	return s.empty();
 }
 
+path path::filename() const
+{
+	const std::size_t i = s.find_last_of(preferred_separator);
+
+	if ( i == std::string::npos )
+	{
+		return *this;
+	}
+
+	if ( i + 1 < s.length())
+	{
+		return path(s.substr(i + 1));
+	}
+	else
+	{
+		return "/";
+	}
+}
+
+path::operator string_type() const
+{
+	return s;
+}
+
 path& path::append(const path& p)
 {
 	bool sep = true;
@@ -116,11 +142,6 @@ const std::string& path::native() const
 	return s;
 }
 
-path path::filename() const
-{
-	return path(basename(s));
-}
-
 path operator/(
 	const path& lhs,
 	const path& rhs
@@ -130,6 +151,14 @@ path operator/(
 
 	res.append(rhs);
 	return res;
+}
+
+std::ostream& operator<<(
+	std::ostream& os,
+	const path&   p
+)
+{
+	return os << p.string();
 }
 
 }

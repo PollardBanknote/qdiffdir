@@ -26,6 +26,7 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include "copyfile.h"
 #include "file.h"
 
 namespace pbl
@@ -40,7 +41,7 @@ namespace fs
  * @todo What if dest is a directory?
  * @todo Don't copy over self
  */
-bool copy_file(
+bool copy(
 	const std::string& source,
 	const std::string& dest
 )

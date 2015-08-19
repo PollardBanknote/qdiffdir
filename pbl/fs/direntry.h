@@ -26,9 +26,10 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef DIRENTRY_H
-#define DIRENTRY_H
+#ifndef PBL_FS_DIRENTRY_H
+#define PBL_FS_DIRENTRY_H
 
+#include <iosfwd>
 #include "path.h"
 #include "filestatus.h"
 
@@ -36,7 +37,8 @@ namespace pbl
 {
 namespace fs
 {
-
+/** Reperesents a file system object
+ */
 class directory_entry
 {
 public:
@@ -44,17 +46,22 @@ public:
 	directory_entry(const directory_entry&);
 	explicit directory_entry(const path&, file_status = file_status(), file_status = file_status());
 	directory_entry& operator=(const directory_entry&);
-	void assign(const path &, file_status = file_status(), file_status = file_status());
-	const pbl::fs::path& get_path() const;
+	void             assign(const path &, file_status = file_status(), file_status = file_status());
+	const ::pbl::fs::path& get_path() const;
+
 	file_status status() const;
+
 	file_status symbolic_status() const;
+	::pbl::fs::path filename() const;
 private:
-	pbl::fs::path path_;
-	file_status   mstatus;
-	file_status   sym_status;
+	::pbl::fs::path path_;
+	file_status mstatus;
+	file_status sym_status;
 
 };
 
+std::ostream& operator<<(std::ostream&, const directory_entry&);
+
 }
 }
-#endif // DIRENTRY_H
+#endif // PBL_FS_DIRENTRY_H

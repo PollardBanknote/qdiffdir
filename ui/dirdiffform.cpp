@@ -44,7 +44,8 @@
 #include <QDesktopServices>
 #include <QUrl>
 
-#include "fs/fileutils.h"
+#include "fs/basename.h"
+#include "fs/copyfile.h"
 #include "fs/diriter.h"
 #include "fs/file.h"
 #include "mysettings.h"
@@ -606,7 +607,7 @@ void DirDiffForm::copyTo(
 		}
 	}
 
-	if ( pbl::fs::copy_file(file.toStdString(), s.toStdString()))
+	if ( pbl::fs::copy(file.toStdString(), s.toStdString()))
 	{
 		fileChanged(s);
 	}

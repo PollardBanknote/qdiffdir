@@ -26,47 +26,22 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef FILESTATUS_H
-#define FILESTATUS_H
-
-#include <iosfwd>
-#include "filetype.h"
 #include "perms.h"
 
-namespace pbl
+#include <iostream>
+#include <iomanip>
+
+namespace perms
 {
-namespace fs
+std::ostream& operator<<(
+	std::ostream& os,
+	perms         p
+)
 {
-class path;
+	std::ostream t(os.rdbuf());
 
-/** Information about a file's type and permissions
- *
- * Due to the nature of the file system, the information may not be exactly
- * current.
- */
-class file_status
-{
-public:
-	file_status(const file_status&);
-	explicit file_status(file_type = file_type::none, perms = perms::unknown);
-
-	file_status& operator=(const file_status&);
-	file_type type() const;
-	void type(file_type);
-	perms permissions() const;
-	void permissions(perms);
-private:
-	file_type t;
-	perms     p;
-};
-
-file_status status(const path&);
-file_status symlink_status(const path&);
-
-bool is_symlink(file_status);
-
-std::ostream& operator<<(std::ostream&, const file_status&);
-}
+	t << "mode: " << std::oct << static_cast< int >( p );
+	return os;
 }
 
-#endif // FILESTATUS_H
+}

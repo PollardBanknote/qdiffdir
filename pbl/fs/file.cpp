@@ -27,6 +27,7 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "file.h"
+
 #include <cerrno>
 #include <cstdlib>
 #include <cstdio>
@@ -46,10 +47,7 @@ file::file()
 
 }
 
-file::file(
-    const std::string& name,
-    int                flags
-) : is_temp(false), filestat(0)
+file::file(const std::string& name, int flags) : is_temp(false), filestat(0)
 {
 	fd = ::open(name.c_str(), flags);
 
@@ -59,11 +57,7 @@ file::file(
 	}
 }
 
-file::file(
-    const std::string& name,
-    int                flags,
-    pbl::fs::perms     m
-) : filename(), is_temp(false), filestat(0)
+file::file(const std::string& name, int flags, ::pbl::fs::perms m) : filename(), is_temp(false), filestat(0)
 {
 	fd = ::open(name.c_str(), flags, m);
 
@@ -174,17 +168,17 @@ void file::flush()
 	}
 }
 
-pbl::fs::perms file::permissions() const
+::pbl::fs::perms file::permissions() const
 {
 	if ( get_stat())
 	{
-		return static_cast< pbl::fs::perms >( filestat->st_mode & ( S_IRWXU | S_IRWXG | S_IRWXO ));
+		return static_cast< ::pbl::fs::perms >( filestat->st_mode & ( S_IRWXU | S_IRWXG | S_IRWXO ));
 	}
 
 	return perms::none;
 }
 
-void file::chmod(pbl::fs::perms m)
+void file::chmod(::pbl::fs::perms m)
 {
 	if ( fd != -1 )
 	{
@@ -242,7 +236,7 @@ bool file::rename(const std::string& dest)
 {
 	if ( fd != -1 )
 	{
-		const int res = ::rename(filename.c_str(), dest.c_str());
+		const int res = std::rename(filename.c_str(), dest.c_str());
 
 		if ( res == 0 )
 		{
@@ -322,7 +316,7 @@ file::size_type file::size() const
 class file::seek_guard
 {
 public:
-	explicit seek_guard(const file& f) : fd(-1)
+	explicit seek_guard(const file& f) : fd(-1), position(-1)
 	{
 		if ( f.is_open())
 		{
@@ -435,7 +429,7 @@ int file::compare(const file& other)
 		const std::size_t m = std::min(size1, size2);
 
 		// files are different
-		if ( ::memcmp(buf1, buf2, m) != 0 )
+		if ( std::memcmp(buf1, buf2, m) != 0 )
 		{
 			return 0;
 		}
@@ -450,14 +444,14 @@ int file::compare(const file& other)
 			// files are the same so far... save the data
 			if ( size1 > m )
 			{
-				::memmove(buf1, buf1 + m, size1 - m);
+				std::memmove(buf1, buf1 + m, size1 - m);
 			}
 
 			size1 -= m;
 
 			if ( size2 > m )
 			{
-				::memmove(buf2, buf2 + m, size2 - m);
+				std::memmove(buf2, buf2 + m, size2 - m);
 			}
 
 			size2 -= m;

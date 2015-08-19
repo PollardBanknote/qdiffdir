@@ -26,47 +26,29 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef FILESTATUS_H
-#define FILESTATUS_H
-
-#include <iosfwd>
-#include "filetype.h"
-#include "perms.h"
+#ifndef DETACH_H
+#define DETACH_H
 
 namespace pbl
 {
-namespace fs
+namespace process
 {
-class path;
 
-/** Information about a file's type and permissions
+/** @brief Try to detach from terminal
  *
- * Due to the nature of the file system, the information may not be exactly
- * current.
+ * This function tries to achieve two effects: allow the calling process to
+ * continue, and allow this process to continue to run if the calling process
+ * ends. In particular, on *nix, the program will not block the terminal and
+ * will continue to run if the terminal closes.
+ *
+ * This function may (silently) fail.
+ *
+ * @note On *nix this function results in a new process ID, and stdin/out/err
+ * will be closed.
  */
-class file_status
-{
-public:
-	file_status(const file_status&);
-	explicit file_status(file_type = file_type::none, perms = perms::unknown);
+void detach();
 
-	file_status& operator=(const file_status&);
-	file_type type() const;
-	void type(file_type);
-	perms permissions() const;
-	void permissions(perms);
-private:
-	file_type t;
-	perms     p;
-};
-
-file_status status(const path&);
-file_status symlink_status(const path&);
-
-bool is_symlink(file_status);
-
-std::ostream& operator<<(std::ostream&, const file_status&);
 }
 }
 
-#endif // FILESTATUS_H
+#endif // DETACH_H

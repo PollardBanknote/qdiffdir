@@ -26,13 +26,15 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include <string>
-#include <stdexcept>
+#include "basename.h"
 
-#include "fileutils.h"
+#include <unistd.h>
+#include "cleanpath.h"
 
 namespace
 {
+// the position following the previous occurrence of c (relative to position j),
+// or 0 if not. In this file, the first letter of a path component.
 std::size_t after_last(
 	const std::string& s,
 	char               c,
@@ -44,12 +46,13 @@ std::size_t after_last(
 	return i == std::string::npos ? 0 : i + 1;
 }
 
-// (first character, length) of last path component in s
+// (first character, length) of last path component in s or (0,0) for "."
 // or (npos, 0) if error
 std::pair< std::size_t, std::size_t > locate_last_path_component(const std::string& s)
 {
 	if ( s.empty())
 	{
+		// error
 		return std::pair< std::size_t, std::size_t >(std::string::npos, 0);
 	}
 
@@ -86,8 +89,16 @@ std::pair< std::size_t, std::size_t > locate_last_path_component(const std::stri
 
 		if ( i == 0 )
 		{
-			// error, path is malformed
-			return std::pair< std::size_t, std::size_t >(std::string::npos, 0);
+			if ( depth == 0 )
+			{
+				// "."
+				return std::pair< std::size_t, std::size_t >(0, 0);
+			}
+			else
+			{
+				// error, path is malformed
+				return std::pair< std::size_t, std::size_t >(std::string::npos, 0);
+			}
 		}
 
 		j = s.find_last_not_of('/', i - 1);
@@ -106,6 +117,11 @@ std::string basename_posix(const std::string& s)
 		return std::string();
 	}
 
+	if ( range.first == 0 && range.second == 0 )
+	{
+		return ".";
+	}
+
 	return s.substr(range.first, range.second);
 }
 
@@ -121,6 +137,11 @@ std::string dirname_posix(const std::string& s)
 
 	if ( range.first == 0 )
 	{
+		if ( range.second == 0 )
+		{
+			return "..";
+		}
+
 		// could be '/', or could be a unpathed filename
 		if ( s[0] == '/' )
 		{
@@ -145,7 +166,7 @@ namespace fs
 // Calls the basename_xxx appropriate for this platform
 std::string basename(const std::string& s)
 {
-	#ifdef _POSIX_C_SOURCE
+	#ifdef _POSIX_VERSION
 	return basename_posix(s);
 
 	#else
@@ -155,67 +176,20 @@ std::string basename(const std::string& s)
 
 std::string dirname(const std::string& s)
 {
-	#ifdef _POSIX_C_SOURCE
-	return cleanpath(dirname_posix(s));
+	#ifdef _POSIX_VERSION
+	const std::string& t = dirname_posix(s);
+
+	if ( t == "." )
+	{
+		return t;
+	}
+
+	return cleanpath(t);
 
 	#else
 	#error "No implementation of dirname is available for this platform"
 	#endif
 }
-
-#if 0
-
-void test_basename()
-{
-	// (input, basename)
-	const char* const paths[][2] =
-	{
-		{ "/", "/" },
-		{ "///", "/" },
-		{ "/./", "/" },
-		{ "/../", "/" },
-		{ "/one/../", "/" },
-		{ "lib", "lib" },
-		{ "lib/", "lib" },
-		{ "/lib", "lib" },
-		{ "/lib/", "lib" },
-		{ "usr/lib", "lib" },
-		{ "usr/lib", "lib" },
-		{ "/usr/lib", "lib" },
-		{ "/usr/lib/", "lib" },
-		{ "lib///", "lib" },
-		{ "///lib", "lib" },
-		{ "///lib///", "lib" },
-		{ "usr///lib", "lib" },
-		{ "///usr///lib", "lib" },
-		{ "///usr///lib///", "lib" },
-		{ "///usr///lib///", "lib" },
-		{ "///usr///lib///", "lib" },
-		{ "/lib/.", "lib" },
-		{ "lib/.", "lib" },
-		{ "lib/./", "lib" },
-		{ "/lib/one/../", "lib" },
-		{ "/lib/one/..", "lib" },
-		{ "lib/one/..", "lib" },
-		{ "lib/one/../", "lib" },
-		{ "lib/one/two/../../", "lib" },
-		{ "", "" },
-		{ "./", "" },
-		{ "usr/..", "" },
-	};
-
-	const std::size_t n = sizeof( paths ) / sizeof( paths[0] );
-
-	for ( std::size_t i = 0; i < n; ++i )
-	{
-		if ( basename_posix(paths[i][0]) != paths[i][1] )
-		{
-			throw std::runtime_error("Bad implementation of basename_posix");
-		}
-	}
-}
-
-#endif  // if 0
 
 }
 }

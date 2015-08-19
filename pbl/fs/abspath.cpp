@@ -26,7 +26,8 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include <string>
+#include "abspath.h"
+
 #include <climits>
 #include <cstdlib>
 
@@ -55,10 +56,6 @@ std::string absolute_path(const std::string& filename)
 			std::string s = res;
 			::free(res);
 			return s;
-		}
-		else
-		{
-			return std::string();
 		}
 
 		#else

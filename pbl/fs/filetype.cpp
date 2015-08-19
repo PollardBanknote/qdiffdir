@@ -26,47 +26,34 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef FILESTATUS_H
-#define FILESTATUS_H
-
-#include <iosfwd>
 #include "filetype.h"
-#include "perms.h"
 
-namespace pbl
-{
-namespace fs
-{
-class path;
+#include <iostream>
 
-/** Information about a file's type and permissions
- *
- * Due to the nature of the file system, the information may not be exactly
- * current.
- */
-class file_status
+static const char* const friendly[] =
 {
-public:
-	file_status(const file_status&);
-	explicit file_status(file_type = file_type::none, perms = perms::unknown);
-
-	file_status& operator=(const file_status&);
-	file_type type() const;
-	void type(file_type);
-	perms permissions() const;
-	void permissions(perms);
-private:
-	file_type t;
-	perms     p;
+	"Not found", "None", "Regular File", "Directory", "Symbolic Link",
+	"Block Device", "Character Device", "FIFO", "Socket"
 };
 
-file_status status(const path&);
-file_status symlink_status(const path&);
+namespace file_type
+{
 
-bool is_symlink(file_status);
+std::ostream& operator<<(
+	std::ostream& os,
+	file_type     t
+)
+{
+	if ( -1 <= t && t < 8 )
+	{
+		os << friendly[t + 1];
+	}
+	else
+	{
+		os << "Unknown";
+	}
 
-std::ostream& operator<<(std::ostream&, const file_status&);
+	return os;
 }
-}
 
-#endif // FILESTATUS_H
+}

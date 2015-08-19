@@ -29,6 +29,8 @@
 #ifndef PERMS_H
 #define PERMS_H
 
+#include <iosfwd>
+
 namespace perms
 {
 /** File permissions
@@ -85,13 +87,15 @@ inline perms operator^(
 	return static_cast< perms >( static_cast< int >( a ) ^ static_cast< int >( b ));
 }
 
+std::ostream& operator<<(std::ostream&, perms);
+
 }
 
 namespace pbl
 {
 namespace fs
 {
-typedef::perms::perms perms;
+typedef ::perms::perms perms;
 }
 }
 #endif // PERMS_H

@@ -26,9 +26,10 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef PATH_H
-#define PATH_H
+#ifndef PBL_FS_PATH_H
+#define PBL_FS_PATH_H
 #include <string>
+#include <iosfwd>
 
 namespace pbl
 {
@@ -37,12 +38,13 @@ namespace fs
 /** A file path
  *
  * A partial implementation of std::experimental::filesystem::path
+ * @todo Construct from the other basic_string types and pointer-to-char16_t, etc.
  */
 class path
 {
 public:
-	typedef std::string string_type;
 	typedef char value_type;
+	typedef std::basic_string< value_type > string_type;
 
 	static const value_type preferred_separator = '/';
 
@@ -50,7 +52,9 @@ public:
 	path();
 
 	/// Construct a path form the given string
-	explicit path(const string_type&);
+	path(const string_type&);
+
+	path(const char*);
 
 	/// Copy constructor
 	path(const path&);
@@ -75,12 +79,16 @@ public:
 	const std::string& native() const;
 
 	path filename() const;
+
+	operator string_type() const;
 private:
 	std::string s;
 };
 
 path operator/(const path& lhs, const path& rhs);
+
+std::ostream& operator<<(std::ostream&, const path&);
 }
 }
 
-#endif // PATH_H
+#endif // PBL_FS_PATH_H

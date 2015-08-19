@@ -28,6 +28,7 @@
  */
 #ifndef FILETYPE_H
 #define FILETYPE_H
+#include <iosfwd>
 
 namespace file_type
 {
@@ -36,6 +37,8 @@ enum file_type
 	not_found = -1, none = 0, regular, directory, symlink, block, character, fifo,
 	socket, unknown
 };
+
+std::ostream& operator<<(std::ostream&, file_type);
 }
 
 namespace pbl
@@ -44,7 +47,7 @@ namespace fs
 {
 /** Types of file system objects
  */
-typedef::file_type::file_type file_type;
+typedef ::file_type::file_type file_type;
 }
 }
 
