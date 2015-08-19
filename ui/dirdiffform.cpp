@@ -615,9 +615,7 @@ void DirDiffForm::startDirectoryWatcher()
 	stopDirectoryWatcher();
 
 	// create new file system watcher
-	QStringList dirlist;
-	dirlist << ldir.getDirectories()
-			<< rdir.getDirectories();
+    QStringList dirlist = derp.getDirectories();
 
 	// Note: there is a bug that causes a crash if QFileSystemWatcher gets the
 	// same path twice
