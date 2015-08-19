@@ -1349,16 +1349,3 @@ QStringList DirDiffForm::currentText() const
 {
     return ui->multilistview->currentText();
 }
-
-void DirDiffForm::on_autoRefresh_stateChanged(int state)
-{
-	if( state == Qt::Checked)
-	{
-		startDirectoryWatcher();
-	}
-	else
-	{
-		stopDirectoryWatcher();
-	}
-
-}
