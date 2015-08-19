@@ -118,7 +118,7 @@ const std::string& path::native() const
 
 path path::filename() const
 {
-    return path(basename(s));
+	return path(basename(s));
 }
 
 path operator/(
@@ -131,7 +131,6 @@ path operator/(
 	res.append(rhs);
 	return res;
 }
-
 
 }
 }

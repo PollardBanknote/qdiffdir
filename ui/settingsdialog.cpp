@@ -31,35 +31,36 @@
 
 #include "mysettings.h"
 
-SettingsDialog::SettingsDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::SettingsDialog)
+SettingsDialog::SettingsDialog(QWidget* parent) :
+	QDialog(parent),
+	ui(new Ui::SettingsDialog)
 {
-    ui->setupUi(this);
+	ui->setupUi(this);
 
-    MySettings& settings = MySettings::instance();
-    ui->diffToolLineEdit->setText(settings.getDiffToolSetting());
+	MySettings& settings = MySettings::instance();
+	ui->diffToolLineEdit->setText(settings.getDiffToolSetting());
 }
 
 SettingsDialog::~SettingsDialog()
 {
-    delete ui;
+	delete ui;
 }
 
 void SettingsDialog::on_save_clicked()
 {
-    MySettings& settings = MySettings::instance();
-    settings.setDiffTool(ui->diffToolLineEdit->text());
+	MySettings& settings = MySettings::instance();
 
-    accept();
+	settings.setDiffTool(ui->diffToolLineEdit->text());
+
+	accept();
 }
 
 void SettingsDialog::on_cancel_clicked()
 {
-    reject();
+	reject();
 }
 
 void SettingsDialog::accept()
 {
-    QDialog::accept();
+	QDialog::accept();
 }

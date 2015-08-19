@@ -37,19 +37,18 @@ class QRegExp;
 class MySettings
 {
 public:
-    static MySettings& instance();
+	static MySettings& instance();
 
-    QString getDiffTool() const;
-    QString getDiffToolSetting() const;
-    void setDiffTool(const QString&);
-
+	QString getDiffTool() const;
+	QString getDiffToolSetting() const;
+	void setDiffTool(const QString&);
 private:
-    MySettings();
-    ~MySettings();
+	MySettings();
+	~MySettings();
 
-    void setValue(const QString& key, const QString& value);
+	void setValue(const QString& key, const QString& value);
 
-    QSettings* store;
+	QSettings* store;
 };
 
 #endif // MYSETTINGS_H

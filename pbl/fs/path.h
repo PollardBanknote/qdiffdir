@@ -46,35 +46,35 @@ public:
 
 	static const value_type preferred_separator = '/';
 
-    /// An empty path
+	/// An empty path
 	path();
 
-    /// Construct a path form the given string
+	/// Construct a path form the given string
 	explicit path(const string_type&);
 
-    /// Copy constructor
+	/// Copy constructor
 	path(const path&);
 
-    /// Copy assignment
+	/// Copy assignment
 	path& operator=(const path&);
 
 	path& operator=(const string_type&);
 
-    /// Clear the path
+	/// Clear the path
 	void clear();
 
-    /// Swap the two paths
+	/// Swap the two paths
 	void swap(path&);
 
 	std::string string() const;
 	const char* c_str() const;
 	path& append(const path&);
 
-    /// Is the path empty (i.e., "")
+	/// Is the path empty (i.e., "")
 	bool empty() const;
 	const std::string& native() const;
 
-    path filename() const;
+	path filename() const;
 private:
 	std::string s;
 };

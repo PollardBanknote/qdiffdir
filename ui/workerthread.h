@@ -37,23 +37,20 @@
 
 class WorkerThread : public QThread
 {
-    Q_OBJECT
+	Q_OBJECT
 public:
-    explicit WorkerThread(
-        Compare                     *,
-        const std::vector< items_t >&
-    );
-    ~WorkerThread();
+	explicit WorkerThread(Compare*, const std::vector< items_t >&);
+	~WorkerThread();
 
-    void clear();
+	void clear();
 signals:
-    void compared(QString, QString, bool);
+	void compared(QString, QString, bool);
 private:
-    typedef std::vector< items_t > TaskList;
-    Compare* compare;
-    QMutex   lock;
-    TaskList todo;
-    void run();
+	typedef std::vector< items_t > TaskList;
+	Compare* compare;
+	QMutex   lock;
+	TaskList todo;
+	void run();
 };
 
 #endif // WORKERTHREAD_H

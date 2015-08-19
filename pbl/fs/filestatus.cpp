@@ -40,7 +40,7 @@ file_status::file_status(const file_status& s)
 
 file_status::file_status(
     file_type t_,
-    perms         p_
+    perms     p_
 )
 	: t(t_), p(p_)
 {

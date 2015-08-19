@@ -46,7 +46,10 @@ file::file()
 
 }
 
-file::file(const std::string& name, int flags) : is_temp(false), filestat(0)
+file::file(
+    const std::string& name,
+    int                flags
+) : is_temp(false), filestat(0)
 {
 	fd = ::open(name.c_str(), flags);
 
@@ -56,7 +59,11 @@ file::file(const std::string& name, int flags) : is_temp(false), filestat(0)
 	}
 }
 
-file::file(const std::string& name, int flags, pbl::fs::perms m) : filename(), is_temp(false), filestat(0)
+file::file(
+    const std::string& name,
+    int                flags,
+    pbl::fs::perms     m
+) : filename(), is_temp(false), filestat(0)
 {
 	fd = ::open(name.c_str(), flags, m);
 

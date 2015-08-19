@@ -31,9 +31,10 @@
 
 namespace file_type
 {
-enum file_type {
-    not_found = -1, none = 0, regular, directory, symlink, block, character, fifo,
-    socket, unknown
+enum file_type
+{
+	not_found = -1, none = 0, regular, directory, symlink, block, character, fifo,
+	socket, unknown
 };
 }
 
@@ -43,7 +44,7 @@ namespace fs
 {
 /** Types of file system objects
  */
-typedef ::file_type::file_type file_type;
+typedef::file_type::file_type file_type;
 }
 }
 

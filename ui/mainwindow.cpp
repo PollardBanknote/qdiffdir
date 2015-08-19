@@ -58,6 +58,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actionSettings_triggered()
 {
-    SettingsDialog dlg(this);
-    dlg.exec();
+	SettingsDialog dlg(this);
+
+	dlg.exec();
 }

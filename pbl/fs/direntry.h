@@ -42,11 +42,7 @@ class directory_entry
 public:
 	directory_entry();
 	directory_entry(const directory_entry&);
-	explicit directory_entry(
-	    const path&,
-	    file_status = file_status(),
-	    file_status = file_status()
-	);
+	explicit directory_entry(const path&, file_status = file_status(), file_status = file_status());
 	directory_entry& operator=(const directory_entry&);
 	void assign(const path &, file_status = file_status(), file_status = file_status());
 	const pbl::fs::path& get_path() const;

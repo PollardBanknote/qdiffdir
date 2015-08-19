@@ -46,18 +46,18 @@ bool copy_file(
 )
 {
 	// Open the input file
-    file in(source, file::readonly);
+	file in(source, file::readonly);
 
 	if ( in.is_open() && in.is_file())
 	{
-        file out(dest, file::create | file::writeonly, perms::owner_read | perms::owner_write);
+		file out(dest, file::create | file::writeonly, perms::owner_read | perms::owner_write);
 
 		if ( out.is_open())
 		{
 			// Copy the file to the newly created file
 			if ( out.copy(in))
 			{
-                out.chmod(in);
+				out.chmod(in);
 				return true;
 			}
 			else
@@ -69,12 +69,12 @@ bool copy_file(
 		}
 		else
 		{
-            file tmp; /// @todo pbl::fs::tempfile
+			file tmp; /// @todo pbl::fs::tempfile
 
 			/// @bug if(errno == EEXIST)
 			if ( tmp.mkstemp(dest) && tmp.copy(in) && tmp.realize(dest))
 			{
-                tmp.chmod(in);
+				tmp.chmod(in);
 				return true;
 			}
 		}

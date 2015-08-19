@@ -34,13 +34,12 @@
 class Compare
 {
 public:
-    virtual ~Compare()
-    {
-    }
+	virtual ~Compare()
+	{
+	}
 
-    virtual bool equal(const QString&, const QString&) = 0;
-    virtual Compare* clone() const                     = 0;
+	virtual bool equal(const QString&, const QString&) = 0;
+	virtual Compare* clone() const                     = 0;
 };
 
 #endif // COMPARE_H
-

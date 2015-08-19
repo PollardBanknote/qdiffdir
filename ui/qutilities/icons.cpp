@@ -33,38 +33,46 @@
 QIcon get_icon(const QString& name)
 {
 	// hopefully we have the free desktop icon
-	if (QIcon::hasThemeIcon(name))
+	if ( QIcon::hasThemeIcon(name))
+	{
 		return QIcon::fromTheme(name);
-	
+	}
+
 	// Try using old icon names (if we're on KDE3)
-	if ( name == "view-refresh")
+	if ( name == "view-refresh" )
 	{
 		return QIcon::fromTheme("reload");
 	}
-	if (name == "folder-open")
+
+	if ( name == "folder-open" )
 	{
 		return QIcon::fromTheme("folder_open");
 	}
-	if (name == "zoom-in")
+
+	if ( name == "zoom-in" )
 	{
 		return QIcon::fromTheme("viewmag");
 	}
-    if ( name == "list-add" )
-    {
-        return QIcon::fromTheme("add");
-    }
 
-    if ( name == "list-remove" )
-    {
-        return QIcon::fromTheme("remove");
-    }
-	
-	if (name == "document-save-as")
+	if ( name == "list-add" )
+	{
+		return QIcon::fromTheme("add");
+	}
+
+	if ( name == "list-remove" )
+	{
+		return QIcon::fromTheme("remove");
+	}
+
+	if ( name == "document-save-as" )
+	{
 		return QIcon::fromTheme("filesaveas");
-	
-	if (name == "go-down")
+	}
+
+	if ( name == "go-down" )
+	{
 		return QIcon::fromTheme("down");
+	}
 
 	return QIcon();
 }
-
