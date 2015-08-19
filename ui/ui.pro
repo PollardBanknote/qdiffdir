@@ -14,23 +14,27 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    comparewidget.cpp \
     dirdiffform.cpp \
     directorycontents.cpp \
     mysettings.cpp \
     settingsdialog.cpp \
-    multilist.cpp
+    multilist.cpp \
+    directorycomparison.cpp \
+    workerthread.cpp
 
 HEADERS  += mainwindow.h \
-    comparewidget.h \
     dirdiffform.h \
     directorycontents.h \
     mysettings.h \
     settingsdialog.h \
-    multilist.h
+    multilist.h \
+    directorycomparison.h \
+    compare.h \
+    items.h \
+    workerthread.h \
+    matcher.h
 
 FORMS    += mainwindow.ui \
-    comparewidget.ui \
     dirdiffform.ui \
     settingsdialog.ui \
     multilist.ui

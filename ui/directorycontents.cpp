@@ -197,7 +197,7 @@ QStringList DirectoryContents::getAbsoluteFileNames() const
 
 	for ( int i = 0, n = files.count(); i < n; ++i )
 	{
-		l << dir.absoluteFilePath(files.at(i));
+        l << absoluteFilePath(files.at(i));
 	}
 
 	return l;

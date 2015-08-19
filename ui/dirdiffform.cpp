@@ -34,6 +34,8 @@
 
 #include <iostream>
 
+#include <QTextStream>
+#include <QClipboard>
 #include <QMessageBox>
 #include <QProcess>
 #include <QFileDialog>
@@ -242,17 +244,27 @@ QString directoryComponent(const QString& s)
 
 DirDiffForm::DirDiffForm(QWidget* parent_) :
 	QWidget(parent_),
-	ui(new Ui::DirDiffForm), watcher()
+    ui(new Ui::DirDiffForm), filter(),
+    hide_left_only(false),
+    hide_right_only(false), hide_identical_items(false), hide_ignored(false),
+    watcher()
 {
 	ui->setupUi(this);
-	ui->compareview->setMatcher(FileNameMatcher());
-	connect(ui->compareview, SIGNAL(itemDoubleClicked(QString, QString)), SLOT(viewfiles(QString, QString)));
-	changeDirectories(ldir.absolutePath(), rdir.absolutePath());
+
+    ui->multilistview->addAction(ui->actionIgnore);
+    ui->multilistview->addAction(ui->actionCopy_To_Clipboard);
+    connect(ui->multilistview, SIGNAL(itemDoubleClicked(int)), SLOT(viewfiles(int)));
+
+    connect(&derp, SIGNAL(compared(QString, QString, bool)), SLOT(items_compared(QString, QString, bool)));
+
+    derp.setMatcher(FileNameMatcher());
+    changeDirectories(derp.getLeftLocation(), derp.getRightLocation());
 }
 
 DirDiffForm::~DirDiffForm()
 {
-	delete ui;
+    derp.stopComparison();
+    delete ui;
 }
 
 void DirDiffForm::setFlags(
@@ -268,7 +280,7 @@ void DirDiffForm::setFlags(
 
 void DirDiffForm::on_viewdiff_clicked()
 {
-    QStringList ss = ui->compareview->currentText();
+    QStringList ss = currentText();
     const QString s1 = ss.at(0);
     const QString s2 = ss.at(1);
 
@@ -280,17 +292,17 @@ void DirDiffForm::on_viewdiff_clicked()
 
 	if ( s1.isEmpty()) // view s2
 	{
-		QProcess::startDetached("gvim", QStringList(s2), rdir.absolutePath());
+        QProcess::startDetached("gvim", QStringList(s2), derp.getRightLocation());
 	}
 	else if ( s2.isEmpty()) // view s1
 	{
-		QProcess::startDetached("gvim", QStringList(s1), ldir.absolutePath());
+        QProcess::startDetached("gvim", QStringList(s1), derp.getLeftLocation());
 	}
 	else // run gvimdiff
 	{
 		QStringList l;
-		l << ldir.absoluteFilePath(s1)
-		  << rdir.absoluteFilePath(s2);
+        l << derp.getLeftLocation(s1)
+          << derp.getRightLocation(s2);
 		QProcess::startDetached(MySettings::instance().getDiffTool(), l);
 	}
 }
@@ -348,7 +360,7 @@ void DirDiffForm::saveAs(
 
 void DirDiffForm::on_copytoright_clicked()
 {
-	const QStringList s = ui->compareview->getSelectedLeft();
+    const QStringList s = ui->multilistview->getSelectedLeft();
 
 	if ( s.isEmpty())
 	{
@@ -358,13 +370,13 @@ void DirDiffForm::on_copytoright_clicked()
 
 	for ( int i = 0; i < s.count(); ++i )
 	{
-		copyTo(ldir.absoluteFilePath(s.at(i)), directoryComponent(rdir.absolutePath() + "/" + s.at(i)));
+        copyTo(derp.getLeftLocation(s.at(i)), directoryComponent(derp.getRightLocation() + "/" + s.at(i)));
 	}
 }
 
 void DirDiffForm::on_copytoleft_clicked()
 {
-	const QStringList s = ui->compareview->getSelectedRight();
+    const QStringList s = ui->multilistview->getSelectedRight();
 
 	if ( s.isEmpty())
 	{
@@ -374,18 +386,18 @@ void DirDiffForm::on_copytoleft_clicked()
 
 	for ( int i = 0; i < s.count(); ++i )
 	{
-		copyTo(rdir.absoluteFilePath(s.at(i)), directoryComponent(ldir.absolutePath() + "/" + s.at(i)));
+        copyTo(derp.getRightLocation(s.at(i)), directoryComponent(derp.getLeftLocation() + "/" + s.at(i)));
 	}
 }
 
 void DirDiffForm::on_renametoright_clicked()
 {
-	saveAs(ui->compareview->getSelectedLeft(), ldir.absolutePath(), rdir.absolutePath());
+    saveAs(ui->multilistview->getSelectedLeft(), derp.getLeftLocation(), derp.getRightLocation());
 }
 
 void DirDiffForm::on_renametoleft_clicked()
 {
-	saveAs(ui->compareview->getSelectedRight(), rdir.absolutePath(), ldir.absolutePath());
+    saveAs(ui->multilistview->getSelectedRight(), derp.getRightLocation(), derp.getLeftLocation());
 }
 
 QString DirDiffForm::getDirectory(const QString& dir)
@@ -416,7 +428,7 @@ QString DirDiffForm::getDirectory(const QString& dir)
 
 void DirDiffForm::on_openleftdir_clicked()
 {
-	const QString s = getDirectory(ldir.absolutePath());
+    const QString s = getDirectory(derp.getLeftLocation());
 
 	if ( !s.isEmpty())
 	{
@@ -426,7 +438,7 @@ void DirDiffForm::on_openleftdir_clicked()
 
 void DirDiffForm::on_openrightdir_clicked()
 {
-	const QString s = getDirectory(rdir.absolutePath());
+    const QString s = getDirectory(derp.getRightLocation());
 
 	if ( !s.isEmpty())
 	{
@@ -435,27 +447,32 @@ void DirDiffForm::on_openrightdir_clicked()
 }
 
 void DirDiffForm::viewfiles(
-	QString s1,
-	QString s2
+       int x_
 )
 {
-	if ( s1.isEmpty())
-	{
-		QProcess::startDetached("gvim",
-			QStringList(rdir.absoluteFilePath(s2)));
-	}
-	else if ( s2.isEmpty())
-	{
-		QProcess::startDetached("gvim",
-			QStringList(ldir.absoluteFilePath(s1)));
-	}
-	else // run gvimdiff
-	{
-		QStringList l;
-		l << ldir.absoluteFilePath(s1)
-		  << rdir.absoluteFilePath(s2);
-		QProcess::startDetached(MySettings::instance().getDiffTool(), l);
-	}
+    if ( x_ >= 0 )
+    {
+        const QString s1 = list[x_].items.left;
+        const QString s2 = list[x_].items.right;
+
+        if ( s1.isEmpty())
+        {
+            QProcess::startDetached("gvim",
+                QStringList(derp.getRightLocation(s2)));
+        }
+        else if ( s2.isEmpty())
+        {
+            QProcess::startDetached("gvim",
+                QStringList(derp.getLeftLocation(s1)));
+        }
+        else // run gvimdiff
+        {
+            QStringList l;
+            l << derp.getLeftLocation(s1)
+              << derp.getRightLocation(s2);
+            QProcess::startDetached(MySettings::instance().getDiffTool(), l);
+        }
+    }
 }
 
 QString DirDiffForm::renumber(const QString& s_)
@@ -484,27 +501,28 @@ QString DirDiffForm::renumber(const QString& s_)
 // directories have not changed, but list has
 void DirDiffForm::on_depth_valueChanged(int d)
 {
-	{
-		QStringList       rem   = ldir.getRelativeFileNames();
-		const QStringList files = ldir.setDepth(d);
+    QStringList       reml   = derp.getLeftRelativeFileNames();
+    QStringList       remr   = derp.getRightRelativeFileNames();
+    QPair< QStringList, QStringList > bothfiles = derp.setDepth(d);
+    {
+        const QStringList files = bothfiles.first;
 
 		for ( int i = 0; i < files.count(); ++i )
 		{
-			rem.removeAll(files.at(i));
+            reml.removeAll(files.at(i));
 		}
 
-		ui->compareview->updateLeft(files, rem);
+        updateLeft(files, reml);
 	}
 	{
-		QStringList       rem   = rdir.getRelativeFileNames();
-		const QStringList files = rdir.setDepth(d);
+        const QStringList files = bothfiles.second;
 
 		for ( int i = 0; i < files.count(); ++i )
 		{
-			rem.removeAll(files.at(i));
+            remr.removeAll(files.at(i));
 		}
 
-		ui->compareview->updateRight(files, rem);
+        updateRight(files, remr);
 	}
 }
 
@@ -519,19 +537,20 @@ void DirDiffForm::changeDirectories(
 	// change to the new directories
 	if ( !left.isEmpty())
 	{
-		ldir.cd(left);
-		ui->openleftdir->setText(ldir.name());
+        derp.setLeftLocation(left);
+        ui->openleftdir->setText(derp.getLeftName());
 	}
 
 	if ( !right.isEmpty())
 	{
-		rdir.cd(right);
-		ui->openrightdir->setText(rdir.name());
+        derp.setRightLocation(right);
+        ui->openrightdir->setText(derp.getRightName());
 	}
 
 	const int         depth_     = ui->depth->value();
-	const QStringList leftfiles  = ldir.setDepth(depth_);
-	const QStringList rightfiles = rdir.setDepth(depth_);
+    const QPair< QStringList, QStringList > bothfiles = derp.setDepth(depth_);
+    const QStringList leftfiles  = bothfiles.first;
+    const QStringList rightfiles = bothfiles.second;
 
 	{
 		/// @todo If left and right are the same, don't do both
@@ -540,8 +559,8 @@ void DirDiffForm::changeDirectories(
 
 		when = QDateTime::currentDateTime();
 
-		ui->compareview->setLeftAndRight(ldir.absolutePath(), rdir.absolutePath(), leftfiles, rightfiles);
-		ui->compareview->setComparison(FileCompare(ldir.absolutePath(), rdir.absolutePath()));
+        setLeftAndRight(derp.getLeftLocation(), derp.getRightLocation(), leftfiles, rightfiles);
+        setComparison(FileCompare(derp.getLeftLocation(), derp.getRightLocation()));
 	}
 
 	startDirectoryWatcher();
@@ -617,13 +636,13 @@ void DirDiffForm::contentsChanged(QString dirname_)
 	const QString dirname = dirName(eventdir); // absolute path of dir
 
 	// absolute path of every file below dirname
-	if ( dirname.startsWith(ldir.absolutePath()))
+    if ( dirname.startsWith(derp.getLeftLocation()))
 	{
-		DirectoryContents::update_t u = ldir.update(dirname);
+        DirectoryContents::update_t u = derp.updateLeft(dirname);
 
 		for ( int i = 0, n = u.changed.count(); i < n; ++i )
 		{
-			QFileInfo fi(ldir.absoluteFilePath(u.changed.at(i)));
+            QFileInfo fi(derp.getLeftLocation(u.changed.at(i)));
 
 			if ( fi.lastModified() > when )
 			{
@@ -631,16 +650,16 @@ void DirDiffForm::contentsChanged(QString dirname_)
 			}
 		}
 
-		ui->compareview->updateLeft(u.added, u.removed);
+        updateLeft(u.added, u.removed);
 	}
 
-	if ( dirname.startsWith(rdir.absolutePath()))
+    if ( dirname.startsWith(derp.getRightLocation()))
 	{
-		DirectoryContents::update_t u = rdir.update(dirname);
+        DirectoryContents::update_t u = derp.updateRight(dirname);
 
 		for ( int i = 0, n = u.changed.count(); i < n; ++i )
 		{
-			QFileInfo fi(rdir.absoluteFilePath(u.changed.at(i)));
+            QFileInfo fi(derp.getRightLocation(u.changed.at(i)));
 
 			if ( fi.lastModified() > when )
 			{
@@ -648,7 +667,7 @@ void DirDiffForm::contentsChanged(QString dirname_)
 			}
 		}
 
-		ui->compareview->updateRight(u.added, u.removed);
+        updateRight(u.added, u.removed);
 	}
 }
 
@@ -656,14 +675,14 @@ void DirDiffForm::contentsChanged(QString dirname_)
 // file is an absolute path
 void DirDiffForm::fileChanged(QString file)
 {
-	if ( file.startsWith(ldir.absolutePath()))
+    if ( file.startsWith(derp.getLeftLocation()))
 	{
-		ui->compareview->updateLeft(QStringList(ldir.relativeFilePath(file)));
+        updateLeft(QStringList(derp.getLeftRelativeFilePath(file)));
 	}
 
-	if ( file.startsWith(rdir.absolutePath()))
+    if ( file.startsWith(derp.getRightLocation()))
 	{
-		ui->compareview->updateRight(QStringList(rdir.relativeFilePath(file)));
+        updateRight(QStringList(derp.getRightRelativeFilePath(file)));
 	}
 }
 
@@ -683,43 +702,43 @@ QString DirDiffForm::dirName(const QDir& dir)
 
 void DirDiffForm::on_refresh_clicked()
 {
-	changeDirectories(ldir.absolutePath(), rdir.absolutePath());
+    changeDirectories(derp.getLeftLocation(), derp.getRightLocation());
 }
 
 void DirDiffForm::on_swap_clicked()
 {
 	/// @todo does a lot of work unnecessarily
-	changeDirectories(rdir.absolutePath(), ldir.absolutePath());
+    changeDirectories(derp.getRightLocation(), derp.getLeftLocation());
 }
 
 void DirDiffForm::on_openright_clicked()
 {
-	QDesktopServices::openUrl(QUrl("file://" + rdir.absolutePath()));
+    QDesktopServices::openUrl(QUrl("file://" + derp.getRightLocation()));
 }
 
 void DirDiffForm::on_openleft_clicked()
 {
-	QDesktopServices::openUrl(QUrl("file://" + ldir.absolutePath()));
+    QDesktopServices::openUrl(QUrl("file://" + derp.getRightLocation()));
 }
 
 void DirDiffForm::on_showleftonly_toggled(bool checked)
 {
-    ui->compareview->showOnlyLeft(checked);
+    showOnlyLeft(checked);
 }
 
 void DirDiffForm::on_showrightonly_toggled(bool checked)
 {
-    ui->compareview->showOnlyRight(checked);
+    showOnlyRight(checked);
 }
 
 void DirDiffForm::on_showignored_toggled(bool checked)
 {
-    ui->compareview->showIgnored(checked);
+    showIgnored(checked);
 }
 
 void DirDiffForm::on_showsame_toggled(bool checked)
 {
-    ui->compareview->showSame(checked);
+    showSame(checked);
 }
 
 void DirDiffForm::on_filter_activated(int index)
@@ -727,10 +746,10 @@ void DirDiffForm::on_filter_activated(int index)
     switch (index)
     {
     case 0:
-        ui->compareview->clearFilter();
+        clearFilter();
         break;
     case 1:
-        ui->compareview->setFilter(QRegExp(".*(cpp|h)"));
+        setFilter(QRegExp(".*(cpp|h)"));
         break;
     }
 }
@@ -739,7 +758,586 @@ void DirDiffForm::on_filter_editTextChanged(const QString &arg1)
 {
     QRegExp rx(arg1);
 
-    ui->compareview->setFilter(rx);
+    setFilter(rx);
+}
+
+
+const std::size_t NOT_FOUND = std::size_t(-1);
+
+bool DirDiffForm::hidden(std::size_t i) const
+{
+    bool hideitem = false;
+
+    // Hide items in the left list that do not have a match in the right
+    if ( hide_left_only && list[i].left_only())
+    {
+        hideitem = true;
+    }
+
+    // Hide items in the right list that do not have a match in the right
+    if ( hide_right_only && list[i].right_only())
+    {
+        hideitem = true;
+    }
+
+    // Hide ignored items
+    if ( hide_ignored && list[i].ignore )
+    {
+        hideitem = true;
+    }
+
+    // Hide items that have compared identical
+    if ( hide_identical_items && list[i].compared && list[i].same )
+    {
+        hideitem = true;
+    }
+
+    // Hide items that don't match the current filter
+    if ( !filter.isEmpty() && !filter.exactMatch(list[i].items.left) && !filter.exactMatch(list[i].items.right))
+    {
+        hideitem = true;
+    }
+
+    return hideitem;
+}
+
+void DirDiffForm::applyFilters()
+{
+    // save the currently selected item
+    const int   sel              = ui->multilistview->currentRow();
+    std::size_t last_low_shown   = NOT_FOUND;
+    std::size_t first_high_shown = NOT_FOUND;
+
+    // for each item, check if it is shown or not, and adjust font
+    for ( std::size_t i = 0, n = list.size(); i < n; ++i )
+    {
+        const bool hideitem = hidden(i);
+
+        ui->multilistview->style(i, hideitem, list[i].ignore, list[i].unmatched(), list[i].compared, list[i].same);
+
+        // find the shown items before and after the selected
+        if ( sel >= 0 && !hideitem )
+        {
+            if ( i <= static_cast< unsigned >( sel ))
+            {
+                last_low_shown = i;
+            }
+
+            if ( i >= static_cast< unsigned >( sel ) && first_high_shown == NOT_FOUND )
+            {
+                first_high_shown = i;
+            }
+        }
+    }
+
+    // select the correct item
+    if ( first_high_shown != NOT_FOUND )
+    {
+        ui->multilistview->changesel(first_high_shown);
+    }
+    else if ( last_low_shown != NOT_FOUND )
+    {
+        ui->multilistview->changesel(last_low_shown);
+    }
+    else
+    {
+        ui->multilistview->clearSelection();
+    }
+}
+
+void DirDiffForm::items_compared(
+    QString first,
+    QString second,
+    bool    equal
+)
+{
+    for ( std::size_t i = 0, n = list.size(); i < n; ++i )
+    {
+        if ( list[i].items.left == first && list[i].items.right == second )
+        {
+            list[i].compared = true;
+            list[i].same     = equal;
+            applyFilters();
+            return;
+        }
+    }
+}
+
+void DirDiffForm::clearFilter()
+{
+    setFilter(QRegExp());
+}
+
+void DirDiffForm::setFilter(const QRegExp & r)
+{
+    filter = r;
+    applyFilters();
+}
+
+void DirDiffForm::showOnlyLeft(bool checked)
+{
+    hide_left_only = !checked;
+    applyFilters();
+}
+
+void DirDiffForm::showIgnored(bool checked)
+{
+    hide_ignored = !checked;
+    applyFilters();
+}
+
+void DirDiffForm::showSame(bool checked)
+{
+    hide_identical_items = !checked;
+    applyFilters();
+}
+
+void DirDiffForm::showOnlyRight(bool checked)
+{
+    hide_right_only = !checked;
+    applyFilters();
+}
+
+void DirDiffForm::on_actionIgnore_triggered()
+{
+    int idx = ui->multilistview->currentRow();
+
+    if ( idx >= 0 )
+    {
+        list[idx].ignore = true;
+        applyFilters();
+    }
+}
+
+void DirDiffForm::on_actionCopy_To_Clipboard_triggered()
+{
+    QClipboard* clipboard = QApplication::clipboard();
+    QString     temp;
+    QTextStream ts(&temp);
+
+    ts << leftname << "\t" << rightname << endl;
+
+    for ( std::size_t i = 0, n = list.size(); i < n; ++i )
+    {
+        if ( !hidden(i))
+        {
+            // items
+            ts << list[i].items.left << '\t' << list[i].items.right << '\t';
+
+            // result of comparison
+            if ( list[i].left_only())
+            {
+                ts << "Left Only";
+            }
+            else if ( list[i].right_only())
+            {
+                ts << "Right Only";
+            }
+            else if ( list[i].compared )
+            {
+                if ( list[i].same )
+                {
+                    ts << "Same";
+                }
+                else
+                {
+                    ts << "Different";
+                }
+            }
+            else
+            {
+                ts << "Unknown";
+            }
+
+            // ignored or not
+            if ( list[i].ignore )
+            {
+                ts << "\tIgnore";
+            }
+
+            ts << endl;
+        }
+    }
+
+    ts.flush();
+    clipboard->setText(temp);
+}
+
+void DirDiffForm::setLeftAndRight(
+    const QString&     leftname_,
+    const QString&     rightname_,
+    const QStringList& leftitems,
+    const QStringList& rightitems
+)
+{
+    derp.stopComparison();
+
+    {
+        // Update internal list
+        QStringList ignore_left;
+        QStringList ignore_right;
+
+        for ( std::size_t i = 0, n = list.size(); i < n; ++i )
+        {
+            if ( list[i].ignore )
+            {
+                if ( !list[i].items.left.isEmpty())
+                {
+                    ignore_left << list[i].items.left;
+                }
+
+                if ( !list[i].items.right.isEmpty())
+                {
+                    ignore_right << list[i].items.right;
+                }
+            }
+        }
+
+        std::vector< items_t > filepairs = match(leftitems, rightitems);
+
+        std::vector< comparison_t > temp;
+
+        for ( std::size_t i = 0, n = filepairs.size(); i < n; ++i )
+        {
+            comparison_t c = { filepairs[i], false, false, false };
+
+            if ( ignore_left.contains(filepairs[i].left) || ignore_right.contains(filepairs[i].right))
+            {
+                c.ignore = true;
+            }
+
+            temp.push_back(c);
+        }
+
+        list      = temp;
+        leftname  = leftname_;
+        rightname = rightname_;
+    }
+
+    QList< QPair< QString, QString > > items;
+
+    for ( std::size_t i = 0, n = list.size(); i < n; ++i )
+    {
+        items.append(qMakePair(list[i].items.left, list[i].items.right));
+    }
+
+    ui->multilistview->setItems(items);
+
+    applyFilters();
+}
+
+std::vector< items_t > DirDiffForm::match(
+    const QStringList& leftitems,
+    const QStringList& rightitems
+) const
+{
+    std::map< int, std::vector< items_t > > score;
+
+    for ( int il = 0, nl = leftitems.count(); il < nl; ++il )
+    {
+        for ( int ir = 0, nr = rightitems.count(); ir < nr; ++ir )
+        {
+            score[derp.match(leftitems.at(il), rightitems.at(ir))].push_back(
+                items_t(leftitems.at(il), rightitems.at(ir)));
+        }
+    }
+
+    std::vector< items_t > matching;
+
+    QStringList leftmatched;
+    QStringList rightmatched;
+
+    for ( std::map< int, std::vector< items_t > >::iterator it = score.begin(); it != score.end(); ++it )
+    {
+        if ( it->first != Matcher::DO_NOT_MATCH )
+        {
+            std::vector< items_t > l = it->second;
+
+            for ( std::size_t i = 0; i < l.size(); ++i )
+            {
+                if ( !leftmatched.contains(l[i].left) && !rightmatched.contains(l[i].right))
+                {
+                    matching.push_back(l[i]);
+                    leftmatched << l[i].left;
+                    rightmatched << l[i].right;
+                }
+            }
+        }
+    }
+
+    for ( int i = 0, n = leftitems.count(); i < n; ++i )
+    {
+        if ( !leftmatched.contains(leftitems.at(i)))
+        {
+            matching.push_back(items_t(leftitems.at(i), QString()));
+        }
+    }
+
+    for ( int i = 0, n = rightitems.count(); i < n; ++i )
+    {
+        if ( !rightmatched.contains(rightitems.at(i)))
+        {
+            matching.push_back(items_t(QString(), rightitems.at(i)));
+        }
+    }
+
+    std::sort(matching.begin(), matching.end());
+
+    return matching;
+}
+
+void DirDiffForm::setComparison(const Compare& comp)
+{
+    if ( Compare * p = comp.clone())
+    {
+        derp.stopComparison();
+        derp.setCompare(p);
+
+        for ( std::size_t i = 0; i < list.size(); ++i )
+        {
+            list[i].compared = false;
+        }
+
+        startComparison();
+
+    }
+}
+
+void DirDiffForm::startComparison()
+{
+    std::vector< items_t > matches;
+
+    for ( std::size_t i = 0, n = list.size(); i < n; ++i )
+    {
+        if ( !list[i].items.left.isEmpty() && !list[i].items.right.isEmpty() && !list[i].compared )
+        {
+            matches.push_back(list[i].items);
+        }
+    }
+
+    if ( !matches.empty())
+    {
+        derp.stopComparison();
+        derp.startWorker(matches);
+    }
+}
+
+QStringList DirDiffForm::getAllLeft() const
+{
+    QStringList l;
+
+    for ( std::size_t i = 0, n = list.size(); i < n; ++i )
+    {
+        if ( !list[i].items.left.isEmpty())
+        {
+            l << list[i].items.left;
+        }
+    }
+
+    return l;
+}
+
+QStringList DirDiffForm::getAllRight() const
+{
+    QStringList l;
+
+    for ( std::size_t i = 0, n = list.size(); i < n; ++i )
+    {
+        if ( !list[i].items.right.isEmpty())
+        {
+            l << list[i].items.right;
+        }
+    }
+
+    return l;
+}
+
+void DirDiffForm::updateLeft(
+    const QStringList& added_or_changed,
+    const QStringList& remove
+)
+{
+    QStringList oldleft;
+
+    for ( std::size_t i = 0, n = list.size(); i < n; ++i )
+    {
+        if ( !list[i].items.left.isEmpty())
+        {
+            if ( remove.contains(list[i].items.left))
+            {
+                list[i].items.left = QString();
+                list[i].compared   = false;
+                list[i].same       = false;
+                ui->multilistview->clearLeft(i);
+            }
+            else if ( added_or_changed.contains(list[i].items.left))
+            {
+                list[i].compared = false;
+                list[i].same     = false;
+            }
+
+            oldleft << list[i].items.left;
+        }
+    }
+
+    for ( int i = 0, n = added_or_changed.count(); i < n; ++i )
+    {
+        const QString item = added_or_changed.at(i);
+
+        // was item added?
+        if ( !oldleft.contains(item))
+        {
+            items_t x(item, QString());
+
+            std::size_t j = 0;
+
+            while ( j < list.size() && list[j].items < x )
+            {
+                ++j;
+            }
+
+            comparison_t y = { x, false, false, false };
+
+            // insert into the list
+            list.insert(list.begin() + j, y);
+
+            ui->multilistview->insert(j, item, QString());
+        }
+    }
+
+    // remove empty items
+    for ( std::size_t i = 0; i < list.size();)
+    {
+        if ( list[i].items.right.isEmpty() && list[i].items.left.isEmpty())
+        {
+            ui->multilistview->remove(i);
+            list.erase(list.begin() + i);
+        }
+        else
+        {
+            ++i;
+        }
+    }
+
+    rematch();
+}
+
+void DirDiffForm::updateRight(
+    const QStringList& added_or_changed,
+    const QStringList& remove
+)
+{
+    QStringList oldright;
+
+    for ( std::size_t i = 0, n = list.size(); i < n; ++i )
+    {
+        if ( !list[i].items.right.isEmpty())
+        {
+            if ( remove.contains(list[i].items.right))
+            {
+                list[i].items.right = QString();
+                list[i].compared    = false;
+                list[i].same        = false;
+                ui->multilistview->clearRight(i);
+            }
+            else if ( added_or_changed.contains(list[i].items.right))
+            {
+                list[i].compared = false;
+                list[i].same     = false;
+            }
+
+            oldright << list[i].items.right;
+        }
+    }
+
+    for ( int i = 0, n = added_or_changed.count(); i < n; ++i )
+    {
+        const QString item = added_or_changed.at(i);
+
+        // was item added?
+        if ( !oldright.contains(item))
+        {
+            items_t x(QString(), item);
+
+            std::size_t j = 0;
+
+            while ( j < list.size() && list[j].items < x )
+            {
+                ++j;
+            }
+
+            comparison_t y = { x, false, false, false };
+
+            // insert into the list
+            list.insert(list.begin() + j, y);
+
+            ui->multilistview->insert(j, QString(), item);
+        }
+    }
+
+    // remove empty items
+    for ( std::size_t i = 0; i < list.size();)
+    {
+        if ( list[i].items.left.isEmpty() && list[i].items.right.isEmpty())
+        {
+            ui->multilistview->remove(i);
+            list.erase(list.begin() + i);
+        }
+        else
+        {
+            ++i;
+        }
+    }
+
+    rematch();
+}
+
+void DirDiffForm::rematch()
+{
+    // rematch filenames
+    std::vector< items_t > matching = match(getAllLeft(), getAllRight());
+
+    // erase all existing rows that are not in the new matching
+    for ( std::size_t i = 0; i < list.size();)
+    {
+        std::size_t j = 0;
+
+        while ( j < matching.size() && list[i].items != matching[j] )
+        {
+            ++j;
+        }
+
+        if ( j == matching.size())
+        {
+            ui->multilistview->remove(i);
+            list.erase(list.begin() + i);
+        }
+        else
+        {
+            ++i;
+        }
+    }
+
+    // add all items in matching that aren't in the current view
+    for ( std::size_t i = 0; i < matching.size(); ++i )
+    {
+        if ( i >= list.size() || matching[i] != list[i].items )
+        {
+            comparison_t c = { matching[i], false, false, false };
+            list.insert(list.begin() + i, c);
+
+            ui->multilistview->insert(i, matching[i].left, matching[i].right);
+        }
+    }
+
+    startComparison();
+    applyFilters();
+
+}
+
+QStringList DirDiffForm::currentText() const
+{
+    return ui->multilistview->currentText();
 }
 
 void DirDiffForm::on_autoRefresh_stateChanged(int state)

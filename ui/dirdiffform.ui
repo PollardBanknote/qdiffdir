@@ -55,7 +55,7 @@
     </layout>
    </item>
    <item>
-    <widget class="CompareWidget" name="compareview" native="true"/>
+    <widget class="MultiList" name="multilistview" native="true"/>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -244,12 +244,28 @@
     </layout>
    </item>
   </layout>
+  <action name="actionIgnore">
+   <property name="text">
+    <string>Ignore</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
+  </action>
+  <action name="actionCopy_To_Clipboard">
+   <property name="text">
+    <string>Copy To Clipboard</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>CompareWidget</class>
+   <class>MultiList</class>
    <extends>QWidget</extends>
-   <header>comparewidget.h</header>
+   <header>multilist.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
