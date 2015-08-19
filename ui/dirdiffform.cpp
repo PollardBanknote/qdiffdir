@@ -48,6 +48,7 @@
 #include "fs/diriter.h"
 #include "fs/file.h"
 #include "mysettings.h"
+#include "qutilities/icons.h"
 
 namespace
 {
@@ -250,6 +251,14 @@ DirDiffForm::DirDiffForm(QWidget* parent_) :
     watcher()
 {
 	ui->setupUi(this);
+	ui->openleftdir->setIcon(get_icon("folder"));
+	ui->openrightdir->setIcon(get_icon("folder"));
+	ui->refresh->setIcon(get_icon("view-refresh"));
+	ui->openleft->setIcon(get_icon("folder-open"));
+	ui->openright->setIcon(get_icon("folder-open"));
+	ui->renametoleft->setIcon(get_icon("document-save-as"));
+	ui->renametoright->setIcon(get_icon("document-save-as"));
+	ui->viewdiff->setIcon(get_icon("zoom-in"));
 
     ui->multilistview->addAction(ui->actionIgnore);
     ui->multilistview->addAction(ui->actionCopy_To_Clipboard);

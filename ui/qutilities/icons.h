@@ -26,44 +26,12 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef MATCHER_H
-#define MATCHER_H
+#ifndef ICONS_H
+#define ICONS_H
 
-#include <QString>
+class QIcon;
+class QString;
 
-class Matcher
-{
-public:
-    enum {EXACT_MATCH = 0, DO_NOT_MATCH = 1000};
+QIcon get_icon(const QString& name);
 
-    virtual ~Matcher()
-    {
-    }
-
-    virtual Matcher* clone() const = 0;
-
-    // return EXACT_MATCH, DO_NOT_MATCH, or something in between indicating
-    // how well the two match (lower is better)
-    virtual int compare(const QString&, const QString&) const = 0;
-};
-
-class DefaultMatcher : public Matcher
-{
-public:
-    DefaultMatcher* clone() const
-    {
-        return new DefaultMatcher;
-    }
-
-    int compare(
-        const QString& a,
-        const QString& b
-    ) const
-    {
-        return a == b ? EXACT_MATCH : DO_NOT_MATCH;
-    }
-
-};
-
-#endif // MATCHER_H
-
+#endif // ICONS_H

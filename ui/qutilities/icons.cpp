@@ -26,44 +26,45 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef MATCHER_H
-#define MATCHER_H
+#include "icons.h"
 
-#include <QString>
+#include <QIcon>
 
-class Matcher
+QIcon get_icon(const QString& name)
 {
-public:
-    enum {EXACT_MATCH = 0, DO_NOT_MATCH = 1000};
-
-    virtual ~Matcher()
+	// hopefully we have the free desktop icon
+	if (QIcon::hasThemeIcon(name))
+		return QIcon::fromTheme(name);
+	
+	// Try using old icon names (if we're on KDE3)
+	if ( name == "view-refresh")
+	{
+		return QIcon::fromTheme("reload");
+	}
+	if (name == "folder-open")
+	{
+		return QIcon::fromTheme("folder_open");
+	}
+	if (name == "zoom-in")
+	{
+		return QIcon::fromTheme("viewmag");
+	}
+    if ( name == "list-add" )
     {
+        return QIcon::fromTheme("add");
     }
 
-    virtual Matcher* clone() const = 0;
-
-    // return EXACT_MATCH, DO_NOT_MATCH, or something in between indicating
-    // how well the two match (lower is better)
-    virtual int compare(const QString&, const QString&) const = 0;
-};
-
-class DefaultMatcher : public Matcher
-{
-public:
-    DefaultMatcher* clone() const
+    if ( name == "list-remove" )
     {
-        return new DefaultMatcher;
+        return QIcon::fromTheme("remove");
     }
+	
+	if (name == "document-save-as")
+		return QIcon::fromTheme("filesaveas");
+	
+	if (name == "go-down")
+		return QIcon::fromTheme("down");
 
-    int compare(
-        const QString& a,
-        const QString& b
-    ) const
-    {
-        return a == b ? EXACT_MATCH : DO_NOT_MATCH;
-    }
-
-};
-
-#endif // MATCHER_H
+	return QIcon();
+}
 

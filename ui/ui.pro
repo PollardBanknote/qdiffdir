@@ -20,7 +20,8 @@ SOURCES += main.cpp\
     settingsdialog.cpp \
     multilist.cpp \
     directorycomparison.cpp \
-    workerthread.cpp
+    workerthread.cpp \
+    qutilities/icons.cpp
 
 HEADERS  += mainwindow.h \
     dirdiffform.h \
@@ -32,7 +33,8 @@ HEADERS  += mainwindow.h \
     compare.h \
     items.h \
     workerthread.h \
-    matcher.h
+    matcher.h \
+    qutilities/icons.h
 
 FORMS    += mainwindow.ui \
     dirdiffform.ui \
