@@ -761,6 +761,18 @@ void DirDiffForm::on_filter_editTextChanged(const QString &arg1)
     setFilter(rx);
 }
 
+void DirDiffForm::on_autoRefresh_stateChanged(int state)
+{
+	if( state == Qt::Checked)
+	{
+		startDirectoryWatcher();
+	}
+	else
+	{
+		stopDirectoryWatcher();
+	}
+
+}
 
 const std::size_t NOT_FOUND = std::size_t(-1);
 
