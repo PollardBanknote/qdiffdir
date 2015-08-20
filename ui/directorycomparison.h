@@ -29,6 +29,8 @@
 #ifndef DIRECTORYCOMPARISON_H
 #define DIRECTORYCOMPARISON_H
 
+#include <vector>
+
 #include <QObject>
 #include <QPair>
 
