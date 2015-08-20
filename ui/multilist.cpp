@@ -277,6 +277,8 @@ QStringList MultiList::getSelectedLeft() const
 			l << item->text();
 		}
 	}
+	
+	l.sort();
 
 	return l;
 }
@@ -294,6 +296,8 @@ QStringList MultiList::getSelectedRight() const
 			l << item->text();
 		}
 	}
+	
+	l.sort();
 
 	return l;
 }
