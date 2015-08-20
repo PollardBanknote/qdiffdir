@@ -48,6 +48,8 @@
 #include "fs/copyfile.h"
 #include "fs/diriter.h"
 #include "fs/file.h"
+#include "compare.h"
+#include "matcher.h"
 #include "mysettings.h"
 #include "qutilities/icons.h"
 
@@ -366,7 +368,9 @@ void DirDiffForm::saveAs(
 			QString t = save_file_name;
 			t.chop(s.length());
 			QDir src(source);
-			copyTo(src.absoluteFilePath(original_filename), t, s);
+            std::pair< bool, overwrite_t > res = copyTo(src.absoluteFilePath(original_filename), t, s, OVERWRITE_ASK);
+            if (res.first)
+                fileChanged(save_file_name);
 		}
 	}
 }
@@ -381,10 +385,24 @@ void DirDiffForm::on_copytoright_clicked()
 		return;
 	}
 
+    overwrite_t overwrite = OVERWRITE_ASK;
+
+    QStringList changed;
+
 	for ( int i = 0; i < s.count(); ++i )
 	{
-		copyTo(derp.getLeftLocation(s.at(i)), directoryComponent(derp.getRightLocation() + "/" + s.at(i)));
+        QString rel = s.at(i);
+        QString source_file =  derp.getLeftLocation(rel);
+        QString dest_file = derp.getRightLocation() + "/" + rel;
+        QString dest_dir = directoryComponent(dest_file);
+        QString file_name = lastPathComponent(source_file);
+        std::pair< bool, overwrite_t > res = copyTo(source_file, dest_dir, file_name, overwrite);
+        if (res.first)
+            changed << dest_file;
+        overwrite = res.second;
 	}
+
+    filesChanged(changed);
 }
 
 void DirDiffForm::on_copytoleft_clicked()
@@ -397,10 +415,23 @@ void DirDiffForm::on_copytoleft_clicked()
 		return;
 	}
 
+    overwrite_t overwrite = OVERWRITE_ASK;
+
+    QStringList changed;
+
 	for ( int i = 0; i < s.count(); ++i )
 	{
-		copyTo(derp.getRightLocation(s.at(i)), directoryComponent(derp.getLeftLocation() + "/" + s.at(i)));
-	}
+        QString rel = s.at(i);
+        QString source_file = derp.getRightLocation(rel);
+        QString dest_file = derp.getLeftLocation() + "/" + rel;
+        QString dest_dir = directoryComponent(dest_file);
+        QString file_name = lastPathComponent(source_file);
+        std::pair< bool, overwrite_t > res = copyTo(source_file, dest_dir, file_name, overwrite);
+        if (res.first)
+            changed << dest_file;
+        overwrite = res.second;
+    }
+    filesChanged(changed);
 }
 
 void DirDiffForm::on_renametoright_clicked()
@@ -572,7 +603,6 @@ void DirDiffForm::changeDirectories(
 		when = QDateTime::currentDateTime();
 
 		setLeftAndRight(derp.getLeftLocation(), derp.getRightLocation(), leftfiles, rightfiles);
-		setComparison(FileCompare(derp.getLeftLocation(), derp.getRightLocation()));
 	}
 
 	startDirectoryWatcher();
@@ -583,34 +613,48 @@ void DirDiffForm::changeDirectories(
 	}
 }
 
-void DirDiffForm::copyTo(
-	const QString& file,
-	const QString& destdir
-)
-{
-	copyTo(file, destdir, lastPathComponent(file));
-}
-
-void DirDiffForm::copyTo(
+std::pair< bool, DirDiffForm::overwrite_t> DirDiffForm::copyTo(
 	const QString& file,
 	const QString& destdir,
-	const QString& newname
+    const QString& newname,
+        overwrite_t overwrite
 )
 {
 	const QString s = destdir + "/" + newname;
 
 	if ( QFile::exists(s))
 	{
-		if ( QMessageBox::question(this, newname + " already exists", "Do you want to overwrite the destination?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No )
-		{
-			return;
-		}
+        switch (overwrite)
+        {
+        case OVERWRITE_ASK:
+        {
+            QMessageBox::StandardButton res = QMessageBox::question(this, newname + " already exists", "Do you want to overwrite the destination?", QMessageBox::YesToAll | QMessageBox::NoToAll | QMessageBox::Yes | QMessageBox::No);
+
+            if (res == QMessageBox::No )
+            {
+                return std::make_pair(false, OVERWRITE_ASK);
+            }
+            else if (res == QMessageBox::NoToAll)
+            {
+                return std::make_pair(false, OVERWRITE_NO);
+            }
+            else if (res == QMessageBox::YesToAll)
+                overwrite = OVERWRITE_YES;
+        }
+            break;
+        case OVERWRITE_YES:
+            break;
+        case OVERWRITE_NO:
+            return std::make_pair(false, OVERWRITE_NO);
+        }
 	}
 
 	if ( pbl::fs::copy(file.toStdString(), s.toStdString()))
 	{
-		fileChanged(s);
+        return std::make_pair(true, overwrite);
 	}
+    else
+        return std::make_pair(false, overwrite);
 }
 
 void DirDiffForm::stopDirectoryWatcher()
@@ -656,7 +700,7 @@ void DirDiffForm::contentsChanged(QString dirname_)
 
 			if ( fi.lastModified() > when )
 			{
-				u.added << u.changed.at(i);
+                u.added << u.changed.at(i );
 			}
 		}
 
@@ -694,6 +738,33 @@ void DirDiffForm::fileChanged(QString file)
 	{
 		updateRight(QStringList(derp.getRightRelativeFilePath(file)));
 	}
+}
+
+void DirDiffForm::filesChanged(const QStringList & files)
+{
+    QStringList l;
+    QStringList r;
+
+    QString lloc = derp.getLeftLocation();
+    QString rloc = derp.getRightLocation();
+
+    for (int i = 0, n = files.count(); i < n; ++i)
+    {
+        QString file = files.at(i);
+
+        if ( file.startsWith(lloc))
+        {
+            l << derp.getLeftRelativeFilePath(file);
+        }
+
+        if ( file.startsWith(rloc))
+        {
+            r << derp.getRightRelativeFilePath(file);
+        }
+    }
+
+    updateLeft(l);
+    updateRight(r);
 }
 
 // sometimes QDir::dirName returns ".", so we use this instead
@@ -1045,6 +1116,7 @@ void DirDiffForm::setLeftAndRight(
 	ui->multilistview->setItems(items);
 
 	applyFilters();
+	setComparison(FileCompare(leftname_, rightname_));
 }
 
 std::vector< items_t > DirDiffForm::match(

@@ -173,13 +173,15 @@ private slots:
 	 */
 	void items_compared(QString l, QString r, bool same);
 private:
+    enum overwrite_t { OVERWRITE_ASK, OVERWRITE_YES, OVERWRITE_NO };
+
 	void saveAs(const QString&, const QString& source, const QString& destination);
 	void saveAs(const QStringList&, const QString&, const QString&);
-	void copyTo(const QString& file, const QString& destdir);
-	void copyTo(const QString& file, const QString& destdir, const QString& newname);
+    std::pair< bool, overwrite_t> copyTo(const QString& file, const QString& destdir, const QString& newname, overwrite_t);
 	void stopDirectoryWatcher();
 	void startDirectoryWatcher();
 	void fileChanged(QString);
+    void filesChanged(const QStringList&);
 	QString renumber(const QString& s_);
 	QString dirName(const QDir& dir);
 	QString getDirectory(const QString& dir);

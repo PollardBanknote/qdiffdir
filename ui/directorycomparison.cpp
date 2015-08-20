@@ -27,6 +27,10 @@
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "directorycomparison.h"
+#include "compare.h"
+#include "matcher.h"
+#include "workerthread.h"
+
 
 DirectoryComparison::DirectoryComparison(QObject* parent)
 	: compare(0), worker(0), matcher(new DefaultMatcher)

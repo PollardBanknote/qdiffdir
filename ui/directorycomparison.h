@@ -31,11 +31,12 @@
 
 #include <QObject>
 #include <QPair>
-#include "compare.h"
+
 #include "items.h"
-#include "workerthread.h"
 #include "directorycontents.h"
-#include "matcher.h"
+class Matcher;
+class WorkerThread;
+class Compare;
 
 class DirectoryComparison
 	: public QObject
