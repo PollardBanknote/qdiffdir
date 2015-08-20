@@ -147,27 +147,6 @@ void MultiList::clearSelection()
 	ui->rightdir->setCurrentItem(0);
 }
 
-void MultiList::changesel(int row)
-{
-	if ( ui->leftdir->currentRow() != row )
-	{
-		if ( QListWidgetItem* item = ui->leftdir->item(row))
-		{
-			ui->leftdir->setCurrentItem(item, QItemSelectionModel::ClearAndSelect);
-			ui->leftdir->scrollToItem(item);
-		}
-	}
-
-	if ( ui->rightdir->currentRow() != row )
-	{
-		if ( QListWidgetItem* item = ui->rightdir->item(row))
-		{
-			ui->rightdir->setCurrentItem(item, QItemSelectionModel::ClearAndSelect);
-			ui->rightdir->scrollToItem(item);
-		}
-	}
-}
-
 QString get_text(QListWidget* w)
 {
 	if ( QListWidgetItem* item = w->currentItem())
@@ -376,4 +355,49 @@ int MultiList::currentRow() const
 	}
 
 	return idx;
+}
+
+QList< int > MultiList::selectedRows() const
+{
+	QList< int > l;
+
+	QList< QListWidgetItem* > items = ui->rightdir->selectedItems();
+	for (int i = 0, n = items.count(); i < n; ++i)
+	{
+		l << ui->rightdir->row(items.at(i));
+	}
+	
+	return l;
+}
+
+void MultiList::setSelectedRows(const QList<int> & l)
+{
+	if (l.isEmpty())
+		clearSelection();
+	else
+	{
+		// temporarily disonnect signals that edit selection
+		ui->leftdir->disconnect(SIGNAL(itemSelectionChanged()), this, SLOT(copy_selection_to_right()));
+		ui->rightdir->disconnect(SIGNAL(itemSelectionChanged()), this, SLOT(copy_selection_to_left()));
+		
+		ui->leftdir->setCurrentRow(l.at(0));
+		ui->rightdir->setCurrentRow(l.at(0));
+		
+		for (int i = 0, n = ui->leftdir->count(); i < n; ++i)
+		{
+			const bool sel = l.contains(i);
+
+			if (QListWidgetItem* item = ui->leftdir->item(i))
+			{
+				item->setSelected(sel);
+			}
+			if (QListWidgetItem* item = ui->rightdir->item(i))
+			{
+				item->setSelected(sel);
+			}
+		}
+		
+		connect(ui->leftdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_right()));
+		connect(ui->rightdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_left()));
+	}
 }

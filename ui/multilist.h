@@ -44,10 +44,6 @@ public:
 	explicit MultiList(QWidget* parent = 0);
 	~MultiList();
 
-	/** Change the currently selected item in both lists. Scroll to it
-	 */
-	void changesel(int);
-
 	/** Deselect all items
 	 */
 	void clearSelection();
@@ -70,6 +66,8 @@ public:
 	void style(int, bool, bool, bool, bool, bool);
 
 	int currentRow() const;
+	QList< int > selectedRows() const;
+	void setSelectedRows(const QList<int>&);
 signals:
 	void itemDoubleClicked(int);
 private slots:

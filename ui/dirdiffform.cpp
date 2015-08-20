@@ -895,46 +895,50 @@ bool DirDiffForm::hidden(std::size_t i) const
 
 void DirDiffForm::applyFilters()
 {
-	// save the currently selected item
-	const int   sel              = ui->multilistview->currentRow();
-	std::size_t last_low_shown   = NOT_FOUND;
-	std::size_t first_high_shown = NOT_FOUND;
+	// save the current selection
+	const QList< int > sel = ui->multilistview->selectedRows();
 
+	QList< int > new_selection;
+	
+	bool seen_selected = false;
+	const std::size_t n = list.size();
+	std::size_t first_unselected_after_selected = n;
+	std::size_t last_unselected = n;
+	
 	// for each item, check if it is shown or not, and adjust font
-	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
+	for ( std::size_t i = 0; i < n; ++i )
 	{
 		const bool hideitem = hidden(i);
 
 		ui->multilistview->style(i, hideitem, list[i].ignore, list[i].unmatched(), list[i].compared, list[i].same);
-
-		// find the shown items before and after the selected
-		if ( sel >= 0 && !hideitem )
+		
+		if (sel.contains(i))
 		{
-			if ( i <= static_cast< unsigned >( sel ))
+			seen_selected = true;
+			if (!hideitem)
+				new_selection.append(i);
+		}
+		else
+		{
+			if (!hideitem)
 			{
-				last_low_shown = i;
-			}
-
-			if ( i >= static_cast< unsigned >( sel ) && first_high_shown == NOT_FOUND )
-			{
-				first_high_shown = i;
+				if (seen_selected && first_unselected_after_selected == n)
+					first_unselected_after_selected = i;
+				last_unselected = i;
 			}
 		}
 	}
 
-	// select the correct item
-	if ( first_high_shown != NOT_FOUND )
+	if (new_selection.isEmpty() && !sel.isEmpty())
 	{
-		ui->multilistview->changesel(first_high_shown);
+		// select the first visible row after the selection begins
+		if (first_unselected_after_selected != n)
+			new_selection << first_unselected_after_selected;
+		else if (last_unselected != n)
+			new_selection << last_unselected;
 	}
-	else if ( last_low_shown != NOT_FOUND )
-	{
-		ui->multilistview->changesel(last_low_shown);
-	}
-	else
-	{
-		ui->multilistview->clearSelection();
-	}
+	
+	ui->multilistview->setSelectedRows(new_selection);
 }
 
 void DirDiffForm::items_compared(
@@ -992,13 +996,38 @@ void DirDiffForm::showOnlyRight(bool checked)
 
 void DirDiffForm::on_actionIgnore_triggered()
 {
-	int idx = ui->multilistview->currentRow();
+	const QList< int > l = ui->multilistview->selectedRows();
+	
+	bool some_ignored = false;
+	bool some_not_ignored = false;
 
-	if ( idx >= 0 )
+	for (int i = 0, n = l.count(); i < n; ++i)
 	{
-		list[idx].ignore = true;
-		applyFilters();
+		const int idx = l.at(i);
+		
+		if (idx >= 0 && static_cast<unsigned>(idx) < list.size())
+		{
+			if (list[idx].ignore)
+				some_ignored = true;
+			else
+				some_not_ignored = true;
+		}
 	}
+	
+	bool all_ignored = some_ignored && !some_not_ignored;
+	
+	bool ignore = (all_ignored ? false : true);
+	
+	for (int i = 0, n = l.count(); i < n; ++i)
+	{
+		const int idx = l.at(i);
+		if (idx >= 0 && static_cast<unsigned>(idx) < list.size())
+		{
+			list[idx].ignore = ignore;
+		}
+	}
+
+	applyFilters();
 }
 
 void DirDiffForm::on_actionCopy_To_Clipboard_triggered()
