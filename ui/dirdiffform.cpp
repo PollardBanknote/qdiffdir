@@ -299,31 +299,34 @@ void DirDiffForm::setFlags(
 
 void DirDiffForm::on_viewdiff_clicked()
 {
-	QStringList   ss = currentText();
-	const QString s1 = ss.at(0);
-	const QString s2 = ss.at(1);
+    const int r = ui->multilistview->currentRow();
+    if (r >= 0)
+    {
+        const QString s1 = list[r].items.left;
+        const QString s2 = list[r].items.right;
 
-	if ( s1.isEmpty() && s2.isEmpty())
-	{
-		QMessageBox::warning(this, "No file selected", "Cannot complete action");
-		return;
-	}
+        if ( s1.isEmpty() && s2.isEmpty())
+        {
+            QMessageBox::warning(this, "No file selected", "Cannot complete action");
+            return;
+        }
 
-	if ( s1.isEmpty()) // view s2
-	{
-		QProcess::startDetached("gvim", QStringList(s2), derp.getRightLocation());
-	}
-	else if ( s2.isEmpty()) // view s1
-	{
-		QProcess::startDetached("gvim", QStringList(s1), derp.getLeftLocation());
-	}
-	else // run gvimdiff
-	{
-		QStringList l;
-		l << derp.getLeftLocation(s1)
-		  << derp.getRightLocation(s2);
-		QProcess::startDetached(MySettings::instance().getDiffTool(), l);
-	}
+        if ( s1.isEmpty()) // view s2
+        {
+            QProcess::startDetached("gvim", QStringList(s2), derp.getRightLocation());
+        }
+        else if ( s2.isEmpty()) // view s1
+        {
+            QProcess::startDetached("gvim", QStringList(s1), derp.getLeftLocation());
+        }
+        else // run gvimdiff
+        {
+            QStringList l;
+            l << derp.getLeftLocation(s1)
+              << derp.getRightLocation(s2);
+            QProcess::startDetached(MySettings::instance().getDiffTool(), l);
+        }
+    }
 }
 
 void DirDiffForm::saveAs(
@@ -1162,14 +1165,11 @@ void DirDiffForm::setLeftAndRight(
 		rightname = rightname_;
 	}
 
-	QList< QPair< QString, QString > > items;
-
+    ui->multilistview->clear();
 	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
 	{
-		items.append(qMakePair(list[i].items.left, list[i].items.right));
+        ui->multilistview->addItem(list[i].items.left, list[i].items.right);
 	}
-
-	ui->multilistview->setItems(items);
 
 	applyFilters();
 	setComparison(FileCompare(leftname_, rightname_));
@@ -1350,7 +1350,7 @@ void DirDiffForm::updateLeft(
 			// insert into the list
 			list.insert(list.begin() + j, y);
 
-			ui->multilistview->insert(j, item, QString());
+            ui->multilistview->insertItem(j, item, QString());
 		}
 	}
 
@@ -1420,7 +1420,7 @@ void DirDiffForm::updateRight(
 			// insert into the list
 			list.insert(list.begin() + j, y);
 
-			ui->multilistview->insert(j, QString(), item);
+            ui->multilistview->insertItem(j, QString(), item);
 		}
 	}
 
@@ -1475,18 +1475,13 @@ void DirDiffForm::rematch()
 			comparison_t c = { matching[i], false, false, false };
 			list.insert(list.begin() + i, c);
 
-			ui->multilistview->insert(i, matching[i].left, matching[i].right);
+            ui->multilistview->insertItem(i, matching[i].left, matching[i].right);
 		}
 	}
 
 	startComparison();
 	applyFilters();
 
-}
-
-QStringList DirDiffForm::currentText() const
-{
-	return ui->multilistview->currentText();
 }
 
 void DirDiffForm::on_actionSelect_Different_triggered()

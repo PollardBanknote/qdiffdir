@@ -83,6 +83,8 @@ void MultiList::syncwindows()
 
 	connect(ui->leftdir, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(handle_item_double_clicked(QListWidgetItem*)));
 	connect(ui->rightdir, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(handle_item_double_clicked(QListWidgetItem*)));
+    connect(ui->leftdir,SIGNAL(currentRowChanged(int)), SLOT(left_current_row_changed()));
+    connect(ui->rightdir, SIGNAL(currentRowChanged(int)), SLOT(right_current_row_changed()));
 }
 
 void MultiList::unsyncwindows()
@@ -157,51 +159,32 @@ QString get_text(QListWidget* w)
 	return QString();
 }
 
-QStringList MultiList::currentText() const
+void MultiList::clear()
 {
-	QStringList res;
-
-	res << get_text(ui->leftdir) << get_text(ui->rightdir);
-
-	return res;
+    ui->leftdir->clear();
+    ui->rightdir->clear();
 }
 
-void MultiList::setItems(const QList< QPair< QString, QString > >& items)
+void MultiList::addItem(const QString &leftfile, const QString &rightfile)
 {
+    // create items
+    if ( leftfile.isEmpty())
+    {
+        new QListWidgetItem(ui->leftdir);
+    }
+    else
+    {
+        new QListWidgetItem(leftfile, ui->leftdir);
+    }
 
-	// Update display
-	unsyncwindows();
-
-	ui->leftdir->clear();
-	ui->rightdir->clear();
-
-	for ( std::size_t i = 0, n = items.size(); i < n; ++i )
-	{
-		const QString leftfile  = items.at(i).first;
-		const QString rightfile = items.at(i).second;
-
-		// create items
-		if ( leftfile.isEmpty())
-		{
-			new QListWidgetItem(ui->leftdir);
-		}
-		else
-		{
-			new QListWidgetItem(leftfile, ui->leftdir);
-		}
-
-		if ( rightfile.isEmpty())
-		{
-			new QListWidgetItem(ui->rightdir);
-		}
-		else
-		{
-			new QListWidgetItem(rightfile, ui->rightdir);
-		}
-	}
-
-	syncwindows();
-
+    if ( rightfile.isEmpty())
+    {
+        new QListWidgetItem(ui->rightdir);
+    }
+    else
+    {
+        new QListWidgetItem(rightfile, ui->rightdir);
+    }
 }
 
 void MultiList::clearLeft(int i)
@@ -233,7 +216,7 @@ void MultiList::remove(int i)
 	}
 }
 
-void MultiList::insert(
+void MultiList::insertItem(
 	int            j,
 	const QString& l,
 	const QString& r
@@ -309,14 +292,14 @@ void MultiList::styleitem(
 
 int MultiList::currentRow() const
 {
-	int idx = ui->leftdir->currentRow();
+    int idx = ui->leftdir->currentRow();
 
-	if ( idx < 0 )
-	{
-		idx = ui->rightdir->currentRow();
-	}
+    if ( idx < 0 )
+    {
+        idx = ui->rightdir->currentRow();
+    }
 
-	return idx;
+    return idx;
 }
 
 QList< int > MultiList::selectedRows() const
@@ -363,3 +346,14 @@ void MultiList::setSelectedRows(const QList<int> & l)
 		connect(ui->rightdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_left()));
 	}
 }
+
+void MultiList::left_current_row_changed()
+{
+    ui->rightdir->setCurrentRow(-1);
+}
+
+void MultiList::right_current_row_changed()
+{
+    ui->leftdir->setCurrentRow(-1);
+}
+

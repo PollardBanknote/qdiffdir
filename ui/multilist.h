@@ -44,13 +44,9 @@ public:
 	explicit MultiList(QWidget* parent = 0);
 	~MultiList();
 
-	/** Deselect all items
-	 */
-	void clearSelection();
+    void addItem(const QString& left, const QString& right);
 
-	QStringList currentText() const;
-
-	void setItems(const QList< QPair< QString, QString > >&);
+    void clear();
 
 	void clearLeft(int);
 
@@ -58,13 +54,19 @@ public:
 
 	void remove(int);
 
-	void insert(int, const QString&, const QString&);
+    void insertItem(int, const QString&, const QString&);
 
 	void style(int, bool, bool, bool, bool, bool);
 
-	int currentRow() const;
-	QList< int > selectedRows() const;
-	void setSelectedRows(const QList<int>&);
+    int currentRow() const;
+
+    QList< int > selectedRows() const;
+
+    /** Deselect all items
+     */
+    void clearSelection();
+
+    void setSelectedRows(const QList<int>&);
 signals:
 	void itemDoubleClicked(int);
 private slots:
@@ -80,6 +82,8 @@ private slots:
 
 	void copy_selection_to_left();
 	void copy_selection_to_right();
+    void left_current_row_changed();
+    void right_current_row_changed();
 private:
 	/** Setup signals for keeping the two list widgets scrolled to the same point
 	 */

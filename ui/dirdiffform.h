@@ -92,8 +92,6 @@ public:
 	 */
 	void setComparison(const Compare&);
 
-	QStringList currentText() const;
-
 	void setLeftAndRight(const QString& leftname, const QString& rightname, const QStringList& leftitems, const QStringList& rightitems);
 	void updateLeft(const QStringList& added_or_changed, const QStringList& remove = QStringList());
 	void updateRight(const QStringList& added_or_changed, const QStringList& remove = QStringList());
