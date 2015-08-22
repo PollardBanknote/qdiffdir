@@ -268,6 +268,10 @@ DirDiffForm::DirDiffForm(QWidget* parent_) :
 
 	ui->multilistview->addAction(ui->actionIgnore);
 	ui->multilistview->addAction(ui->actionCopy_To_Clipboard);
+    ui->multilistview->addAction(ui->actionSelect_Different);
+    ui->multilistview->addAction(ui->actionSelect_Same);
+    ui->multilistview->addAction(ui->actionSelect_Left_Only);
+    ui->multilistview->addAction(ui->actionSelect_Right_Only);
 	connect(ui->multilistview, SIGNAL(itemDoubleClicked(int)), SLOT(viewfiles(int)));
 
 	connect(&derp, SIGNAL(compared(QString, QString, bool)), SLOT(items_compared(QString, QString, bool)));
@@ -377,71 +381,94 @@ void DirDiffForm::saveAs(
 
 void DirDiffForm::on_copytoright_clicked()
 {
-	const QStringList s = ui->multilistview->getSelectedLeft();
+    const QList<int> indices = ui->multilistview->selectedRows();
 
-	if ( s.isEmpty())
-	{
-		QMessageBox::warning(this, "No file selected", "Cannot complete action");
-		return;
-	}
+    bool nonempty = false;
 
     overwrite_t overwrite = OVERWRITE_ASK;
 
     QStringList changed;
 
-	for ( int i = 0; i < s.count(); ++i )
+    for ( int i = 0, n = indices.count(); i < n; ++i )
 	{
-        QString rel = s.at(i);
-        QString source_file =  derp.getLeftLocation(rel);
-        QString dest_file = derp.getRightLocation() + "/" + rel;
-        QString dest_dir = directoryComponent(dest_file);
-        QString file_name = lastPathComponent(source_file);
-        std::pair< bool, overwrite_t > res = copyTo(source_file, dest_dir, file_name, overwrite);
-        if (res.first)
-            changed << dest_file;
-        overwrite = res.second;
+        const QString rel = list[indices[i]].items.left;
+        if (!rel.isEmpty())
+        {
+            const QString source_file =  derp.getLeftLocation(rel);
+            const QString dest_file = derp.getRightLocation() + "/" + rel;
+            const QString dest_dir = directoryComponent(dest_file);
+            const QString file_name = lastPathComponent(source_file);
+            std::pair< bool, overwrite_t > res = copyTo(source_file, dest_dir, file_name, overwrite);
+            if (res.first)
+                changed << dest_file;
+            overwrite = res.second;
+            nonempty = true;
+        }
 	}
 
-    filesChanged(changed);
+    if (!nonempty)
+    {
+        QMessageBox::warning(this, "No file selected", "Cannot complete action");
+        return;
+    }
+    if (!changed.isEmpty())
+        filesChanged(changed);
 }
 
 void DirDiffForm::on_copytoleft_clicked()
 {
-	const QStringList s = ui->multilistview->getSelectedRight();
+    const QList<int> indices = ui->multilistview->selectedRows();
 
-	if ( s.isEmpty())
-	{
-		QMessageBox::warning(this, "No file selected", "Cannot complete action");
-		return;
-	}
+    bool nonempty = false;
 
     overwrite_t overwrite = OVERWRITE_ASK;
 
     QStringList changed;
 
-	for ( int i = 0; i < s.count(); ++i )
-	{
-        QString rel = s.at(i);
-        QString source_file = derp.getRightLocation(rel);
-        QString dest_file = derp.getLeftLocation() + "/" + rel;
-        QString dest_dir = directoryComponent(dest_file);
-        QString file_name = lastPathComponent(source_file);
-        std::pair< bool, overwrite_t > res = copyTo(source_file, dest_dir, file_name, overwrite);
-        if (res.first)
-            changed << dest_file;
-        overwrite = res.second;
+    for ( int i = 0, n = indices.count(); i < n; ++i )
+    {
+        const QString rel = list[indices[i]].items.right;
+        if (!rel.isEmpty())
+        {
+            QString source_file = derp.getRightLocation(rel);
+            QString dest_file = derp.getLeftLocation() + "/" + rel;
+            QString dest_dir = directoryComponent(dest_file);
+            QString file_name = lastPathComponent(source_file);
+            std::pair< bool, overwrite_t > res = copyTo(source_file, dest_dir, file_name, overwrite);
+            if (res.first)
+                changed << dest_file;
+            overwrite = res.second;
+            nonempty = true;
+        }
     }
-    filesChanged(changed);
+
+    if (!nonempty)
+    {
+        QMessageBox::warning(this, "No file selected", "Cannot complete action");
+        return;
+    }
+    if (!changed.isEmpty())
+        filesChanged(changed);
 }
 
 void DirDiffForm::on_renametoright_clicked()
 {
-	saveAs(ui->multilistview->getSelectedLeft(), derp.getLeftLocation(), derp.getRightLocation());
+    const QList<int> indices = ui->multilistview->selectedRows();
+    QStringList files;
+    for (int i = 0, n = indices.count(); i < n; ++i)
+        if (!list[indices.at(i)].items.left.isEmpty())
+            files << list[indices.at(i)].items.left;
+    saveAs(files, derp.getLeftLocation(), derp.getRightLocation());
 }
 
 void DirDiffForm::on_renametoleft_clicked()
 {
-	saveAs(ui->multilistview->getSelectedRight(), derp.getRightLocation(), derp.getLeftLocation());
+    const QList<int> indices = ui->multilistview->selectedRows();
+    QStringList files;
+    for (int i = 0, n = indices.count(); i < n; ++i)
+        if (!list[indices.at(i)].items.right.isEmpty())
+            files << list[indices.at(i)].items.right;
+    saveAs(files, derp.getRightLocation(), derp.getLeftLocation());
 }
 
 QString DirDiffForm::getDirectory(const QString& dir)
@@ -1460,4 +1487,40 @@ void DirDiffForm::rematch()
 QStringList DirDiffForm::currentText() const
 {
 	return ui->multilistview->currentText();
+}
+
+void DirDiffForm::on_actionSelect_Different_triggered()
+{
+    QList< int > indices;
+    for (std::size_t i = 0, n = list.size(); i < n; ++i)
+        if (list[i].compared && !list[i].same)
+            indices << i;
+    ui->multilistview->setSelectedRows(indices);
+}
+
+void DirDiffForm::on_actionSelect_Same_triggered()
+{
+    QList< int > indices;
+    for (std::size_t i = 0, n = list.size(); i < n; ++i)
+        if (list[i].compared && list[i].same)
+            indices << i;
+    ui->multilistview->setSelectedRows(indices);
+}
+
+void DirDiffForm::on_actionSelect_Left_Only_triggered()
+{
+    QList< int > indices;
+    for (std::size_t i = 0, n = list.size(); i < n; ++i)
+        if (!list[i].items.left.isEmpty() && list[i].items.right.isEmpty())
+            indices << i;
+    ui->multilistview->setSelectedRows(indices);
+}
+
+void DirDiffForm::on_actionSelect_Right_Only_triggered()
+{
+    QList< int > indices;
+    for (std::size_t i = 0, n = list.size(); i < n; ++i)
+        if (list[i].items.left.isEmpty() && !list[i].items.right.isEmpty())
+            indices << i;
+    ui->multilistview->setSelectedRows(indices);
 }

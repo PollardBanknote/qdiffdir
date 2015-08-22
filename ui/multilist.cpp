@@ -243,44 +243,6 @@ void MultiList::insert(
 	ui->rightdir->insertItem(j, new QListWidgetItem(r));
 }
 
-QStringList MultiList::getSelectedLeft() const
-{
-	QStringList l;
-
-	QList< QListWidgetItem* > items = ui->leftdir->selectedItems();
-
-	for ( int j = 0; j < items.count(); ++j )
-	{
-		if ( QListWidgetItem* item = items.at(j))
-		{
-			l << item->text();
-		}
-	}
-	
-	l.sort();
-
-	return l;
-}
-
-QStringList MultiList::getSelectedRight() const
-{
-	QStringList l;
-
-	QList< QListWidgetItem* > items = ui->rightdir->selectedItems();
-
-	for ( int j = 0; j < items.count(); ++j )
-	{
-		if ( QListWidgetItem* item = items.at(j))
-		{
-			l << item->text();
-		}
-	}
-	
-	l.sort();
-
-	return l;
-}
-
 void MultiList::style(
 	int  i,
 	bool hidden,

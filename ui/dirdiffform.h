@@ -172,6 +172,14 @@ private slots:
 	 * @param same True iff items compared "the same"
 	 */
 	void items_compared(QString l, QString r, bool same);
+    void on_actionSelect_Different_triggered();
+
+    void on_actionSelect_Same_triggered();
+
+    void on_actionSelect_Left_Only_triggered();
+
+    void on_actionSelect_Right_Only_triggered();
+
 private:
     enum overwrite_t { OVERWRITE_ASK, OVERWRITE_YES, OVERWRITE_NO };
 

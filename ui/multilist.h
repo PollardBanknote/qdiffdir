@@ -60,9 +60,6 @@ public:
 
 	void insert(int, const QString&, const QString&);
 
-	QStringList getSelectedLeft() const;
-	QStringList getSelectedRight() const;
-
 	void style(int, bool, bool, bool, bool, bool);
 
 	int currentRow() const;

@@ -260,6 +260,26 @@
     <string>Ctrl+C</string>
    </property>
   </action>
+  <action name="actionSelect_Different">
+   <property name="text">
+    <string>Select Different</string>
+   </property>
+  </action>
+  <action name="actionSelect_Same">
+   <property name="text">
+    <string>Select Same</string>
+   </property>
+  </action>
+  <action name="actionSelect_Left_Only">
+   <property name="text">
+    <string>Select Left Only</string>
+   </property>
+  </action>
+  <action name="actionSelect_Right_Only">
+   <property name="text">
+    <string>Select Right Only</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
