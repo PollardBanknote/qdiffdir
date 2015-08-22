@@ -70,31 +70,22 @@ MultiList::~MultiList()
 
 void MultiList::syncwindows()
 {
+    // Keep scrollbar in sync
 	ui->verticalScrollBar->setRange(ui->leftdir->verticalScrollBar()->minimum(), ui->leftdir->verticalScrollBar()->maximum());
 	connect(ui->leftdir->verticalScrollBar(), SIGNAL(rangeChanged(int, int)), SLOT(setScrollBarRange(int, int)));
 	connect(ui->verticalScrollBar, SIGNAL(valueChanged(int)), SLOT(sync_scroll(int)));
-
 	connect(ui->leftdir->verticalScrollBar(), SIGNAL(valueChanged(int)), ui->verticalScrollBar, SLOT(setValue(int)));
 	connect(ui->rightdir->verticalScrollBar(), SIGNAL(valueChanged(int)), ui->verticalScrollBar, SLOT(setValue(int)));
+    ui->verticalScrollBar->setValue(0);
+
+    // Keep selections in sync
 	connect(ui->leftdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_right()));
 	connect(ui->rightdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_left()));
-
-	ui->verticalScrollBar->setValue(0);
-
-	connect(ui->leftdir, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(handle_item_double_clicked(QListWidgetItem*)));
-	connect(ui->rightdir, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(handle_item_double_clicked(QListWidgetItem*)));
     connect(ui->leftdir,SIGNAL(currentRowChanged(int)), SLOT(left_current_row_changed()));
     connect(ui->rightdir, SIGNAL(currentRowChanged(int)), SLOT(right_current_row_changed()));
-}
 
-void MultiList::unsyncwindows()
-{
-	ui->leftdir->disconnect(this);
-	ui->rightdir->disconnect(this);
-	ui->leftdir->verticalScrollBar()->disconnect(ui->verticalScrollBar);
-	ui->rightdir->verticalScrollBar()->disconnect(ui->verticalScrollBar);
-	ui->verticalScrollBar->disconnect(this);
-	ui->leftdir->verticalScrollBar()->disconnect(this);
+    connect(ui->leftdir, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(handle_item_double_clicked(QListWidgetItem*)));
+    connect(ui->rightdir, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(handle_item_double_clicked(QListWidgetItem*)));
 }
 
 void MultiList::setScrollBarRange(
@@ -138,7 +129,7 @@ void MultiList::handle_item_double_clicked(QListWidgetItem* item)
 	{
 		if ( QListWidget* w = item->listWidget())
 		{
-			emit itemDoubleClicked(w->row(item));
+            emit itemActivated(w->row(item));
 		}
 	}
 }
@@ -203,7 +194,7 @@ void MultiList::clearRight(int i)
 	}
 }
 
-void MultiList::remove(int i)
+void MultiList::removeItem(int i)
 {
 	if ( QListWidgetItem* leftitem = ui->leftdir->takeItem(i))
 	{
@@ -228,7 +219,6 @@ void MultiList::insertItem(
 
 void MultiList::style(
 	int  i,
-	bool hidden,
 	bool ignored,
 	bool unmatched,
 	bool compared,
@@ -237,26 +227,36 @@ void MultiList::style(
 {
 	if ( QListWidgetItem* l = ui->leftdir->item(i))
 	{
-		styleitem(l, hidden, ignored, unmatched, compared, same);
+        styleitem(l, ignored, unmatched, compared, same);
 	}
 
 	if ( QListWidgetItem* r = ui->rightdir->item(i))
 	{
-		styleitem(r, hidden, ignored, unmatched, compared, same);
+        styleitem(r, ignored, unmatched, compared, same);
 	}
+}
+
+void MultiList::setRowHidden(int i, bool hidden)
+{
+    if ( QListWidgetItem* l = ui->leftdir->item(i))
+    {
+        l->setHidden(hidden);
+    }
+
+    if ( QListWidgetItem* r = ui->rightdir->item(i))
+    {
+        r->setHidden(hidden);
+    }
 }
 
 void MultiList::styleitem(
 	QListWidgetItem* item,
-	bool             hidden_,
 	bool             ignore_,
 	bool             unmatched_,
 	bool             compared_,
 	bool             same_
 )
 {
-	item->setHidden(hidden_);
-
 	// strike out ignored items
 	QFont f = item->font();
 	f.setStrikeOut(ignore_);

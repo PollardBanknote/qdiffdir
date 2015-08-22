@@ -272,7 +272,7 @@ DirDiffForm::DirDiffForm(QWidget* parent_) :
     ui->multilistview->addAction(ui->actionSelect_Same);
     ui->multilistview->addAction(ui->actionSelect_Left_Only);
     ui->multilistview->addAction(ui->actionSelect_Right_Only);
-	connect(ui->multilistview, SIGNAL(itemDoubleClicked(int)), SLOT(viewfiles(int)));
+    connect(ui->multilistview, SIGNAL(itemActivated(int)), SLOT(viewfiles(int)));
 
 	connect(&derp, SIGNAL(compared(QString, QString, bool)), SLOT(items_compared(QString, QString, bool)));
 
@@ -940,7 +940,8 @@ void DirDiffForm::applyFilters()
 	{
 		const bool hideitem = hidden(i);
 
-		ui->multilistview->style(i, hideitem, list[i].ignore, list[i].unmatched(), list[i].compared, list[i].same);
+        ui->multilistview->style(i, list[i].ignore, list[i].unmatched(), list[i].compared, list[i].same);
+        ui->multilistview->setRowHidden(i, hideitem);
 		
 		if (sel.contains(i))
 		{
@@ -1359,7 +1360,7 @@ void DirDiffForm::updateLeft(
 	{
 		if ( list[i].items.right.isEmpty() && list[i].items.left.isEmpty())
 		{
-			ui->multilistview->remove(i);
+            ui->multilistview->removeItem(i);
 			list.erase(list.begin() + i);
 		}
 		else
@@ -1429,7 +1430,7 @@ void DirDiffForm::updateRight(
 	{
 		if ( list[i].items.left.isEmpty() && list[i].items.right.isEmpty())
 		{
-			ui->multilistview->remove(i);
+            ui->multilistview->removeItem(i);
 			list.erase(list.begin() + i);
 		}
 		else
@@ -1458,7 +1459,7 @@ void DirDiffForm::rematch()
 
 		if ( j == matching.size())
 		{
-			ui->multilistview->remove(i);
+            ui->multilistview->removeItem(i);
 			list.erase(list.begin() + i);
 		}
 		else

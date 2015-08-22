@@ -46,29 +46,31 @@ public:
 
     void addItem(const QString& left, const QString& right);
 
+    void insertItem(int, const QString&, const QString&);
+
+    void removeItem(int);
+
     void clear();
 
 	void clearLeft(int);
 
 	void clearRight(int);
 
-	void remove(int);
-
-    void insertItem(int, const QString&, const QString&);
-
-	void style(int, bool, bool, bool, bool, bool);
+    void style(int, bool, bool, bool, bool);
 
     int currentRow() const;
 
     QList< int > selectedRows() const;
 
+    void setSelectedRows(const QList<int>&);
+
     /** Deselect all items
      */
     void clearSelection();
 
-    void setSelectedRows(const QList<int>&);
+    void setRowHidden(int, bool);
 signals:
-	void itemDoubleClicked(int);
+    void itemActivated(int);
 private slots:
 	void handle_item_double_clicked(QListWidgetItem*);
 
@@ -89,14 +91,7 @@ private:
 	 */
 	void syncwindows();
 
-	/** Stop the synchronization between the list widgets
-	 *
-	 * This function is necessary so that the GUI doesn't go wild as many
-	 * changes are made to the lists. It seems like a bit of a workaround.
-	 */
-	void unsyncwindows();
-
-	void styleitem(QListWidgetItem*, bool, bool, bool, bool, bool);
+    void styleitem(QListWidgetItem*, bool, bool, bool, bool);
 
 	Ui::MultiList* ui;
 };
