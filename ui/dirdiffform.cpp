@@ -311,20 +311,22 @@ void DirDiffForm::on_viewdiff_clicked()
             return;
         }
 
+        MySettings& settings = MySettings::instance();
+
         if ( s1.isEmpty()) // view s2
         {
-            QProcess::startDetached("gvim", QStringList(s2), derp.getRightLocation());
+            QProcess::startDetached(settings.getEditor(), QStringList(s2), derp.getRightLocation());
         }
         else if ( s2.isEmpty()) // view s1
         {
-            QProcess::startDetached("gvim", QStringList(s1), derp.getLeftLocation());
+            QProcess::startDetached(settings.getEditor(), QStringList(s1), derp.getLeftLocation());
         }
-        else // run gvimdiff
+        else
         {
             QStringList l;
             l << derp.getLeftLocation(s1)
               << derp.getRightLocation(s2);
-            QProcess::startDetached(MySettings::instance().getDiffTool(), l);
+            QProcess::startDetached(settings.getDiffTool(), l);
         }
     }
 }
@@ -527,22 +529,24 @@ void DirDiffForm::viewfiles(int x_)
 		const QString s1 = list[x_].items.left;
 		const QString s2 = list[x_].items.right;
 
+        MySettings& settings = MySettings::instance();
+
 		if ( s1.isEmpty())
 		{
-			QProcess::startDetached("gvim",
+            QProcess::startDetached(settings.getEditor(),
 				QStringList(derp.getRightLocation(s2)));
 		}
 		else if ( s2.isEmpty())
 		{
-			QProcess::startDetached("gvim",
+            QProcess::startDetached(settings.getEditor(),
 				QStringList(derp.getLeftLocation(s1)));
 		}
-		else // run gvimdiff
+        else
 		{
 			QStringList l;
 			l << derp.getLeftLocation(s1)
 			  << derp.getRightLocation(s2);
-			QProcess::startDetached(MySettings::instance().getDiffTool(), l);
+            QProcess::startDetached(settings.getDiffTool(), l);
 		}
 	}
 }
