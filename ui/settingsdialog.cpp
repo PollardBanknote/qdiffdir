@@ -52,7 +52,7 @@ void SettingsDialog::on_save_clicked()
 	MySettings& settings = MySettings::instance();
 
 	settings.setDiffTool(ui->diffToolLineEdit->text());
-    settings.setEditor(ui->diffToolLineEdit->text());
+    settings.setEditor(ui->editorLineEdit->text());
 
 	accept();
 }
