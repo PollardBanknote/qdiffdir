@@ -84,8 +84,8 @@ private slots:
 
 	void copy_selection_to_left();
 	void copy_selection_to_right();
-    void left_current_row_changed();
-    void right_current_row_changed();
+    void left_current_row_changed(int);
+    void right_current_row_changed(int);
 private:
 	/** Setup signals for keeping the two list widgets scrolled to the same point
 	 */

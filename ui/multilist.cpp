@@ -81,8 +81,8 @@ void MultiList::syncwindows()
     // Keep selections in sync
 	connect(ui->leftdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_right()));
 	connect(ui->rightdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_left()));
-    connect(ui->leftdir,SIGNAL(currentRowChanged(int)), SLOT(left_current_row_changed()));
-    connect(ui->rightdir, SIGNAL(currentRowChanged(int)), SLOT(right_current_row_changed()));
+    connect(ui->leftdir,SIGNAL(currentRowChanged(int)), SLOT(left_current_row_changed(int)));
+    connect(ui->rightdir, SIGNAL(currentRowChanged(int)), SLOT(right_current_row_changed(int)));
 
     connect(ui->leftdir, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(handle_item_double_clicked(QListWidgetItem*)));
     connect(ui->rightdir, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(handle_item_double_clicked(QListWidgetItem*)));
@@ -347,13 +347,13 @@ void MultiList::setSelectedRows(const QList<int> & l)
 	}
 }
 
-void MultiList::left_current_row_changed()
+void MultiList::left_current_row_changed(int idx)
 {
-    ui->rightdir->setCurrentRow(-1);
+    ui->rightdir->setCurrentRow(idx, QItemSelectionModel::NoUpdate);
 }
 
-void MultiList::right_current_row_changed()
+void MultiList::right_current_row_changed(int idx)
 {
-    ui->leftdir->setCurrentRow(-1);
+    ui->leftdir->setCurrentRow(idx, QItemSelectionModel::NoUpdate);
 }
 

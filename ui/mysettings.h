@@ -48,7 +48,9 @@ public:
 	void setDiffTool(const QString&);
 private:
 	MySettings();
+	MySettings(const MySettings&);
 	~MySettings();
+	MySettings& operator=(const MySettings&);
 
 	void setValue(const QString& key, const QString& value);
 
