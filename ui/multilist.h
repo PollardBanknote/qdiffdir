@@ -30,12 +30,9 @@
 #define MULTILIST_H
 
 #include <QWidget>
+#include <QListWidget>
+#include <QScrollBar>
 class QListWidgetItem;
-
-namespace Ui
-{
-class MultiList;
-}
 
 class MultiList : public QWidget
 {
@@ -44,33 +41,33 @@ public:
 	explicit MultiList(QWidget* parent = 0);
 	~MultiList();
 
-    void addItem(const QString& left, const QString& right);
+	void addItem(const QString& left, const QString& right);
 
-    void insertItem(int, const QString&, const QString&);
+	void insertItem(int, const QString&, const QString&);
 
-    void removeItem(int);
+	void removeItem(int);
 
-    void clear();
+	void clear();
 
 	void clearLeft(int);
 
 	void clearRight(int);
 
-    void style(int, bool, bool, bool, bool);
+	void style(int, bool, bool, bool, bool);
 
-    int currentRow() const;
+	int currentRow() const;
 
-    QList< int > selectedRows() const;
+	QList< int > selectedRows() const;
 
-    void setSelectedRows(const QList<int>&);
+	void setSelectedRows(const QList< int >&);
 
-    /** Deselect all items
-     */
-    void clearSelection();
+	/** Deselect all items
+	 */
+	void clearSelection();
 
-    void setRowHidden(int, bool);
+	void setRowHidden(int, bool);
 signals:
-    void itemActivated(int);
+	void itemActivated(int);
 private slots:
 	void handle_item_double_clicked(QListWidgetItem*);
 
@@ -84,16 +81,18 @@ private slots:
 
 	void copy_selection_to_left();
 	void copy_selection_to_right();
-    void left_current_row_changed(int);
-    void right_current_row_changed(int);
+	void left_current_row_changed(int);
+	void right_current_row_changed(int);
 private:
 	/** Setup signals for keeping the two list widgets scrolled to the same point
 	 */
 	void syncwindows();
 
-    void styleitem(QListWidgetItem*, bool, bool, bool, bool);
+	void styleitem(QListWidgetItem*, bool, bool, bool, bool);
 
-	Ui::MultiList* ui;
+	QListWidget* leftdir;
+	QListWidget* rightdir;
+	QScrollBar*  verticalScrollBar;
 };
 
 #endif // MULTILIST_H

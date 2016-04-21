@@ -38,8 +38,7 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui \
     dirdiffform.ui \
-    settingsdialog.ui \
-    multilist.ui
+    settingsdialog.ui
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../pbl/release/ -lpbl
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../pbl/debug/ -lpbl
