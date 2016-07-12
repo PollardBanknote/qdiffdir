@@ -12,31 +12,32 @@ CONFIG += staticlib
 
 SOURCES += \
     process/detach.cpp \
-    fs/abspath.cpp \
-    fs/basename.cpp \
-    fs/copyfile.cpp \
-    fs/diriter.cpp \
-    fs/cleanpath.cpp \
-    fs/filestatus.cpp \
-    fs/path.cpp \
-    fs/direntry.cpp \
-    fs/file.cpp \
-    fs/perms.cpp \
-    fs/filetype.cpp
+    cpp/fs/abspath.cpp \
+    cpp/fs/basename.cpp \
+    cpp/fs/copyfile.cpp \
+    cpp/fs/diriter.cpp \
+    cpp/fs/cleanpath.cpp \
+    cpp/fs/filestatus.cpp \
+    cpp/fs/path.cpp \
+    cpp/fs/direntry.cpp \
+    cpp/fs/perms.cpp \
+    cpp/fs/filetype.cpp \
+    util/file.cpp
 
 HEADERS += \
-    fs/diriter.h \
-    fs/filetype.h \
-    fs/filestatus.h \
-    fs/perms.h \
-    fs/path.h \
-    fs/direntry.h \
-    fs/file.h \
-    fs/abspath.h \
-    fs/basename.h \
-    fs/copyfile.h \
-    fs/cleanpath.h \
-    process/detach.h
+    cpp/fs/diriter.h \
+    cpp/fs/filetype.h \
+    cpp/fs/filestatus.h \
+    cpp/fs/perms.h \
+    cpp/fs/path.h \
+    cpp/fs/direntry.h \
+    cpp/fs/abspath.h \
+    cpp/fs/basename.h \
+    cpp/fs/copyfile.h \
+    cpp/fs/cleanpath.h \
+    process/detach.h \
+    cpp/filesystem.h \
+    util/file.h
 
 unix {
     target.path = /usr/lib

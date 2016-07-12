@@ -28,7 +28,7 @@
  */
 #include "directorycontents.h"
 
-#include "fs/diriter.h"
+#include "cpp/filesystem.h"
 
 namespace
 {

@@ -44,10 +44,8 @@
 #include <QDesktopServices>
 #include <QUrl>
 
-#include "fs/basename.h"
-#include "fs/copyfile.h"
-#include "fs/diriter.h"
-#include "fs/file.h"
+#include "util/file.h"
+
 #include "compare.h"
 #include "matcher.h"
 #include "mysettings.h"
