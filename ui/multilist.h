@@ -71,10 +71,6 @@ signals:
 private slots:
 	void handle_item_double_clicked(QListWidgetItem*);
 
-	/** Change the scroll bar range to match the list widgets
-	 */
-	void setScrollBarRange(int, int);
-
 	/** Scroll the left and right lists to the same point
 	 */
 	void sync_scroll(int);
@@ -84,11 +80,9 @@ private slots:
 	void left_current_row_changed(int);
 	void right_current_row_changed(int);
 private:
-	/** Setup signals for keeping the two list widgets scrolled to the same point
-	 */
-	void syncwindows();
-
 	void styleitem(QListWidgetItem*, bool, bool, bool, bool);
+
+    void update_scroll_range();
 
 	QListWidget* leftdir;
 	QListWidget* rightdir;

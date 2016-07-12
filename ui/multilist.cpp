@@ -59,59 +59,44 @@ void copy_selection(
 MultiList::MultiList(QWidget* parent) :
 	QWidget(parent)
 {
-	QHBoxLayout* layout = new QHBoxLayout;
+    QHBoxLayout* layout = new QHBoxLayout(this);
+    layout->setSpacing(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
 	setLayout(layout);
 
-	layout->setSpacing(0);
-	layout->setContentsMargins(0, 0, 0, 0);
+    verticalScrollBar = new QScrollBar(Qt::Vertical, this);
+    connect(verticalScrollBar, SIGNAL(valueChanged(int)), SLOT(sync_scroll(int)));
 
 	leftdir = new QListWidget(this);
-	leftdir->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    leftdir->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	leftdir->setSelectionMode(QAbstractItemView::ExtendedSelection);
-	layout->addWidget(leftdir);
+    connect(leftdir->verticalScrollBar(), SIGNAL(valueChanged(int)), verticalScrollBar, SLOT(setValue(int)));
+    connect(leftdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_right()));
+    connect(leftdir, SIGNAL(currentRowChanged(int)), SLOT(left_current_row_changed(int)));
+    connect(leftdir, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(handle_item_double_clicked(QListWidgetItem*)));
+    this->layout()->addWidget(leftdir);
 
-	verticalScrollBar = new QScrollBar(Qt::Vertical, this);
 	layout->addWidget(verticalScrollBar);
 
 	rightdir = new QListWidget(this);
-	rightdir->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    rightdir->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 	rightdir->setSelectionMode(QAbstractItemView::ExtendedSelection);
-	layout->addWidget(rightdir);
 
-	syncwindows();
+    // Sync scrollbar
+    connect(rightdir->verticalScrollBar(), SIGNAL(valueChanged(int)), verticalScrollBar, SLOT(setValue(int)));
+
+    // Keep selections in sync
+    connect(rightdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_left()));
+    connect(rightdir, SIGNAL(currentRowChanged(int)), SLOT(right_current_row_changed(int)));
+    connect(rightdir, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(handle_item_double_clicked(QListWidgetItem*)));
+    this->layout()->addWidget(rightdir);
+
+    update_scroll_range();
 }
 
 MultiList::~MultiList()
 {
-}
-
-void MultiList::syncwindows()
-{
-	// Keep scrollbar in sync
-	verticalScrollBar->setRange(leftdir->verticalScrollBar()->minimum(), leftdir->verticalScrollBar()->maximum());
-	connect(leftdir->verticalScrollBar(), SIGNAL(rangeChanged(int, int)), SLOT(setScrollBarRange(int, int)));
-	connect(verticalScrollBar, SIGNAL(valueChanged(int)), SLOT(sync_scroll(int)));
-	connect(leftdir->verticalScrollBar(), SIGNAL(valueChanged(int)), verticalScrollBar, SLOT(setValue(int)));
-	connect(rightdir->verticalScrollBar(), SIGNAL(valueChanged(int)), verticalScrollBar, SLOT(setValue(int)));
-	verticalScrollBar->setValue(0);
-
-	// Keep selections in sync
-	connect(leftdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_right()));
-	connect(rightdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_left()));
-	connect(leftdir, SIGNAL(currentRowChanged(int)), SLOT(left_current_row_changed(int)));
-	connect(rightdir, SIGNAL(currentRowChanged(int)), SLOT(right_current_row_changed(int)));
-
-	connect(leftdir, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(handle_item_double_clicked(QListWidgetItem*)));
-	connect(rightdir, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(handle_item_double_clicked(QListWidgetItem*)));
-}
-
-void MultiList::setScrollBarRange(
-	int min_,
-	int max_
-)
-{
-	verticalScrollBar->setRange(min_, max_);
 }
 
 void MultiList::sync_scroll(int val)
@@ -197,6 +182,13 @@ void MultiList::addItem(
 	{
 		new QListWidgetItem(rightfile, rightdir);
 	}
+
+    update_scroll_range();
+}
+
+void MultiList::update_scroll_range()
+{
+    verticalScrollBar->setRange(leftdir->verticalScrollBar()->minimum(), leftdir->verticalScrollBar()->maximum());
 }
 
 void MultiList::clearLeft(int i)
@@ -226,6 +218,8 @@ void MultiList::removeItem(int i)
 	{
 		delete rightitem;
 	}
+
+    update_scroll_range();
 }
 
 void MultiList::insertItem(
@@ -236,6 +230,7 @@ void MultiList::insertItem(
 {
 	leftdir->insertItem(j, new QListWidgetItem(l));
 	rightdir->insertItem(j, new QListWidgetItem(r));
+    update_scroll_range();
 }
 
 void MultiList::style(
@@ -271,6 +266,8 @@ void MultiList::setRowHidden(
 	{
 		r->setHidden(hidden);
 	}
+
+    update_scroll_range();
 }
 
 void MultiList::styleitem(
