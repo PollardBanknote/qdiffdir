@@ -1324,7 +1324,7 @@ void DirDiffForm::updateLeft(
 				list[i].items.left = QString();
 				list[i].compared   = false;
 				list[i].same       = false;
-                ui->multilistview->clearText(i, 0);
+                ui->multilistview->clearText(0, i);
 			}
 			else if ( added_or_changed.contains(list[i].items.left))
 			{
@@ -1396,7 +1396,7 @@ void DirDiffForm::updateRight(
 				list[i].items.right = QString();
 				list[i].compared    = false;
 				list[i].same        = false;
-                ui->multilistview->clearText(i, 1);
+                ui->multilistview->clearText(1, i);
 			}
 			else if ( added_or_changed.contains(list[i].items.right))
 			{

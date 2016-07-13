@@ -61,6 +61,7 @@ void copy_selection(
 MultiList::MultiList(QWidget* parent) :
 	QWidget(parent)
 {
+    setContextMenuPolicy(Qt::ActionsContextMenu);
     QHBoxLayout* layout = new QHBoxLayout(this);
     layout->setSpacing(0);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -75,6 +76,7 @@ MultiList::MultiList(QWidget* parent) :
         if (QListWidget* dir = new QListWidget(this))
         {
             dirs.push_back(dir);
+            dir->setContextMenuPolicy(Qt::NoContextMenu);
             dir->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
             dir->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
@@ -188,7 +190,7 @@ void MultiList::update_scroll_range()
     }
 }
 
-void MultiList::clearText(int row, int col)
+void MultiList::clearText(int col, int row)
 {
     if (col >= 0 && static_cast<unsigned>(col) < dirs.size())
     {

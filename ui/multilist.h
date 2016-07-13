@@ -34,6 +34,11 @@ class QListWidget;
 class QScrollBar;
 class QListWidgetItem;
 
+/** Display several columns of data in synchronized list widgets
+ *
+ * @todo Use QListView-s or QTreeView-s
+ * @todo Share selection model so we don't have to manually copy selections
+ */
 class MultiList : public QWidget
 {
 	Q_OBJECT
@@ -49,7 +54,7 @@ public:
 
 	void clear();
 
-    void clearText(int row, int col);
+    void clearText(int col, int row);
 
 	void style(int, bool, bool, bool, bool);
 
