@@ -38,11 +38,11 @@
 
 namespace
 {
-::pbl::fs::file_status from_mode_t(mode_t m)
+::cpp17::filesystem::file_status from_mode_t(mode_t m)
 {
-	::pbl::fs::perms p = static_cast< ::pbl::fs::perms >( m & 0xFFF );
+    ::cpp17::filesystem::perms p = static_cast< ::cpp17::filesystem::perms >( m & 0xFFF );
 
-	::pbl::fs::file_type t = file_type::unknown;
+    ::cpp17::filesystem::file_type t = file_type::unknown;
 
 	if ( S_ISREG(m))
 	{
@@ -73,15 +73,15 @@ namespace
 		t = file_type::socket;
 	}
 
-	return ::pbl::fs::file_status(t, p);
+    return ::cpp17::filesystem::file_status(t, p);
 
 }
 
 }
 
-namespace pbl
+namespace cpp17
 {
-namespace fs
+namespace filesystem
 {
 file_status::file_status(const file_status& s)
 	: t(s.t), p(s.p)

@@ -53,6 +53,7 @@
 
 namespace
 {
+
 // Check that two files are equal. Files are relative to the directories passed
 // to the constructor
 class FileCompare : public Compare
@@ -91,9 +92,10 @@ public:
 		}
 		else
 		{
-			pbl::fs::file f(first.toStdString(), pbl::fs::file::readonly);
-			pbl::fs::file g(second.toStdString(), pbl::fs::file::readonly);
-			return f.compare(g);
+            pbl::fs::file f(first.toStdString(), pbl::fs::file::readonly);
+            pbl::fs::file g(second.toStdString(), pbl::fs::file::readonly);
+
+            return f.compare(g);
 		}
 	}
 
@@ -239,12 +241,12 @@ private:
 
 QString lastPathComponent(const QString& s)
 {
-	return QString::fromStdString(pbl::fs::basename(s.toStdString()));
+    return QString::fromStdString(cpp17::filesystem::basename(s.toStdString()));
 }
 
 QString directoryComponent(const QString& s)
 {
-	return QString::fromStdString(pbl::fs::dirname(s.toStdString()));
+    return QString::fromStdString(cpp17::filesystem::dirname(s.toStdString()));
 }
 
 DirDiffForm::DirDiffForm(QWidget* parent_) :
@@ -681,7 +683,7 @@ std::pair< bool, DirDiffForm::overwrite_t> DirDiffForm::copyTo(
         }
 	}
 
-	if ( pbl::fs::copy(file.toStdString(), s.toStdString()))
+    if ( cpp17::filesystem::copy_file(file.toStdString(), s.toStdString(), copy_options::overwrite_existing))
 	{
         return std::make_pair(true, overwrite);
 	}

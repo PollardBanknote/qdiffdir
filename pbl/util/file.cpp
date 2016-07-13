@@ -57,7 +57,7 @@ file::file(const std::string& name, int flags) : is_temp(false), filestat(0)
 	}
 }
 
-file::file(const std::string& name, int flags, ::pbl::fs::perms m) : filename(), is_temp(false), filestat(0)
+file::file(const std::string& name, int flags, ::cpp17::filesystem::perms m) : filename(), is_temp(false), filestat(0)
 {
 	fd = ::open(name.c_str(), flags, m);
 
@@ -78,7 +78,7 @@ file::~file()
 			remove();
 		}
 
-		::close(fd);
+        ::close(fd);
 	}
 }
 
@@ -168,17 +168,17 @@ void file::flush()
 	}
 }
 
-::pbl::fs::perms file::permissions() const
+::cpp17::filesystem::perms file::permissions() const
 {
 	if ( get_stat())
 	{
-		return static_cast< ::pbl::fs::perms >( filestat->st_mode & ( S_IRWXU | S_IRWXG | S_IRWXO ));
+        return static_cast< ::cpp17::filesystem::perms >( filestat->st_mode & ( S_IRWXU | S_IRWXG | S_IRWXO ));
 	}
 
 	return perms::none;
 }
 
-void file::chmod(::pbl::fs::perms m)
+void file::chmod(::cpp17::filesystem::perms m)
 {
 	if ( fd != -1 )
 	{
@@ -345,126 +345,126 @@ private:
 /// @todo seek guard
 int file::compare(const file& other)
 {
-	if ( !is_open() || !other.is_open())
-	{
-		return -1;
-	}
+    if ( !is_open() || !other.is_open())
+    {
+        return -1;
+    }
 
-	// files of different size are obviously different
-	if ( size() != other.size())
-	{
-		return 0;
-	}
+    // files of different size are obviously different
+    if ( size() != other.size())
+    {
+        return 0;
+    }
 
-	// files with the same dev/inode are obviously the same and don't need to
-	// be compared
-	if ( get_stat() && other.get_stat() && filestat->st_ino == other.filestat->st_ino && filestat->st_dev == other.filestat->st_dev )
-	{
-		return 1;
-	}
+    // files with the same dev/inode are obviously the same and don't need to
+    // be compared
+    if ( get_stat() && other.get_stat() && filestat->st_ino == other.filestat->st_ino && filestat->st_dev == other.filestat->st_dev )
+    {
+        return 1;
+    }
 
-	// Save the current file position
-	seek_guard g1(*this);
-	seek_guard g2(other);
+    // Save the current file position
+    seek_guard g1(*this);
+    seek_guard g2(other);
 
-	// go to the start of each file
-	if ( ::lseek(fd, 0, SEEK_SET) == off_t(-1))
-	{
-		return -1;
-	}
+    // go to the start of each file
+    if ( ::lseek(fd, 0, SEEK_SET) == off_t(-1))
+    {
+        return -1;
+    }
 
-	if ( ::lseek(other.fd, 0, SEEK_SET) == off_t(-1))
-	{
-		return -1;
-	}
+    if ( ::lseek(other.fd, 0, SEEK_SET) == off_t(-1))
+    {
+        return -1;
+    }
 
-	// Start reading buffers
-	char buf1[4096];
-	char buf2[4096];
+    // Start reading buffers
+    char buf1[4096];
+    char buf2[4096];
 
-	std::size_t size1 = 0;
-	std::size_t size2 = 0;
+    std::size_t size1 = 0;
+    std::size_t size2 = 0;
 
-	bool eof1 = false;
-	bool eof2 = false;
+    bool eof1 = false;
+    bool eof2 = false;
 
-	while ( true )
-	{
-		// read from each file
-		if ( !eof1 && size1 < sizeof( buf1 ))
-		{
-			const ssize_t n1 = ::read(fd, buf1 + size1, sizeof( buf1 ) - size1);
+    while ( true )
+    {
+        // read from each file
+        if ( !eof1 && size1 < sizeof( buf1 ))
+        {
+            const ssize_t n1 = ::read(fd, buf1 + size1, sizeof( buf1 ) - size1);
 
-			if ( n1 == -1 )
-			{
-				return -1;
-			}
+            if ( n1 == -1 )
+            {
+                return -1;
+            }
 
-			if ( n1 == 0 )
-			{
-				eof1 = true;
-			}
+            if ( n1 == 0 )
+            {
+                eof1 = true;
+            }
 
-			size1 += n1;
-		}
+            size1 += n1;
+        }
 
-		if ( !eof2 && size2 < sizeof( buf2 ))
-		{
-			const ssize_t n2 = ::read(other.fd, buf2 + size2, sizeof( buf2 ) - size2);
+        if ( !eof2 && size2 < sizeof( buf2 ))
+        {
+            const ssize_t n2 = ::read(other.fd, buf2 + size2, sizeof( buf2 ) - size2);
 
-			if ( n2 == -1 )
-			{
-				return -1;
-			}
+            if ( n2 == -1 )
+            {
+                return -1;
+            }
 
-			if ( n2 == 0 )
-			{
-				eof2 = true;
-			}
+            if ( n2 == 0 )
+            {
+                eof2 = true;
+            }
 
-			size2 += n2;
-		}
+            size2 += n2;
+        }
 
-		// Compare files based on what we have
-		const std::size_t m = std::min(size1, size2);
+        // Compare files based on what we have
+        const std::size_t m = std::min(size1, size2);
 
-		// files are different
-		if ( std::memcmp(buf1, buf2, m) != 0 )
-		{
-			return 0;
-		}
-		else
-		{
-			// files are the same
-			if ( eof1 && eof2 )
-			{
-				return 1;
-			}
+        // files are different
+        if ( std::memcmp(buf1, buf2, m) != 0 )
+        {
+            return 0;
+        }
+        else
+        {
+            // files are the same
+            if ( eof1 && eof2 )
+            {
+                return 1;
+            }
 
-			// files are the same so far... save the data
-			if ( size1 > m )
-			{
-				std::memmove(buf1, buf1 + m, size1 - m);
-			}
+            // files are the same so far... save the data
+            if ( size1 > m )
+            {
+                std::memmove(buf1, buf1 + m, size1 - m);
+            }
 
-			size1 -= m;
+            size1 -= m;
 
-			if ( size2 > m )
-			{
-				std::memmove(buf2, buf2 + m, size2 - m);
-			}
+            if ( size2 > m )
+            {
+                std::memmove(buf2, buf2 + m, size2 - m);
+            }
 
-			size2 -= m;
+            size2 -= m;
 
-			// files have different size
-			if (( eof1 && size2 != 0 ) || ( eof2 && size1 != 0 ))
-			{
-				return 0;
-			}
-		}
-	}
+            // files have different size
+            if (( eof1 && size2 != 0 ) || ( eof2 && size1 != 0 ))
+            {
+                return 0;
+            }
+        }
+    }
 
-	return -1;
+    return -1;
 
 }
 

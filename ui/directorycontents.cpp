@@ -32,7 +32,7 @@
 
 namespace
 {
-bool is_hidden(const pbl::fs::path& p)
+bool is_hidden(const cpp17::filesystem::path& p)
 {
 	const std::string s = p.filename().native();
 
@@ -43,7 +43,7 @@ bool is_hidden(const pbl::fs::path& p)
 void descend(
 	QStringList&         files,
 	QStringList&         subdirs,
-	const pbl::fs::path& path,
+    const cpp17::filesystem::path& path,
 	unsigned             depth,
 	unsigned             maxdepth
 )
@@ -55,7 +55,7 @@ void descend(
 	{
 		subdirs << QString::fromStdString(path.native());
 
-		for ( pbl::fs::directory_iterator it(path), last; it != last; ++it )
+        for ( cpp17::filesystem::directory_iterator it(path), last; it != last; ++it )
 		{
 			if ( it->status().type() == file_type::directory )
 			{
@@ -116,7 +116,7 @@ std::pair< QStringList, QStringList > descend(
 
 	if ( maxdepth >= 0 )
 	{
-		pbl::fs::path p(dir.absolutePath().toStdString());
+        cpp17::filesystem::path p(dir.absolutePath().toStdString());
 
 		descend(res.first, res.second, p, 0, maxdepth);
 	}

@@ -37,9 +37,9 @@
 #include "direntry.h"
 #include "path.h"
 
-namespace pbl
+namespace cpp17
 {
-namespace fs
+namespace filesystem
 {
 
 /// @todo Could save the malloc/free (of e) if we mark end-of-directory

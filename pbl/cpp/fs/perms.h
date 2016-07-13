@@ -91,9 +91,9 @@ std::ostream& operator<<(std::ostream&, perms);
 
 }
 
-namespace pbl
+namespace cpp17
 {
-namespace fs
+namespace filesystem
 {
 typedef ::perms::perms perms;
 }

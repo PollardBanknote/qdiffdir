@@ -28,9 +28,9 @@
  */
 #include "direntry.h"
 
-namespace pbl
+namespace cpp17
 {
-namespace fs
+namespace filesystem
 {
 directory_entry::directory_entry()
 {
@@ -42,7 +42,7 @@ directory_entry::directory_entry(const directory_entry& e)
 
 }
 
-directory_entry::directory_entry(const ::pbl::fs::path& p, file_status status_, file_status sym_status_)
+directory_entry::directory_entry(const ::cpp17::filesystem::path& p, file_status status_, file_status sym_status_)
 	: path_(p), mstatus(status_), sym_status(sym_status_)
 {
 
@@ -57,7 +57,7 @@ directory_entry& directory_entry::operator=(const directory_entry& e)
 }
 
 void directory_entry::assign(
-	const ::pbl::fs::path& p,
+    const ::cpp17::filesystem::path& p,
 	file_status            status_,
 	file_status            sym_status_
 )
@@ -72,7 +72,7 @@ const path& directory_entry::get_path() const
 	return path_;
 }
 
-::pbl::fs::path directory_entry::filename() const
+::cpp17::filesystem::path directory_entry::filename() const
 {
 	return path_.filename();
 }

@@ -31,9 +31,9 @@
 
 #include <string>
 
-namespace pbl
+namespace cpp17
 {
-namespace fs
+namespace filesystem
 {
 /** Return a simplified version of path
  *

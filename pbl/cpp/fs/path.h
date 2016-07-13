@@ -31,9 +31,9 @@
 #include <string>
 #include <iosfwd>
 
-namespace pbl
+namespace cpp17
 {
-namespace fs
+namespace filesystem
 {
 /** A file path
  *

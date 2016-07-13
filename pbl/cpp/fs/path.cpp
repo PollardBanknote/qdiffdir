@@ -28,9 +28,9 @@
  */
 #include "path.h"
 
-namespace pbl
+namespace cpp17
 {
-namespace fs
+namespace filesystem
 {
 path::path()
 {

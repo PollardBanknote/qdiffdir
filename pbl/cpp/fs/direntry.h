@@ -33,9 +33,9 @@
 #include "path.h"
 #include "filestatus.h"
 
-namespace pbl
+namespace cpp17
 {
-namespace fs
+namespace filesystem
 {
 /** Reperesents a file system object
  */
@@ -47,14 +47,14 @@ public:
 	explicit directory_entry(const path&, file_status = file_status(), file_status = file_status());
 	directory_entry& operator=(const directory_entry&);
 	void             assign(const path &, file_status = file_status(), file_status = file_status());
-	const ::pbl::fs::path& get_path() const;
+    const ::cpp17::filesystem::path& get_path() const;
 
 	file_status status() const;
 
 	file_status symbolic_status() const;
-	::pbl::fs::path filename() const;
+    ::cpp17::filesystem::path filename() const;
 private:
-	::pbl::fs::path path_;
+    ::cpp17::filesystem::path path_;
 	file_status mstatus;
 	file_status sym_status;
 

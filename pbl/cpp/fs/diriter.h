@@ -32,9 +32,9 @@
 #include <stack>
 #include "direntry.h"
 
-namespace pbl
+namespace cpp17
 {
-namespace fs
+namespace filesystem
 {
 
 /** An iterator for traversing directory contents

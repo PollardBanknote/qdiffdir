@@ -33,9 +33,9 @@
 #include "filetype.h"
 #include "perms.h"
 
-namespace pbl
+namespace cpp17
 {
-namespace fs
+namespace filesystem
 {
 class path;
 

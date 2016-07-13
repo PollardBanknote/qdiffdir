@@ -28,9 +28,9 @@
  */
 #include "cleanpath.h"
 
-namespace pbl
+namespace cpp17
 {
-namespace fs
+namespace filesystem
 {
 /// @todo Probably belongs in path.cpp
 std::string cleanpath(const std::string& s)

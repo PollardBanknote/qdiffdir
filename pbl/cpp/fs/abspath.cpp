@@ -38,9 +38,9 @@
 #include <fcntl.h>
 #endif
 
-namespace pbl
+namespace cpp17
 {
-namespace fs
+namespace filesystem
 {
 
 std::string absolute_path(const std::string& filename)

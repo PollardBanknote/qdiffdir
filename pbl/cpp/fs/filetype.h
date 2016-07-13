@@ -41,9 +41,9 @@ enum file_type
 std::ostream& operator<<(std::ostream&, file_type);
 }
 
-namespace pbl
+namespace cpp17
 {
-namespace fs
+namespace filesystem
 {
 /** Types of file system objects
  */
