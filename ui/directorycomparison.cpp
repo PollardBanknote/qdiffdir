@@ -33,7 +33,7 @@
 
 
 DirectoryComparison::DirectoryComparison(QObject* parent)
-	: compare(0), worker(0), matcher(new DefaultMatcher)
+    : QObject(parent), compare(0), worker(0), matcher(new DefaultMatcher)
 {
 
 }

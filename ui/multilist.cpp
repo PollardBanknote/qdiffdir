@@ -29,6 +29,8 @@
 #include "multilist.h"
 
 #include <QHBoxLayout>
+#include <QListWidget>
+#include <QScrollBar>
 
 
 void copy_selection(
@@ -68,29 +70,27 @@ MultiList::MultiList(QWidget* parent) :
     verticalScrollBar = new QScrollBar(Qt::Vertical, this);
     connect(verticalScrollBar, SIGNAL(valueChanged(int)), SLOT(sync_scroll(int)));
 
-	leftdir = new QListWidget(this);
-    leftdir->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	leftdir->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    connect(leftdir->verticalScrollBar(), SIGNAL(valueChanged(int)), verticalScrollBar, SLOT(setValue(int)));
-    connect(leftdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_right()));
-    connect(leftdir, SIGNAL(currentRowChanged(int)), SLOT(left_current_row_changed(int)));
-    connect(leftdir, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(handle_item_double_clicked(QListWidgetItem*)));
-    this->layout()->addWidget(leftdir);
+    for (int i = 0; i < 2; ++i)
+    {
+        if (QListWidget* dir = new QListWidget(this))
+        {
+            dirs.push_back(dir);
+            dir->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+            dir->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-	layout->addWidget(verticalScrollBar);
+            // Sync scrollbar
+            connect(dir->verticalScrollBar(), SIGNAL(valueChanged(int)), verticalScrollBar, SLOT(setValue(int)));
 
-	rightdir = new QListWidget(this);
-    rightdir->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-	rightdir->setSelectionMode(QAbstractItemView::ExtendedSelection);
+            // Keep selections in sync
+            connect(dir, SIGNAL(itemSelectionChanged()), SLOT(update_selection()));
+            connect(dir, SIGNAL(currentRowChanged(int)), SLOT(current_row_changed(int)));
+            connect(dir, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(handle_item_double_clicked(QListWidgetItem*)));
 
-    // Sync scrollbar
-    connect(rightdir->verticalScrollBar(), SIGNAL(valueChanged(int)), verticalScrollBar, SLOT(setValue(int)));
+            this->layout()->addWidget(dir);
+        }
+    }
 
-    // Keep selections in sync
-    connect(rightdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_left()));
-    connect(rightdir, SIGNAL(currentRowChanged(int)), SLOT(right_current_row_changed(int)));
-    connect(rightdir, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(handle_item_double_clicked(QListWidgetItem*)));
-    this->layout()->addWidget(rightdir);
+    layout->insertWidget(1, verticalScrollBar);
 
     update_scroll_range();
 }
@@ -101,29 +101,32 @@ MultiList::~MultiList()
 
 void MultiList::sync_scroll(int val)
 {
-	if ( leftdir->verticalScrollBar()->value() != val )
-	{
-		leftdir->verticalScrollBar()->setValue(val);
-	}
-
-	if ( rightdir->verticalScrollBar()->value() != val )
-	{
-		rightdir->verticalScrollBar()->setValue(val);
-	}
+    for (std::size_t i = 0; i < dirs.size(); ++i)
+    {
+        if (QListWidget* dir = dirs[i])
+        {
+            if ( dir->verticalScrollBar()->value() != val )
+            {
+                dir->verticalScrollBar()->setValue(val);
+            }
+        }
+    }
 }
 
-void MultiList::copy_selection_to_left()
+void MultiList::update_selection()
 {
-	leftdir->disconnect(SIGNAL(itemSelectionChanged()), this, SLOT(copy_selection_to_right()));
-	copy_selection(rightdir, leftdir);
-	connect(leftdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_right()));
-}
-
-void MultiList::copy_selection_to_right()
-{
-	rightdir->disconnect(SIGNAL(itemSelectionChanged()), this, SLOT(copy_selection_to_left()));
-	copy_selection(leftdir, rightdir);
-	connect(rightdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_left()));
+    if (QListWidget* from = dynamic_cast< QListWidget* >(sender()))
+    {
+        for (std::size_t i = 0; i < dirs.size(); ++i)
+        {
+            if (dirs[i] != from)
+            {
+                dirs[i]->disconnect(SIGNAL(itemSelectionChanged()), this, SLOT(update_selection()));
+                copy_selection(from, dirs[i]);
+                connect(dirs[i], SIGNAL(itemSelectionChanged()), SLOT(update_selection()));
+            }
+        }
+    }
 }
 
 void MultiList::handle_item_double_clicked(QListWidgetItem* item)
@@ -139,8 +142,8 @@ void MultiList::handle_item_double_clicked(QListWidgetItem* item)
 
 void MultiList::clearSelection()
 {
-	leftdir->setCurrentItem(0);
-	rightdir->setCurrentItem(0);
+    for (std::size_t i = 0; i < dirs.size(); ++i)
+        dirs[i]->setCurrentItem(0);
 }
 
 QString get_text(QListWidget* w)
@@ -155,117 +158,101 @@ QString get_text(QListWidget* w)
 
 void MultiList::clear()
 {
-	leftdir->clear();
-	rightdir->clear();
+    for (std::size_t i = 0; i < dirs.size(); ++i)
+        dirs[i]->clear();
 }
 
 void MultiList::addItem(
-	const QString& leftfile,
-	const QString& rightfile
+    const QStringList& items
 )
 {
-	// create items
-	if ( leftfile.isEmpty())
-	{
-		new QListWidgetItem(leftdir);
-	}
-	else
-	{
-		new QListWidgetItem(leftfile, leftdir);
-	}
+    const std::size_t n = items.count();
 
-	if ( rightfile.isEmpty())
-	{
-		new QListWidgetItem(rightdir);
-	}
-	else
-	{
-		new QListWidgetItem(rightfile, rightdir);
-	}
+    for (std::size_t i = 0; i < dirs.size(); ++i)
+    {
+        if (i < n && !items.at(i).isEmpty())
+            new QListWidgetItem(items.at(i), dirs[i]);
+        else
+            new QListWidgetItem(dirs[i]);
+    }
 
     update_scroll_range();
 }
 
 void MultiList::update_scroll_range()
 {
-    verticalScrollBar->setRange(leftdir->verticalScrollBar()->minimum(), leftdir->verticalScrollBar()->maximum());
+    if (!dirs.empty())
+    {
+        if (QScrollBar* sb = dirs[0]->verticalScrollBar())
+            verticalScrollBar->setRange(sb->minimum(), sb->maximum());
+    }
 }
 
-void MultiList::clearLeft(int i)
+void MultiList::clearText(int row, int col)
 {
-	if ( QListWidgetItem * item = leftdir->item(i))
-	{
-		item->setText(QString());
-	}
+    if (col >= 0 && static_cast<unsigned>(col) < dirs.size())
+    {
+        if ( QListWidgetItem * item = dirs[col]->item(row))
+        {
+            item->setText(QString());
+        }
+    }
 }
 
-void MultiList::clearRight(int i)
+void MultiList::removeItem(int r)
 {
-	if ( QListWidgetItem * item = rightdir->item(i))
-	{
-		item->setText(QString());
-	}
-}
-
-void MultiList::removeItem(int i)
-{
-	if ( QListWidgetItem * leftitem = leftdir->takeItem(i))
-	{
-		delete leftitem;
-	}
-
-	if ( QListWidgetItem * rightitem = rightdir->takeItem(i))
-	{
-		delete rightitem;
-	}
+    for (std::size_t i = 0; i < dirs.size(); ++i)
+    {
+        if ( QListWidgetItem * item = dirs[i]->takeItem(r))
+        {
+            delete item;
+        }
+    }
 
     update_scroll_range();
 }
 
 void MultiList::insertItem(
 	int            j,
-	const QString& l,
-	const QString& r
+    const QStringList& l
 )
 {
-	leftdir->insertItem(j, new QListWidgetItem(l));
-	rightdir->insertItem(j, new QListWidgetItem(r));
+    for (std::size_t i = 0, n = dirs.size(), m = l.count(); i < n && i < m; ++i)
+    {
+        dirs[i]->insertItem(j, new QListWidgetItem(l.at(i)));
+    }
     update_scroll_range();
 }
 
 void MultiList::style(
-	int  i,
+    int  r,
 	bool ignored,
 	bool unmatched,
 	bool compared,
 	bool same
 )
 {
-	if ( QListWidgetItem * l = leftdir->item(i))
-	{
-		styleitem(l, ignored, unmatched, compared, same);
-	}
-
-	if ( QListWidgetItem * r = rightdir->item(i))
-	{
-		styleitem(r, ignored, unmatched, compared, same);
-	}
+    for (std::size_t i = 0 ; i< dirs.size(); ++i)
+    {
+        if ( QListWidgetItem * item = dirs[i]->item(r))
+        {
+            styleitem(item, ignored, unmatched, compared, same);
+        }
+    }
 }
 
 void MultiList::setRowHidden(
-	int  i,
+    int  r,
 	bool hidden
 )
 {
-	if ( QListWidgetItem * l = leftdir->item(i))
-	{
-		l->setHidden(hidden);
-	}
-
-	if ( QListWidgetItem * r = rightdir->item(i))
-	{
-		r->setHidden(hidden);
-	}
+    for (std::size_t i = 0; i < dirs.size(); ++i)
+    {
+        if ( QListWidgetItem * item = dirs[i]->item(r))
+        {
+            item->setHidden(hidden);
+        }
+    }
 
     update_scroll_range();
 }
@@ -314,26 +301,29 @@ void MultiList::styleitem(
 
 int MultiList::currentRow() const
 {
-	int idx = leftdir->currentRow();
+    for (std::size_t i = 0; i < dirs.size(); ++i)
+    {
+        const int idx = dirs[i]->currentRow();
+        if (idx >= 0)
+            return idx;
+    }
 
-	if ( idx < 0 )
-	{
-		idx = rightdir->currentRow();
-	}
-
-	return idx;
+    return -1;
 }
 
 QList< int > MultiList::selectedRows() const
 {
 	QList< int > l;
 
-	QList< QListWidgetItem* > items = rightdir->selectedItems();
+    if (!dirs.empty())
+    {
+        QList< QListWidgetItem* > items = dirs[0]->selectedItems();
 
-	for ( int i = 0, n = items.count(); i < n; ++i )
-	{
-		l << rightdir->row(items.at(i));
-	}
+        for ( int i = 0, n = items.count(); i < n; ++i )
+        {
+            l << dirs[0]->row(items.at(i));
+        }
+    }
 
 	return l;
 }
@@ -347,38 +337,40 @@ void MultiList::setSelectedRows(const QList< int >& l)
 	else
 	{
 		// temporarily disonnect signals that edit selection
-		leftdir->disconnect(SIGNAL(itemSelectionChanged()), this, SLOT(copy_selection_to_right()));
-		rightdir->disconnect(SIGNAL(itemSelectionChanged()), this, SLOT(copy_selection_to_left()));
+        for (std::size_t r = 0; r < dirs.size(); ++r)
+        {
+            dirs[r]->disconnect(SIGNAL(itemSelectionChanged()), this, SLOT(update_selection()));
+        }
 
-		leftdir->setCurrentRow(l.at(0));
-		rightdir->setCurrentRow(l.at(0));
+        for (std::size_t r = 0; r < dirs.size(); ++r)
+        {
+            dirs[r]->setCurrentRow(l.at(0));
 
-		for ( int i = 0, n = leftdir->count(); i < n; ++i )
-		{
-			const bool sel = l.contains(i);
+            for ( int i = 0, n = dirs[r]->count(); i < n; ++i )
+            {
+                const bool sel = l.contains(i);
 
-			if ( QListWidgetItem * item = leftdir->item(i))
-			{
-				item->setSelected(sel);
-			}
+                if ( QListWidgetItem * item = dirs[r]->item(i))
+                {
+                    item->setSelected(sel);
+                }
+            }
+        }
 
-			if ( QListWidgetItem * item = rightdir->item(i))
-			{
-				item->setSelected(sel);
-			}
-		}
-
-		connect(leftdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_right()));
-		connect(rightdir, SIGNAL(itemSelectionChanged()), SLOT(copy_selection_to_left()));
+        // Reconnect slots
+        for (std::size_t r = 0; r < dirs.size(); ++r)
+            connect(dirs[r], SIGNAL(itemSelectionChanged()), SLOT(update_selection()));
 	}
 }
 
-void MultiList::left_current_row_changed(int idx)
+void MultiList::current_row_changed(int idx)
 {
-	rightdir->setCurrentRow(idx, QItemSelectionModel::NoUpdate);
-}
-
-void MultiList::right_current_row_changed(int idx)
-{
-	leftdir->setCurrentRow(idx, QItemSelectionModel::NoUpdate);
+    if (QObject* from = sender())
+    {
+        for (std::size_t i = 0; i < dirs.size(); ++i)
+        {
+            if (dirs[i] != from)
+                dirs[i]->setCurrentRow(idx, QItemSelectionModel::NoUpdate);
+        }
+    }
 }

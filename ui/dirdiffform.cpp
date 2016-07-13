@@ -1173,7 +1173,9 @@ void DirDiffForm::setLeftAndRight(
     ui->multilistview->clear();
 	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
 	{
-        ui->multilistview->addItem(list[i].items.left, list[i].items.right);
+        QStringList items;
+        items << list[i].items.left << list[i].items.right;
+        ui->multilistview->addItem(items);
 	}
 
 	applyFilters();
@@ -1322,7 +1324,7 @@ void DirDiffForm::updateLeft(
 				list[i].items.left = QString();
 				list[i].compared   = false;
 				list[i].same       = false;
-				ui->multilistview->clearLeft(i);
+                ui->multilistview->clearText(i, 0);
 			}
 			else if ( added_or_changed.contains(list[i].items.left))
 			{
@@ -1355,7 +1357,9 @@ void DirDiffForm::updateLeft(
 			// insert into the list
 			list.insert(list.begin() + j, y);
 
-            ui->multilistview->insertItem(j, item, QString());
+            QStringList items;
+            items << item << QString();
+            ui->multilistview->insertItem(j, items);
 		}
 	}
 
@@ -1392,7 +1396,7 @@ void DirDiffForm::updateRight(
 				list[i].items.right = QString();
 				list[i].compared    = false;
 				list[i].same        = false;
-				ui->multilistview->clearRight(i);
+                ui->multilistview->clearText(i, 1);
 			}
 			else if ( added_or_changed.contains(list[i].items.right))
 			{
@@ -1425,7 +1429,9 @@ void DirDiffForm::updateRight(
 			// insert into the list
 			list.insert(list.begin() + j, y);
 
-            ui->multilistview->insertItem(j, QString(), item);
+            QStringList items;
+            items << QString() << item;
+            ui->multilistview->insertItem(j, items);
 		}
 	}
 
@@ -1480,7 +1486,9 @@ void DirDiffForm::rematch()
 			comparison_t c = { matching[i], false, false, false };
 			list.insert(list.begin() + i, c);
 
-            ui->multilistview->insertItem(i, matching[i].left, matching[i].right);
+            QStringList items;
+            items <<  matching[i].left << matching[i].right;
+            ui->multilistview->insertItem(i, items);
 		}
 	}
 
