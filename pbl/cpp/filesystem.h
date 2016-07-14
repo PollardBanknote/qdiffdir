@@ -1,6 +1,8 @@
 #ifndef CPP_FILESYSTEM_H
 #define CPP_FILESYSTEM_H
 
+#include "version.h"
+
 #include "fs/abspath.h"
 #include "fs/basename.h"
 #include "fs/cleanpath.h"

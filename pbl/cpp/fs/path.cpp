@@ -137,9 +137,102 @@ path& path::append(const path& p)
 	return *this;
 }
 
+path& path::operator/=(const path & p)
+{
+    return append(p);
+}
+
 const std::string& path::native() const
 {
 	return s;
+}
+
+std::pair< std::size_t, std::size_t > path::first_path_component() const
+{
+    const std::size_t n = s.length();
+
+    std::size_t i = 0, j = 0;
+    if (n != 0 && s[0] == preferred_separator)
+    {
+        // Absolute path
+        j = 1;
+    }
+    else
+    {
+        // Relative path
+        while (j < n && s[j] != preferred_separator)
+            ++j;
+    }
+    return std::pair< std::size_t, std::size_t >(i, j);
+}
+
+bool path::next_path_component(std::pair<std::size_t, std::size_t> & r) const
+{
+    const std::size_t n = s.length();
+
+    std::size_t i = r.second + 1;
+    while (i < n && s[i] == preferred_separator)
+        ++i;
+    if (i < n)
+    {
+        // Found another component
+        std::size_t j = i + 1;
+        while (j < n && s[j] != preferred_separator)
+            ++j;
+        r.first = i;
+        r.second = j;
+        return true;
+    }
+    else
+        return false;
+}
+
+/// @bug Doesn't handle trailing path separator as implied "."
+path path::lexically_relative(const path & base) const
+{
+    std::pair< std::size_t, std::size_t > r1 = first_path_component();
+    std::pair< std::size_t, std::size_t > r2 = base.first_path_component();
+
+    // compare first path component
+    if (s.compare(r1.first, r1.second - r1.first, base.s, r2.first, r2.second - r2.first) != 0)
+    {
+        return path();
+    }
+
+    // move to next component
+    bool ok1;
+    bool ok2;
+    do
+    {
+        ok1 = next_path_component(r1);
+        ok2 = base.next_path_component(r2);
+
+        if (!ok1 && !ok2)
+        {
+            // paths are identical
+            return path(".");
+        }
+    } while (ok1 && ok2 && s.compare(r1.first, r1.second - r1.first, base.s, r2.first, r2.second - r2.first) == 0);
+
+    path res;
+
+    if (ok2)
+    {
+        do
+        {
+            res /= "..";
+        } while (base.next_path_component(r2));
+    }
+
+    while (next_path_component(r1))
+        res /= s.substr(r1.first, r1.second - r1.first);
+
+    return res;
+}
+
+bool path::is_absolute() const
+{
+    return !s.empty() && s[0] == preferred_separator;
 }
 
 path operator/(

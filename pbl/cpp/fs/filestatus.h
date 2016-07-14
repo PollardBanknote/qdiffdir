@@ -62,8 +62,14 @@ private:
 
 file_status status(const path&);
 file_status symlink_status(const path&);
+bool status_known(file_status);
 
+bool exists(file_status);
+bool exists(const path&);
 bool is_symlink(file_status);
+bool is_symlink(const path&);
+bool is_directory(file_status);
+bool is_directory(const path&);
 
 std::ostream& operator<<(std::ostream&, const file_status&);
 }

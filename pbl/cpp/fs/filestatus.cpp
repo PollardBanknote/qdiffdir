@@ -161,9 +161,39 @@ file_status symlink_status(const path& path_)
 	return file_status();
 }
 
+bool status_known(file_status s)
+{
+    return s.type() != file_type::none;
+}
+
+bool exists(file_status s)
+{
+    return status_known(s) && s.type() != file_type::not_found;
+}
+
+bool exists(const path & p)
+{
+    return exists(status(p));
+}
+
 bool is_symlink(file_status s)
 {
 	return s.type() == file_type::symlink;
+}
+
+bool is_symlink(const path & p)
+{
+    return is_symlink(status(p));
+}
+
+bool is_directory(file_status s)
+{
+    return s.type() == file_type::directory;
+}
+
+bool is_directory(const path& p)
+{
+    return is_directory(status(p));
 }
 
 }

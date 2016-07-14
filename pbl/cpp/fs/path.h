@@ -72,7 +72,8 @@ public:
 
 	std::string string() const;
 	const char* c_str() const;
-	path& append(const path&);
+    path& operator/=(const path&);
+    path& append(const path&);
 
 	/// Is the path empty (i.e., "")
 	bool empty() const;
@@ -81,7 +82,14 @@ public:
 	path filename() const;
 
 	operator string_type() const;
+
+    bool is_absolute() const;
+
+    path lexically_relative(const path&) const;
 private:
+    std::pair< std::size_t, std::size_t > first_path_component() const;
+    bool next_path_component(std::pair< std::size_t, std::size_t >&) const;
+
 	std::string s;
 };
 
