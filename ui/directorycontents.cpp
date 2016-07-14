@@ -29,10 +29,11 @@
 #include "directorycontents.h"
 
 #include "cpp/filesystem.h"
+#include "util/containers.h"
 
 namespace
 {
-bool is_hidden(const cpp17::filesystem::path& p)
+bool is_hidden(const cpp::filesystem::path& p)
 {
 	const std::string s = p.filename().native();
 
@@ -41,9 +42,9 @@ bool is_hidden(const cpp17::filesystem::path& p)
 
 /// @todo Turn into a find-like function
 void descend(
-	QStringList&         files,
-	QStringList&         subdirs,
-    const cpp17::filesystem::path& path,
+    std::vector< std::string >&         files,
+    std::vector< std::string >&         subdirs,
+    const cpp::filesystem::path& path,
 	unsigned             depth,
 	unsigned             maxdepth
 )
@@ -53,9 +54,9 @@ void descend(
 
 	if ( depth < maxdepth )
 	{
-		subdirs << QString::fromStdString(path.native());
+        subdirs.push_back(path.native());
 
-        for ( cpp17::filesystem::directory_iterator it(path), last; it != last; ++it )
+        for ( cpp::filesystem::directory_iterator it(path), last; it != last; ++it )
 		{
 			if ( it->status().type() == file_type::directory )
 			{
@@ -100,25 +101,23 @@ void descend(
 						i = j + 1;
 					}
 
-					files << QString::fromStdString(s.substr(i));
+                    files.push_back(s.substr(i));
 				}
 			}
 		}
 	}
 }
 
-std::pair< QStringList, QStringList > descend(
-	const QDir& dir,
+std::pair< std::vector< std::string >, std::vector< std::string > > descend(
+    const cpp::filesystem::path& dir,
 	int         maxdepth
 )
 {
-	std::pair< QStringList, QStringList > res;
+    std::pair< std::vector< std::string >, std::vector< std::string > > res;
 
 	if ( maxdepth >= 0 )
 	{
-        cpp17::filesystem::path p(dir.absolutePath().toStdString());
-
-		descend(res.first, res.second, p, 0, maxdepth);
+        descend(res.first, res.second, dir, 0, maxdepth);
 	}
 
 	return res;
@@ -127,45 +126,44 @@ std::pair< QStringList, QStringList > descend(
 }
 
 
-QString lastPathComponent(const QString&);
+std::string lastPathComponent(const std::string&);
 
 DirectoryContents::DirectoryContents() : maxdepth(0)
 {
 
 }
 
-QString DirectoryContents::absolutePath() const
+std::string DirectoryContents::absolutePath() const
 {
-	QString s = QDir::cleanPath(dir.absolutePath());
-
-	if ( !s.endsWith(QDir::separator()))
-	{
-		s += QDir::separator();
-	}
-
-	return s;
+    return dir;
 }
 
-QString DirectoryContents::absoluteFilePath(const QString& s) const
+std::string DirectoryContents::absoluteFilePath(const std::string& s) const
 {
-	return dir.absoluteFilePath(s);
+    cpp::filesystem::path p(dir);
+    return p / cpp::filesystem::path(s);
 }
 
-QString DirectoryContents::relativeFilePath(const QString& s) const
+std::string DirectoryContents::relativeFilePath(const std::string& s) const
 {
-	return dir.relativeFilePath(s);
+    const cpp::filesystem::path p(s);
+
+    return p.lexically_relative(dir);
 }
 
-QString DirectoryContents::name() const
+std::string DirectoryContents::name() const
 {
-	return lastPathComponent(dir.absolutePath());
+    return cpp::filesystem::basename(dir);
 }
 
 /// @bug A relative path will change relative to the last directory, not cwd
-bool DirectoryContents::cd(const QString& path)
+bool DirectoryContents::cd(const std::string& path)
 {
-	if ( dir.cd(path))
+    const cpp::filesystem::path p(path);
+
+    if ( p.is_absolute() && cpp::filesystem::is_directory(p))
 	{
+        dir = cpp::filesystem::cleanpath(path) + "/";
 		maxdepth = 0;
 		files.clear();
 		subdirs.clear();
@@ -175,7 +173,7 @@ bool DirectoryContents::cd(const QString& path)
 	return false;
 }
 
-QStringList DirectoryContents::setDepth(int d)
+std::vector< std::string > DirectoryContents::setDepth(int d)
 {
 	/// @todo if depth shrinks, might save some work
 	if ( d != maxdepth )
@@ -187,66 +185,66 @@ QStringList DirectoryContents::setDepth(int d)
 	return getRelativeFileNames();
 }
 
-QStringList DirectoryContents::getRelativeFileNames() const
+std::vector< std::string > DirectoryContents::getRelativeFileNames() const
 {
 	return files;
 }
 
-QStringList DirectoryContents::getAbsoluteFileNames() const
+std::vector< std::string > DirectoryContents::getAbsoluteFileNames() const
 {
-	QStringList l;
+    std::vector< std::string > l;
 
-	for ( int i = 0, n = files.count(); i < n; ++i )
+    for ( std::size_t i = 0, n = files.size(); i < n; ++i )
 	{
-		l << absoluteFilePath(files.at(i));
+        l.push_back(absoluteFilePath(files[i]));
 	}
 
 	return l;
 }
 
-QStringList DirectoryContents::getDirectories() const
+std::vector< std::string > DirectoryContents::getDirectories() const
 {
 	return subdirs;
 }
 
 void DirectoryContents::refresh()
 {
-	const std::pair< QStringList, QStringList > res = descend(dir, maxdepth);
+    const std::pair< std::vector< std::string >, std::vector< std::string > > res = descend(dir, maxdepth);
 
 	files   = res.first;
 	subdirs = res.second;
 }
 
 /// @todo Only return files from the given directory and below
-DirectoryContents::update_t DirectoryContents::update(const QString&)
+DirectoryContents::update_t DirectoryContents::update(const std::string&)
 {
 	update_t u;
 
-	const QStringList old = files;
+    const std::vector< std::string > old = files;
 
 	/// @todo Only need to search from changed directory and down
 	refresh();
 
-	for ( int i = 0, n = old.count(); i < n; ++i )
+    for ( std::size_t i = 0, n = old.size(); i < n; ++i )
 	{
-		if ( files.contains(old.at(i)))
+        if ( pbl::contains(files, old[i]))
 		{
 			// changed
-			u.changed << old.at(i);
+            u.changed.push_back(old[i]);
 		}
 		else
 		{
 			// removed
-			u.removed << old.at(i);
+            u.removed.push_back(old[i]);
 		}
 	}
 
-	for ( int i = 0, n = files.count(); i < n; ++i )
+    for ( std::size_t i = 0, n = files.size(); i < n; ++i )
 	{
 		// added
-		if ( !old.contains(files.at(i)))
+        if ( !pbl::contains(old, files[i]))
 		{
-			u.added << files.at(i);
+            u.added.push_back(files[i]);
 		}
 	}
 

@@ -29,15 +29,15 @@
 #ifndef ITEMS_H
 #define ITEMS_H
 
-#include <QString>
+#include <string>
 
 /** A pair of strings
  */
 struct items_t
 {
 	items_t(
-	    const QString& l,
-	    const QString& r
+        const std::string& l,
+        const std::string& r
 	)
 		: left(l), right(r)
 	{
@@ -46,7 +46,7 @@ struct items_t
 
 	bool operator<(const items_t& o) const
 	{
-		return ( left.isEmpty() ? right : left ) < ( o.left.isEmpty() ? o.right : o.left );
+        return ( left.empty() ? right : left ) < ( o.left.empty() ? o.right : o.left );
 	}
 
 	bool operator==(const items_t& o) const
@@ -59,8 +59,8 @@ struct items_t
 		return left != o.left || right != o.right;
 	}
 
-	QString left;
-	QString right;
+    std::string left;
+    std::string right;
 };
 
 

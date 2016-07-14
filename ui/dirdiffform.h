@@ -67,7 +67,7 @@ public:
 	 * @param left Path for the left directory
 	 * @param right Path for the right directory
 	 */
-	void changeDirectories(const QString& left, const QString& right);
+    void changeDirectories(const std::string& left, const std::string& right);
 
 	/** Change view options
 	 * @param show_left_only Show files that appear on the left only
@@ -92,9 +92,11 @@ public:
 	 */
 	void setComparison(const Compare&);
 
-	void setLeftAndRight(const QString& leftname, const QString& rightname, const QStringList& leftitems, const QStringList& rightitems);
-	void updateLeft(const QStringList& added_or_changed, const QStringList& remove = QStringList());
-	void updateRight(const QStringList& added_or_changed, const QStringList& remove = QStringList());
+    void setLeftAndRight(const std::string &leftname, const std::string &rightname, const std::vector<std::string> &leftitems, const std::vector<std::string> &rightitems);
+    void updateLeft(const std::string & added_or_changed);
+    void updateLeft(const std::vector< std::string >& added_or_changed, const std::vector< std::string >& remove = std::vector< std::string >());
+    void updateRight(const std::string & added_or_changed);
+    void updateRight(const std::vector< std::string >& added_or_changed, const std::vector< std::string >& remove = std::vector< std::string >());
 public slots:
 	/** The "show left only" checkbox was toggled
 	 */
@@ -169,7 +171,7 @@ private slots:
 	 * @param r The identifier of the right item
 	 * @param same True iff items compared "the same"
 	 */
-	void items_compared(QString l, QString r, bool same);
+    void items_compared(std::string l, std::string r, bool same);
     void on_actionSelect_Different_triggered();
 
     void on_actionSelect_Same_triggered();
@@ -181,13 +183,13 @@ private slots:
 private:
     enum overwrite_t { OVERWRITE_ASK, OVERWRITE_YES, OVERWRITE_NO };
 
-	void saveAs(const QString&, const QString& source, const QString& destination);
-	void saveAs(const QStringList&, const QString&, const QString&);
-    std::pair< bool, overwrite_t> copyTo(const QString& file, const QString& destdir, const QString& newname, overwrite_t);
+    void saveAs(const std::string&, const std::string& source, const std::string& destination);
+    void saveAs(const std::vector< std::string >&, const std::string&, const std::string&);
+    std::pair< bool, overwrite_t> copyTo(const std::string& file, const std::string& destdir, const std::string& newname, overwrite_t);
 	void stopDirectoryWatcher();
 	void startDirectoryWatcher();
-	void fileChanged(QString);
-    void filesChanged(const QStringList&);
+    void fileChanged(const std::string&);
+    void filesChanged(const std::vector< std::string >&);
 	QString renumber(const QString& s_);
 	QString dirName(const QDir& dir);
 	QString getDirectory(const QString& dir);
@@ -201,32 +203,32 @@ private:
 
 		bool left_only() const
 		{
-			return !items.left.isEmpty() && items.right.isEmpty();
+            return !items.left.empty() && items.right.empty();
 		}
 
 		bool right_only() const
 		{
-			return items.left.isEmpty() && !items.right.isEmpty();
+            return items.left.empty() && !items.right.empty();
 		}
 
 		bool unmatched() const
 		{
-			return items.left.isEmpty() || items.right.isEmpty();
+            return items.left.empty() || items.right.empty();
 		}
 
 	};
 
 	/// Get a list of all items on the left
-	QStringList getAllLeft() const;
+    std::vector< std::string> getAllLeft() const;
 
 	/// Get a list of all items on the right
-	QStringList getAllRight() const;
+    std::vector< std::string> getAllRight() const;
 
 	/** Perform a matching on the two lists of items
 	 * @param l Items on the left
 	 * @param r Items on the right
 	 */
-	std::vector< items_t > match(const QStringList& l, const QStringList& r) const;
+    std::vector< items_t > match(const std::vector< std::string >& l, const std::vector< std::string >& r) const;
 
 	/** Start a worker thread for comparing matched items
 	 */
@@ -246,9 +248,6 @@ private:
 	/// A filter for which items to show
 	QRegExp filter;
 
-	QString leftname;
-	QString rightname;
-
 	/// Whether or not to show left only items
 	bool hide_left_only;
 
@@ -261,7 +260,10 @@ private:
 	/// Whether or not to show items marked as ignored
 	bool hide_ignored;
 
-	std::vector< comparison_t > list;
+    QString leftname;
+    QString rightname;
+
+    std::vector< comparison_t > list;
 
 	DirectoryComparison derp;
 	QDateTime           when;                  // last time directories were updated

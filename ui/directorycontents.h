@@ -29,9 +29,9 @@
 #ifndef DIRECTORYCONTENTS_H
 #define DIRECTORYCONTENTS_H
 
-#include <QString>
-#include <QDir>
-
+#include <vector>
+#include <string>
+#include "cpp/filesystem.h"
 
 /** Used to observe the files/subdirectories of a directory
  *
@@ -42,44 +42,45 @@ class DirectoryContents
 public:
 	struct update_t
 	{
-		QStringList added;
-		QStringList removed;
-		QStringList changed;
+        std::vector< std::string > added;
+        std::vector< std::string > removed;
+        std::vector< std::string > changed;
 	};
 
 	DirectoryContents();
 
-	QString absolutePath() const;
+    std::string absolutePath() const;
 
-	QString absoluteFilePath(const QString& s) const;
+    std::string absoluteFilePath(const std::string& s) const;
 
-	QString relativeFilePath(const QString& s) const;
+    std::string relativeFilePath(const std::string& s) const;
 
-	QString name() const;
+    std::string name() const;
 
-	bool cd(const QString& path);
+    bool cd(const std::string& path);
 
-	QStringList setDepth(int d);
+    std::vector< std::string > setDepth(int d);
 
-	QStringList getRelativeFileNames() const;
+    std::vector< std::string > getRelativeFileNames() const;
 
-	QStringList getDirectories() const;
+    std::vector< std::string > getDirectories() const;
 
-	QStringList getAbsoluteFileNames() const;
+    std::vector< std::string > getAbsoluteFileNames() const;
 
-	update_t update(const QString& d);
+    update_t update(const std::string& d);
 private:
 	void refresh();
 
-	QDir dir;
+    // an absolute path to the top directory
+    std::string dir;
 
 	int maxdepth;
 
 	// relative paths of each file
-	QStringList files;
+    std::vector< std::string > files;
 
 	// absolute paths of directories that we should watch
-	QStringList subdirs;
+    std::vector< std::string > subdirs;
 };
 
 

@@ -44,7 +44,7 @@ public:
 
 	// return EXACT_MATCH, DO_NOT_MATCH, or something in between indicating
 	// how well the two match (lower is better)
-	virtual int compare(const QString&, const QString&) const = 0;
+    virtual int compare(const std::string&, const std::string&) const = 0;
 };
 
 class DefaultMatcher : public Matcher
@@ -56,8 +56,8 @@ public:
 	}
 
 	int compare(
-		const QString& a,
-		const QString& b
+        const std::string& a,
+        const std::string& b
 	) const
 	{
 		return a == b ? EXACT_MATCH : DO_NOT_MATCH;

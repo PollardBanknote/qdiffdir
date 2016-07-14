@@ -29,6 +29,8 @@
 #ifndef COMPARE_H
 #define COMPARE_H
 
+#include <string>
+
 /** Interface for comparing two items based on their names
  */
 class Compare
@@ -38,7 +40,7 @@ public:
 	{
 	}
 
-	virtual bool equal(const QString&, const QString&) = 0;
+    virtual bool equal(const std::string&, const std::string&) = 0;
 	virtual Compare* clone() const                     = 0;
 };
 

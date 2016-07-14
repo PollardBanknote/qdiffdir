@@ -14,14 +14,15 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    dirdiffform.cpp \
+    directorycomparison.cpp \
     directorycontents.cpp \
+    dirdiffform.cpp \
     mysettings.cpp \
     settingsdialog.cpp \
     multilist.cpp \
-    directorycomparison.cpp \
     workerthread.cpp \
-    qutilities/icons.cpp
+    qutilities/icons.cpp \
+    qutilities/convert.cpp
 
 HEADERS  += mainwindow.h \
     dirdiffform.h \
@@ -34,7 +35,8 @@ HEADERS  += mainwindow.h \
     items.h \
     workerthread.h \
     matcher.h \
-    qutilities/icons.h
+    qutilities/icons.h \
+    qutilities/convert.h
 
 FORMS    += mainwindow.ui \
     dirdiffform.ui \

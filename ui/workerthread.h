@@ -44,7 +44,7 @@ public:
 
 	void clear();
 signals:
-	void compared(QString, QString, bool);
+    void compared(QString, QString, bool);
 private:
 	typedef std::vector< items_t > TaskList;
 	Compare* compare;

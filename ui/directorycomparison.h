@@ -55,43 +55,43 @@ public:
 	 */
 	void stopComparison();
 
-	QString getLeftLocation() const;
+    std::string getLeftLocation() const;
 
-	void setLeftLocation(const QString& s);
+    void setLeftLocation(const std::string& s);
 
-	QString getLeftLocation(const QString& s) const;
+    std::string getLeftLocation(const std::string& s) const;
 
-	QString getLeftName() const;
+    std::string getLeftName() const;
 
-	QString getRightLocation() const;
+    std::string getRightLocation() const;
 
-	void setRightLocation(const QString& s);
+    void setRightLocation(const std::string& s);
 
-	QString getRightLocation(const QString& s) const;
+    std::string getRightLocation(const std::string& s) const;
 
-	QString getRightName() const;
+    std::string getRightName() const;
 
-	QPair< QStringList, QStringList > setDepth(int d);
+    std::pair< std::vector< std::string >, std::vector< std::string > > setDepth(int d);
 
-	QStringList getLeftRelativeFileNames() const;
+    std::vector< std::string > getLeftRelativeFileNames() const;
 
-	QStringList getRightRelativeFileNames() const;
+    std::vector< std::string > getRightRelativeFileNames() const;
 
-	QString getLeftRelativeFilePath(const QString& s) const;
+    std::string getLeftRelativeFilePath(const std::string& s) const;
 
-	QString getRightRelativeFilePath(const QString& s) const;
+    std::string getRightRelativeFilePath(const std::string& s) const;
 
-	DirectoryContents::update_t updateLeft(const QString& s);
+    DirectoryContents::update_t updateLeft(const std::string &s);
 
-	DirectoryContents::update_t updateRight(const QString& s);
+    DirectoryContents::update_t updateRight(const std::string &s);
 
-	QStringList getDirectories() const;
+    std::vector<std::string> getDirectories() const;
 
 	void startWorker(const std::vector< items_t >& matches);
 
 	void setMatcher(const Matcher& m);
 
-	int match(const QString& l, const QString& r) const;
+    int match(const std::string& l, const std::string& r) const;
 signals:
 	void compared(QString, QString, bool);
 public slots:

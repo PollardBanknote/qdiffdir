@@ -45,8 +45,8 @@ DirectoryComparison::~DirectoryComparison()
 }
 
 int DirectoryComparison::match(
-	const QString& l,
-	const QString& r
+    const std::string& l,
+    const std::string& r
 ) const
 {
 	return matcher->compare(l, r);
@@ -68,85 +68,88 @@ void DirectoryComparison::startWorker(const std::vector< items_t >& matches)
 	worker->start();
 }
 
-QStringList DirectoryComparison::getDirectories() const
+std::vector< std::string > DirectoryComparison::getDirectories() const
 {
-	QStringList l;
+    std::vector< std::string > l = ldir.getDirectories();
+    const std::vector< std::string > r = rdir.getDirectories();
+    l.insert(l.end(), r.begin(), r.end());
+    std::sort(l.begin(), l.end());
+    l.erase(std::unique(l.begin(), l.end()), l.end());
 
-	l << ldir.getDirectories() << rdir.getDirectories();
-	return l;
+    return l;
 }
 
-DirectoryContents::update_t DirectoryComparison::updateRight(const QString& s)
+DirectoryContents::update_t DirectoryComparison::updateRight(const std::string& s)
 {
 	return rdir.update(s);
 }
 
-DirectoryContents::update_t DirectoryComparison::updateLeft(const QString& s)
+DirectoryContents::update_t DirectoryComparison::updateLeft(const std::string& s)
 {
 	return ldir.update(s);
 }
 
-QString DirectoryComparison::getRightRelativeFilePath(const QString& s) const
+std::string DirectoryComparison::getRightRelativeFilePath(const std::string& s) const
 {
 	return rdir.relativeFilePath(s);
 }
 
-QString DirectoryComparison::getLeftRelativeFilePath(const QString& s) const
+std::string DirectoryComparison::getLeftRelativeFilePath(const std::string& s) const
 {
 	return ldir.relativeFilePath(s);
 }
 
-QStringList DirectoryComparison::getRightRelativeFileNames() const
+std::vector< std::string > DirectoryComparison::getRightRelativeFileNames() const
 {
 	return rdir.getRelativeFileNames();
 }
 
-QStringList DirectoryComparison::getLeftRelativeFileNames() const
+std::vector< std::string > DirectoryComparison::getLeftRelativeFileNames() const
 {
 	return ldir.getRelativeFileNames();
 }
 
-QPair< QStringList, QStringList > DirectoryComparison::setDepth(int d)
+std::pair< std::vector< std::string >, std::vector< std::string > > DirectoryComparison::setDepth(int d)
 {
-	return QPair< QStringList, QStringList >(ldir.setDepth(d), rdir.setDepth(d));
+    return std::make_pair(ldir.setDepth(d), rdir.setDepth(d));
 }
 
-QString DirectoryComparison::getRightName() const
+std::string DirectoryComparison::getRightName() const
 {
 	return rdir.name();
 }
 
-QString DirectoryComparison::getRightLocation(const QString& s) const
+std::string DirectoryComparison::getRightLocation(const std::string& s) const
 {
 	return rdir.absoluteFilePath(s);
 }
 
-void DirectoryComparison::setRightLocation(const QString& s)
+void DirectoryComparison::setRightLocation(const std::string& s)
 {
 	rdir.cd(s);
 }
 
-QString DirectoryComparison::getRightLocation() const
+std::string DirectoryComparison::getRightLocation() const
 {
 	return rdir.absolutePath();
 }
 
-QString DirectoryComparison::getLeftName() const
+std::string DirectoryComparison::getLeftName() const
 {
 	return ldir.name();
 }
 
-QString DirectoryComparison::getLeftLocation(const QString& s) const
+std::string DirectoryComparison::getLeftLocation(const std::string& s) const
 {
 	return ldir.absoluteFilePath(s);
 }
 
-void DirectoryComparison::setLeftLocation(const QString& s)
+void DirectoryComparison::setLeftLocation(const std::string& s)
 {
 	ldir.cd(s);
 }
 
-QString DirectoryComparison::getLeftLocation() const
+std::string DirectoryComparison::getLeftLocation() const
 {
 	return ldir.absolutePath();
 }
