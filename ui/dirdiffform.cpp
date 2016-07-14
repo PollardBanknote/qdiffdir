@@ -64,8 +64,8 @@ class FileCompare : public Compare
 {
 public:
 	FileCompare(
-        const std::string& l,
-        const std::string& r
+	    const std::string& l,
+	    const std::string& r
 	)
 		: left(l), right(r)
 	{
@@ -80,14 +80,14 @@ public:
 	/// @todo Don't unzip a file if we don't need to
 	/// @todo Don't read entire files into memory when doing the file compare
 	bool equal(
-        const std::string& lfile,
-        const std::string& rfile
+		const std::string& lfile,
+		const std::string& rfile
 	)
 	{
-        const std::string first  = left + "/" + lfile;
-        const std::string second = right + "/" + rfile;
+		const std::string first  = left + "/" + lfile;
+		const std::string second = right + "/" + rfile;
 
-        if ( pbl::ends_with(first, ".gz") || pbl::ends_with(second, ".gz"))
+		if ( pbl::ends_with(first, ".gz") || pbl::ends_with(second, ".gz"))
 		{
 			const QByteArray data1 = gunzip(first);
 			const QByteArray data2 = gunzip(second);
@@ -96,20 +96,20 @@ public:
 		}
 		else
 		{
-            pbl::fs::file f(first, pbl::fs::file::readonly);
-            pbl::fs::file g(second, pbl::fs::file::readonly);
+			pbl::fs::file f(first, pbl::fs::file::readonly);
+			pbl::fs::file g(second, pbl::fs::file::readonly);
 
-            return f.compare(g);
+			return f.compare(g);
 		}
 	}
 
 private:
-    static QByteArray gunzip(const std::string& filename)
+	static QByteArray gunzip(const std::string& filename)
 	{
-        if ( pbl::ends_with(filename, ".gz"))
+		if ( pbl::ends_with(filename, ".gz"))
 		{
 			QStringList l;
-            l << "-c" << qt::convert(filename);
+			l << "-c" << qt::convert(filename);
 
 			QProcess gz;
 			gz.start("gunzip", l);
@@ -123,7 +123,7 @@ private:
 		}
 		else
 		{
-            QFile file(qt::convert(filename));
+			QFile file(qt::convert(filename));
 
 			if ( !file.open(QIODevice::ReadOnly))
 			{
@@ -134,8 +134,8 @@ private:
 		}
 	}
 
-    std::string left;
-    std::string right;
+	std::string left;
+	std::string right;
 
 };
 
@@ -148,8 +148,8 @@ public:
 	}
 
 	int compare(
-        const std::string& a,
-        const std::string& b
+		const std::string& a,
+		const std::string& b
 	) const
 	{
 		if ( a == b )
@@ -177,61 +177,61 @@ public:
 
 private:
 	// ext <=> ext.gz
-    static std::string gzalt(const std::string& s)
+	static std::string gzalt(const std::string& s)
 	{
-        if ( !pbl::ends_with(s, ".gz"))
+		if ( !pbl::ends_with(s, ".gz"))
 		{
 			return s + ".gz";
 		}
 
-        std::string t(s, 0, s.length() - 3);
+		std::string t(s, 0, s.length() - 3);
 		return t;
 	}
 
 	// c <=> cpp
-    static std::string cppalt(const std::string& s)
+	static std::string cppalt(const std::string& s)
 	{
-        if ( pbl::ends_with(s, ".cpp"))
+		if ( pbl::ends_with(s, ".cpp"))
 		{
-            std::string t(s, 0, s.length() - 2);
+			std::string t(s, 0, s.length() - 2);
 			return t;
 		}
 
-        if ( pbl::ends_with(s, ".c"))
+		if ( pbl::ends_with(s, ".c"))
 		{
 			return s + "pp";
 		}
 
-        return std::string();
+		return std::string();
 	}
 
 	// c <=> cpp.gz or cpp <=> c.gz
-    static std::string cgalt(const std::string& s)
+	static std::string cgalt(const std::string& s)
 	{
-        if ( pbl::ends_with(s, ".cpp"))
+		if ( pbl::ends_with(s, ".cpp"))
 		{
-            std::string t(s, 0, s.length() - 2);
+			std::string t(s, 0, s.length() - 2);
 			return t + ".gz";
 		}
 
-        if ( pbl::ends_with(s, ".c"))
+		if ( pbl::ends_with(s, ".c"))
 		{
 			return s + "pp.gz";
 		}
 
-        if ( pbl::ends_with(s, ".c.gz"))
+		if ( pbl::ends_with(s, ".c.gz"))
 		{
-            std::string t(s, 0, s.length() - 3);
+			std::string t(s, 0, s.length() - 3);
 			return t + "pp";
 		}
 
-        if ( pbl::ends_with(s, ".cpp.gz"))
+		if ( pbl::ends_with(s, ".cpp.gz"))
 		{
-            std::string t(s, 0, s.length() - 5);
+			std::string t(s, 0, s.length() - 5);
 			return t;
 		}
 
-        return std::string();
+		return std::string();
 	}
 
 };
@@ -240,12 +240,12 @@ private:
 
 QString lastPathComponent(const QString& s)
 {
-    return qt::convert(cpp::filesystem::basename(qt::convert(s)));
+	return qt::convert(cpp::filesystem::basename(qt::convert(s)));
 }
 
 QString directoryComponent(const QString& s)
 {
-    return qt::convert(cpp::filesystem::dirname(qt::convert(s)));
+	return qt::convert(cpp::filesystem::dirname(qt::convert(s)));
 }
 
 DirDiffForm::DirDiffForm(QWidget* parent_) :
@@ -267,11 +267,11 @@ DirDiffForm::DirDiffForm(QWidget* parent_) :
 
 	ui->multilistview->addAction(ui->actionIgnore);
 	ui->multilistview->addAction(ui->actionCopy_To_Clipboard);
-    ui->multilistview->addAction(ui->actionSelect_Different);
-    ui->multilistview->addAction(ui->actionSelect_Same);
-    ui->multilistview->addAction(ui->actionSelect_Left_Only);
-    ui->multilistview->addAction(ui->actionSelect_Right_Only);
-    connect(ui->multilistview, SIGNAL(itemActivated(int)), SLOT(viewfiles(int)));
+	ui->multilistview->addAction(ui->actionSelect_Different);
+	ui->multilistview->addAction(ui->actionSelect_Same);
+	ui->multilistview->addAction(ui->actionSelect_Left_Only);
+	ui->multilistview->addAction(ui->actionSelect_Right_Only);
+	connect(ui->multilistview, SIGNAL(itemActivated(int)), SLOT(viewfiles(int)));
 
 	connect(&derp, SIGNAL(compared(QString, QString, bool)), SLOT(items_compared(QString, QString, bool)));
 
@@ -298,62 +298,63 @@ void DirDiffForm::setFlags(
 
 void DirDiffForm::on_viewdiff_clicked()
 {
-    const int r = ui->multilistview->currentRow();
-    if (r >= 0)
-    {
-        const std::string s1 = list[r].items.left;
-        const std::string s2 = list[r].items.right;
+	const int r = ui->multilistview->currentRow();
 
-        if ( s1.empty() && s2.empty())
-        {
-            QMessageBox::warning(this, "No file selected", "Cannot complete action");
-            return;
-        }
-
-        MySettings& settings = MySettings::instance();
-
-        if ( s1.empty()) // view s2
-        {
-            QProcess::startDetached(settings.getEditor(), QStringList(qt::convert(s2)), qt::convert(derp.getRightLocation()));
-        }
-        else if ( s2.empty()) // view s1
-        {
-            QProcess::startDetached(settings.getEditor(), QStringList(qt::convert(s1)), qt::convert(derp.getLeftLocation()));
-        }
-        else
-        {
-            QStringList l;
-            l << QString::fromStdString(derp.getLeftLocation(s1))
-              << QString::fromStdString(derp.getRightLocation(s2));
-            QProcess::startDetached(settings.getDiffTool(), l);
-        }
-    }
-}
-
-void DirDiffForm::saveAs(
-    const std::vector< std::string >& filenames,
-    const std::string&     source,
-    const std::string&     dest
-)
-{
-    for ( std::size_t i = 0; i < filenames.size(); ++i )
+	if ( r >= 0 )
 	{
-        saveAs(filenames[i], source, dest);
+		const std::string s1 = list[r].items.left;
+		const std::string s2 = list[r].items.right;
+
+		if ( s1.empty() && s2.empty())
+		{
+			QMessageBox::warning(this, "No file selected", "Cannot complete action");
+			return;
+		}
+
+		MySettings& settings = MySettings::instance();
+
+		if ( s1.empty()) // view s2
+		{
+			QProcess::startDetached(settings.getEditor(), QStringList(qt::convert(s2)), qt::convert(derp.getRightLocation()));
+		}
+		else if ( s2.empty()) // view s1
+		{
+			QProcess::startDetached(settings.getEditor(), QStringList(qt::convert(s1)), qt::convert(derp.getLeftLocation()));
+		}
+		else
+		{
+			QStringList l;
+			l << QString::fromStdString(derp.getLeftLocation(s1))
+			  << QString::fromStdString(derp.getRightLocation(s2));
+			QProcess::startDetached(settings.getDiffTool(), l);
+		}
 	}
 }
 
 void DirDiffForm::saveAs(
-    const std::string& original_filename, // a filename relative to source
-    const std::string& source,
-    const std::string& destination
+	const std::vector< std::string >& filenames,
+	const std::string&                source,
+	const std::string&                dest
 )
 {
-    if ( !original_filename.empty())
+	for ( std::size_t i = 0; i < filenames.size(); ++i )
 	{
-        QStringList suggested_relative_path = qt::convert(original_filename).split(QDir::separator(), QString::SkipEmptyParts);
+		saveAs(filenames[i], source, dest);
+	}
+}
+
+void DirDiffForm::saveAs(
+	const std::string& original_filename, // a filename relative to source
+	const std::string& source,
+	const std::string& destination
+)
+{
+	if ( !original_filename.empty())
+	{
+		QStringList suggested_relative_path = qt::convert(original_filename).split(QDir::separator(), QString::SkipEmptyParts);
 		suggested_relative_path.pop_back(); // remove the filename
 
-        QDir suggested_save_directory(qt::convert(destination));
+		QDir suggested_save_directory(qt::convert(destination));
 
 		bool valid_dir = true;
 
@@ -364,10 +365,10 @@ void DirDiffForm::saveAs(
 
 		if ( !valid_dir )
 		{
-            suggested_save_directory.cd(qt::convert(destination));
+			suggested_save_directory.cd(qt::convert(destination));
 		}
 
-        QString suggested_filename = suggested_save_directory.absolutePath() + QDir::separator() + qt::convert(cpp::filesystem::basename(original_filename));
+		QString suggested_filename = suggested_save_directory.absolutePath() + QDir::separator() + qt::convert(cpp::filesystem::basename(original_filename));
 		QString save_file_name     = QFileDialog::getSaveFileName(this, "Save as", suggested_filename);
 
 		if ( !save_file_name.isEmpty())
@@ -375,104 +376,135 @@ void DirDiffForm::saveAs(
 			QString s = lastPathComponent(save_file_name);
 			QString t = save_file_name;
 			t.chop(s.length());
-            QDir src(qt::convert(source));
-            std::pair< bool, overwrite_t > res = copyTo(qt::convert(src.absoluteFilePath(qt::convert(original_filename))), qt::convert(t), qt::convert(s), OVERWRITE_ASK);
-            if (res.first)
-                fileChanged(qt::convert(save_file_name));
+			QDir                           src(qt::convert(source));
+			std::pair< bool, overwrite_t > res = copyTo(qt::convert(src.absoluteFilePath(qt::convert(original_filename))), qt::convert(t), qt::convert(s), OVERWRITE_ASK);
+
+			if ( res.first )
+			{
+				fileChanged(qt::convert(save_file_name));
+			}
 		}
 	}
 }
 
 void DirDiffForm::on_copytoright_clicked()
 {
-    const QList<int> indices = ui->multilistview->selectedRows();
+	const QList< int > indices = ui->multilistview->selectedRows();
 
-    bool nonempty = false;
+	bool nonempty = false;
 
-    overwrite_t overwrite = OVERWRITE_ASK;
+	overwrite_t overwrite = OVERWRITE_ASK;
 
-    std::vector< std::string > changed;
+	std::vector< std::string > changed;
 
-    for ( int i = 0, n = indices.count(); i < n; ++i )
+	for ( int i = 0, n = indices.count(); i < n; ++i )
 	{
-        const std::string rel = list[indices[i]].items.left;
-        if (!rel.empty())
-        {
-            const std::string source_file =  derp.getLeftLocation(rel);
-            const std::string dest_file = derp.getRightLocation() + "/" + rel;
-            const std::string dest_dir = cpp::filesystem::dirname(dest_file);
-            const std::string file_name = cpp::filesystem::basename(source_file);
-            std::pair< bool, overwrite_t > res = copyTo(source_file, dest_dir, file_name, overwrite);
-            if (res.first)
-                changed.push_back(dest_file);
-            overwrite = res.second;
-            nonempty = true;
-        }
+		const std::string rel = list[indices[i]].items.left;
+
+		if ( !rel.empty())
+		{
+			const std::string              source_file = derp.getLeftLocation(rel);
+			const std::string              dest_file   = derp.getRightLocation() + "/" + rel;
+			const std::string              dest_dir    = cpp::filesystem::dirname(dest_file);
+			const std::string              file_name   = cpp::filesystem::basename(source_file);
+			std::pair< bool, overwrite_t > res         = copyTo(source_file, dest_dir, file_name, overwrite);
+
+			if ( res.first )
+			{
+				changed.push_back(dest_file);
+			}
+
+			overwrite = res.second;
+			nonempty  = true;
+		}
 	}
 
-    if (!nonempty)
-    {
-        QMessageBox::warning(this, "No file selected", "Cannot complete action");
-        return;
-    }
-    if (!changed.empty())
-        filesChanged(changed);
+	if ( !nonempty )
+	{
+		QMessageBox::warning(this, "No file selected", "Cannot complete action");
+		return;
+	}
+
+	if ( !changed.empty())
+	{
+		filesChanged(changed);
+	}
 }
 
 void DirDiffForm::on_copytoleft_clicked()
 {
-    const QList<int> indices = ui->multilistview->selectedRows();
+	const QList< int > indices = ui->multilistview->selectedRows();
 
-    bool nonempty = false;
+	bool nonempty = false;
 
-    overwrite_t overwrite = OVERWRITE_ASK;
+	overwrite_t overwrite = OVERWRITE_ASK;
 
-    std::vector< std::string > changed;
+	std::vector< std::string > changed;
 
-    for ( int i = 0, n = indices.count(); i < n; ++i )
-    {
-        const std::string rel = list[indices[i]].items.right;
-        if (!rel.empty())
-        {
-            std::string source_file = derp.getRightLocation(rel);
-            std::string dest_file = derp.getLeftLocation() + "/" + rel;
-            std::string dest_dir = cpp::filesystem::dirname(dest_file);
-            std::string file_name = cpp::filesystem::basename(source_file);
-            std::pair< bool, overwrite_t > res = copyTo(source_file, dest_dir, file_name, overwrite);
-            if (res.first)
-                changed.push_back(dest_file);
-            overwrite = res.second;
-            nonempty = true;
-        }
-    }
+	for ( int i = 0, n = indices.count(); i < n; ++i )
+	{
+		const std::string rel = list[indices[i]].items.right;
 
-    if (!nonempty)
-    {
-        QMessageBox::warning(this, "No file selected", "Cannot complete action");
-        return;
-    }
-    if (!changed.empty())
-        filesChanged(changed);
+		if ( !rel.empty())
+		{
+			std::string                    source_file = derp.getRightLocation(rel);
+			std::string                    dest_file   = derp.getLeftLocation() + "/" + rel;
+			std::string                    dest_dir    = cpp::filesystem::dirname(dest_file);
+			std::string                    file_name   = cpp::filesystem::basename(source_file);
+			std::pair< bool, overwrite_t > res         = copyTo(source_file, dest_dir, file_name, overwrite);
+
+			if ( res.first )
+			{
+				changed.push_back(dest_file);
+			}
+
+			overwrite = res.second;
+			nonempty  = true;
+		}
+	}
+
+	if ( !nonempty )
+	{
+		QMessageBox::warning(this, "No file selected", "Cannot complete action");
+		return;
+	}
+
+	if ( !changed.empty())
+	{
+		filesChanged(changed);
+	}
 }
 
 void DirDiffForm::on_renametoright_clicked()
 {
-    const QList<int> indices = ui->multilistview->selectedRows();
-    std::vector< std::string > files;
-    for (int i = 0, n = indices.count(); i < n; ++i)
-        if (!list[indices.at(i)].items.left.empty())
-            files.push_back(list[indices.at(i)].items.left);
-    saveAs(files, derp.getLeftLocation(), derp.getRightLocation());
+	const QList< int >         indices = ui->multilistview->selectedRows();
+	std::vector< std::string > files;
+
+	for ( int i = 0, n = indices.count(); i < n; ++i )
+	{
+		if ( !list[indices.at(i)].items.left.empty())
+		{
+			files.push_back(list[indices.at(i)].items.left);
+		}
+	}
+
+	saveAs(files, derp.getLeftLocation(), derp.getRightLocation());
 }
 
 void DirDiffForm::on_renametoleft_clicked()
 {
-    const QList<int> indices = ui->multilistview->selectedRows();
-    std::vector< std::string > files;
-    for (int i = 0, n = indices.count(); i < n; ++i)
-        if (!list[indices.at(i)].items.right.empty())
-            files.push_back(list[indices.at(i)].items.right);
-    saveAs(files, derp.getRightLocation(), derp.getLeftLocation());
+	const QList< int >         indices = ui->multilistview->selectedRows();
+	std::vector< std::string > files;
+
+	for ( int i = 0, n = indices.count(); i < n; ++i )
+	{
+		if ( !list[indices.at(i)].items.right.empty())
+		{
+			files.push_back(list[indices.at(i)].items.right);
+		}
+	}
+
+	saveAs(files, derp.getRightLocation(), derp.getLeftLocation());
 }
 
 QString DirDiffForm::getDirectory(const QString& dir)
@@ -503,21 +535,21 @@ QString DirDiffForm::getDirectory(const QString& dir)
 
 void DirDiffForm::on_openleftdir_clicked()
 {
-    const QString s = getDirectory(qt::convert(derp.getLeftLocation()));
+	const QString s = getDirectory(qt::convert(derp.getLeftLocation()));
 
 	if ( !s.isEmpty())
 	{
-        changeDirectories(qt::convert(s), std::string());
+		changeDirectories(qt::convert(s), std::string());
 	}
 }
 
 void DirDiffForm::on_openrightdir_clicked()
 {
-    const QString s = getDirectory(qt::convert(derp.getRightLocation()));
+	const QString s = getDirectory(qt::convert(derp.getRightLocation()));
 
 	if ( !s.isEmpty())
 	{
-        changeDirectories(std::string(), qt::convert(s));
+		changeDirectories(std::string(), qt::convert(s));
 	}
 }
 
@@ -525,27 +557,27 @@ void DirDiffForm::viewfiles(int x_)
 {
 	if ( x_ >= 0 )
 	{
-        const std::string s1 = list[x_].items.left;
-        const std::string s2 = list[x_].items.right;
+		const std::string s1 = list[x_].items.left;
+		const std::string s2 = list[x_].items.right;
 
-        MySettings& settings = MySettings::instance();
+		MySettings& settings = MySettings::instance();
 
-        if ( s1.empty())
+		if ( s1.empty())
 		{
-            QProcess::startDetached(settings.getEditor(),
-                QStringList(qt::convert(derp.getRightLocation(s2))));
+			QProcess::startDetached(settings.getEditor(),
+				QStringList(qt::convert(derp.getRightLocation(s2))));
 		}
-        else if ( s2.empty())
+		else if ( s2.empty())
 		{
-            QProcess::startDetached(settings.getEditor(),
-                QStringList(qt::convert(derp.getLeftLocation(s1))));
+			QProcess::startDetached(settings.getEditor(),
+				QStringList(qt::convert(derp.getLeftLocation(s1))));
 		}
-        else
+		else
 		{
 			QStringList l;
-            l << qt::convert(derp.getLeftLocation(s1))
-              << qt::convert(derp.getRightLocation(s2));
-            QProcess::startDetached(settings.getDiffTool(), l);
+			l << qt::convert(derp.getLeftLocation(s1))
+			  << qt::convert(derp.getRightLocation(s2));
+			QProcess::startDetached(settings.getDiffTool(), l);
 		}
 	}
 }
@@ -576,58 +608,58 @@ QString DirDiffForm::renumber(const QString& s_)
 // directories have not changed, but list has
 void DirDiffForm::on_depth_valueChanged(int d)
 {
-    std::set< std::string > reml = pbl::make_set(derp.getLeftRelativeFileNames());
-    std::set< std::string > remr = pbl::make_set(derp.getRightRelativeFileNames());
+	std::set< std::string > reml = pbl::make_set(derp.getLeftRelativeFileNames());
+	std::set< std::string > remr = pbl::make_set(derp.getRightRelativeFileNames());
 
-    std::pair< std::vector< std::string >, std::vector< std::string > > bothfiles = derp.setDepth(d);
+	std::pair< std::vector< std::string >, std::vector< std::string > > bothfiles = derp.setDepth(d);
 	{
 
-        const std::vector< std::string > files = bothfiles.first;
+		const std::vector< std::string > files = bothfiles.first;
 
-        for ( std::size_t i = 0; i < files.size(); ++i )
+		for ( std::size_t i = 0; i < files.size(); ++i )
 		{
-            reml.erase(files[i]);
+			reml.erase(files[i]);
 		}
 
-        updateLeft(files, std::vector< std::string >(reml.begin(), reml.end()));
+		updateLeft(files, std::vector< std::string >(reml.begin(), reml.end()));
 	}
 	{
-        const std::vector< std::string > files = bothfiles.second;
+		const std::vector< std::string > files = bothfiles.second;
 
-        for ( std::size_t i = 0; i < files.size(); ++i )
+		for ( std::size_t i = 0; i < files.size(); ++i )
 		{
-            remr.erase(files[i]);
+			remr.erase(files[i]);
 		}
 
-        updateRight(files, std::vector< std::string >(remr.begin(), remr.end()));
+		updateRight(files, std::vector< std::string >(remr.begin(), remr.end()));
 	}
 }
 
 void DirDiffForm::changeDirectories(
-    const std::string& left,
-    const std::string& right
+	const std::string& left,
+	const std::string& right
 )
 {
 	// stop the watcher, and clear the comparisons we know
 	stopDirectoryWatcher();
 
 	// change to the new directories
-    if ( !left.empty())
+	if ( !left.empty())
 	{
 		derp.setLeftLocation(left);
-        ui->openleftdir->setText(qt::convert(derp.getLeftName()));
+		ui->openleftdir->setText(qt::convert(derp.getLeftName()));
 	}
 
-    if ( !right.empty())
+	if ( !right.empty())
 	{
 		derp.setRightLocation(right);
-        ui->openrightdir->setText(qt::convert(derp.getRightName()));
+		ui->openrightdir->setText(qt::convert(derp.getRightName()));
 	}
 
-	const int                               depth_     = ui->depth->value();
-    const std::pair< std::vector< std::string >, std::vector< std::string > > bothfiles  = derp.setDepth(depth_);
-    const std::vector< std::string >                       leftfiles  = bothfiles.first;
-    const std::vector< std::string >                       rightfiles = bothfiles.second;
+	const int                                                                 depth_     = ui->depth->value();
+	const std::pair< std::vector< std::string >, std::vector< std::string > > bothfiles  = derp.setDepth(depth_);
+	const std::vector< std::string >                                          leftfiles  = bothfiles.first;
+	const std::vector< std::string >                                          rightfiles = bothfiles.second;
 
 	{
 		/// @todo If left and right are the same, don't do both
@@ -647,48 +679,52 @@ void DirDiffForm::changeDirectories(
 	}
 }
 
-std::pair< bool, DirDiffForm::overwrite_t> DirDiffForm::copyTo(
-    const std::string& file,
-    const std::string& destdir,
-    const std::string& newname,
-        overwrite_t overwrite
+std::pair< bool, DirDiffForm::overwrite_t > DirDiffForm::copyTo(
+	const std::string& file,
+	const std::string& destdir,
+	const std::string& newname,
+	overwrite_t        overwrite
 )
 {
-    const std::string s = destdir + "/" + newname;
+	const std::string s = destdir + "/" + newname;
 
-    if ( cpp::filesystem::exists(s))
+	if ( cpp::filesystem::exists(s))
 	{
-        switch (overwrite)
-        {
-        case OVERWRITE_ASK:
-        {
-            QMessageBox::StandardButton res = QMessageBox::question(this, qt::convert(newname) + " already exists", "Do you want to overwrite the destination?", QMessageBox::YesToAll | QMessageBox::NoToAll | QMessageBox::Yes | QMessageBox::No);
+		switch ( overwrite )
+		{
+		case OVERWRITE_ASK:
+		{
+			QMessageBox::StandardButton res = QMessageBox::question(this, qt::convert(newname) + " already exists", "Do you want to overwrite the destination?", QMessageBox::YesToAll | QMessageBox::NoToAll | QMessageBox::Yes | QMessageBox::No);
 
-            if (res == QMessageBox::No )
-            {
-                return std::make_pair(false, OVERWRITE_ASK);
-            }
-            else if (res == QMessageBox::NoToAll)
-            {
-                return std::make_pair(false, OVERWRITE_NO);
-            }
-            else if (res == QMessageBox::YesToAll)
-                overwrite = OVERWRITE_YES;
-        }
-            break;
-        case OVERWRITE_YES:
-            break;
-        case OVERWRITE_NO:
-            return std::make_pair(false, OVERWRITE_NO);
-        }
+			if ( res == QMessageBox::No )
+			{
+				return std::make_pair(false, OVERWRITE_ASK);
+			}
+			else if ( res == QMessageBox::NoToAll )
+			{
+				return std::make_pair(false, OVERWRITE_NO);
+			}
+			else if ( res == QMessageBox::YesToAll )
+			{
+				overwrite = OVERWRITE_YES;
+			}
+		}
+		break;
+		case OVERWRITE_YES:
+			break;
+		case OVERWRITE_NO:
+			return std::make_pair(false, OVERWRITE_NO);
+		} // switch
 	}
 
-    if ( cpp::filesystem::copy_file(file, s, copy_options::overwrite_existing))
+	if ( cpp::filesystem::copy_file(file, s, copy_options::overwrite_existing))
 	{
-        return std::make_pair(true, overwrite);
+		return std::make_pair(true, overwrite);
 	}
-    else
-        return std::make_pair(false, overwrite);
+	else
+	{
+		return std::make_pair(false, overwrite);
+	}
 }
 
 void DirDiffForm::stopDirectoryWatcher()
@@ -705,9 +741,9 @@ void DirDiffForm::startDirectoryWatcher()
 	stopDirectoryWatcher();
 
 	// create new file system watcher
-    std::vector< std::string > dirlist = derp.getDirectories();
+	std::vector< std::string > dirlist = derp.getDirectories();
 
-    watcher = new QFileSystemWatcher(qt::convert(dirlist), this);
+	watcher = new QFileSystemWatcher(qt::convert(dirlist), this);
 	connect(watcher, SIGNAL(directoryChanged(QString)), SLOT(contentsChanged(QString)));
 }
 
@@ -716,38 +752,38 @@ void DirDiffForm::startDirectoryWatcher()
 /// @todo added_or_changed should not include files that haven't changed
 void DirDiffForm::contentsChanged(QString dirname_)
 {
-	QDir          eventdir(dirname_);
-    const std::string dirname = qt::convert(dirName(eventdir)); // absolute path of dir
+	QDir              eventdir(dirname_);
+	const std::string dirname = qt::convert(dirName(eventdir)); // absolute path of dir
 
 	// absolute path of every file below dirname
-    if ( pbl::starts_with(dirname,derp.getLeftLocation()))
+	if ( pbl::starts_with(dirname, derp.getLeftLocation()))
 	{
 		DirectoryContents::update_t u = derp.updateLeft(dirname);
 
-        for ( std::size_t i = 0, n = u.changed.size(); i < n; ++i )
+		for ( std::size_t i = 0, n = u.changed.size(); i < n; ++i )
 		{
-            QFileInfo fi(qt::convert(derp.getLeftLocation(u.changed[i])));
+			QFileInfo fi(qt::convert(derp.getLeftLocation(u.changed[i])));
 
 			if ( fi.lastModified() > when )
 			{
-                u.added.push_back(u.changed[i]);
+				u.added.push_back(u.changed[i]);
 			}
 		}
 
 		updateLeft(u.added, u.removed);
 	}
 
-    if ( pbl::starts_with(dirname,derp.getRightLocation()))
+	if ( pbl::starts_with(dirname, derp.getRightLocation()))
 	{
 		DirectoryContents::update_t u = derp.updateRight(dirname);
 
-        for ( std::size_t i = 0, n = u.changed.size(); i < n; ++i )
+		for ( std::size_t i = 0, n = u.changed.size(); i < n; ++i )
 		{
-            QFileInfo fi(qt::convert(derp.getRightLocation(u.changed[i])));
+			QFileInfo fi(qt::convert(derp.getRightLocation(u.changed[i])));
 
 			if ( fi.lastModified() > when )
 			{
-                u.added.push_back(u.changed[i]);
+				u.added.push_back(u.changed[i]);
 			}
 		}
 
@@ -759,42 +795,42 @@ void DirDiffForm::contentsChanged(QString dirname_)
 // file is an absolute path
 void DirDiffForm::fileChanged(const std::string& file)
 {
-    if ( pbl::starts_with(file, derp.getLeftLocation()))
+	if ( pbl::starts_with(file, derp.getLeftLocation()))
 	{
-        updateLeft(derp.getLeftRelativeFilePath(file));
+		updateLeft(derp.getLeftRelativeFilePath(file));
 	}
 
-    if ( pbl::starts_with(file, derp.getRightLocation()))
+	if ( pbl::starts_with(file, derp.getRightLocation()))
 	{
-        updateRight(derp.getRightRelativeFilePath(file));
+		updateRight(derp.getRightRelativeFilePath(file));
 	}
 }
 
-void DirDiffForm::filesChanged(const std::vector< std::string > & files)
+void DirDiffForm::filesChanged(const std::vector< std::string >& files)
 {
-    std::vector< std::string > l;
-    std::vector< std::string > r;
+	std::vector< std::string > l;
+	std::vector< std::string > r;
 
-    std::string lloc = derp.getLeftLocation();
-    std::string rloc = derp.getRightLocation();
+	std::string lloc = derp.getLeftLocation();
+	std::string rloc = derp.getRightLocation();
 
-    for (std::size_t i = 0, n = files.size(); i < n; ++i)
-    {
-        std::string file = files[i];
+	for ( std::size_t i = 0, n = files.size(); i < n; ++i )
+	{
+		std::string file = files[i];
 
-        if ( pbl::starts_with(file, lloc))
-        {
-            l.push_back(derp.getLeftRelativeFilePath(file));
-        }
+		if ( pbl::starts_with(file, lloc))
+		{
+			l.push_back(derp.getLeftRelativeFilePath(file));
+		}
 
-        if ( pbl::starts_with(file, rloc))
-        {
-            r.push_back(derp.getRightRelativeFilePath(file));
-        }
-    }
+		if ( pbl::starts_with(file, rloc))
+		{
+			r.push_back(derp.getRightRelativeFilePath(file));
+		}
+	}
 
-    updateLeft(l);
-    updateRight(r);
+	updateLeft(l);
+	updateRight(r);
 }
 
 // sometimes QDir::dirName returns ".", so we use this instead
@@ -824,12 +860,12 @@ void DirDiffForm::on_swap_clicked()
 
 void DirDiffForm::on_openright_clicked()
 {
-    QDesktopServices::openUrl(QUrl("file://" + qt::convert(derp.getRightLocation())));
+	QDesktopServices::openUrl(QUrl("file://" + qt::convert(derp.getRightLocation())));
 }
 
 void DirDiffForm::on_openleft_clicked()
 {
-    QDesktopServices::openUrl(QUrl("file://" + qt::convert(derp.getRightLocation())));
+	QDesktopServices::openUrl(QUrl("file://" + qt::convert(derp.getRightLocation())));
 }
 
 void DirDiffForm::on_showleftonly_toggled(bool checked)
@@ -915,7 +951,7 @@ bool DirDiffForm::hidden(std::size_t i) const
 	}
 
 	// Hide items that don't match the current filter
-    if ( !filter.isEmpty() && !filter.exactMatch(qt::convert(list[i].items.left)) && !filter.exactMatch(qt::convert(list[i].items.right)))
+	if ( !filter.isEmpty() && !filter.exactMatch(qt::convert(list[i].items.left)) && !filter.exactMatch(qt::convert(list[i].items.right)))
 	{
 		hideitem = true;
 	}
@@ -929,57 +965,67 @@ void DirDiffForm::applyFilters()
 	const QList< int > sel = ui->multilistview->selectedRows();
 
 	QList< int > new_selection;
-	
-	bool seen_selected = false;
-	const std::size_t n = list.size();
-	std::size_t first_unselected_after_selected = n;
-	std::size_t last_unselected = n;
-	
+
+	bool              seen_selected                   = false;
+	const std::size_t n                               = list.size();
+	std::size_t       first_unselected_after_selected = n;
+	std::size_t       last_unselected                 = n;
+
 	// for each item, check if it is shown or not, and adjust font
 	for ( std::size_t i = 0; i < n; ++i )
 	{
 		const bool hideitem = hidden(i);
 
-        ui->multilistview->style(i, list[i].ignore, list[i].unmatched(), list[i].compared, list[i].same);
-        ui->multilistview->setRowHidden(i, hideitem);
-		
-		if (sel.contains(i))
+		ui->multilistview->style(i, list[i].ignore, list[i].unmatched(), list[i].compared, list[i].same);
+		ui->multilistview->setRowHidden(i, hideitem);
+
+		if ( sel.contains(i))
 		{
 			seen_selected = true;
-			if (!hideitem)
+
+			if ( !hideitem )
+			{
 				new_selection.append(i);
+			}
 		}
 		else
 		{
-			if (!hideitem)
+			if ( !hideitem )
 			{
-				if (seen_selected && first_unselected_after_selected == n)
+				if ( seen_selected && first_unselected_after_selected == n )
+				{
 					first_unselected_after_selected = i;
+				}
+
 				last_unselected = i;
 			}
 		}
 	}
 
-	if (new_selection.isEmpty() && !sel.isEmpty())
+	if ( new_selection.isEmpty() && !sel.isEmpty())
 	{
 		// select the first visible row after the selection begins
-		if (first_unselected_after_selected != n)
+		if ( first_unselected_after_selected != n )
+		{
 			new_selection << first_unselected_after_selected;
-		else if (last_unselected != n)
+		}
+		else if ( last_unselected != n )
+		{
 			new_selection << last_unselected;
+		}
 	}
-	
+
 	ui->multilistview->setSelectedRows(new_selection);
 }
 
 void DirDiffForm::items_compared(
-    QString first_,
-    QString second_,
+	QString first_,
+	QString second_,
 	bool    equal
 )
 {
-    const std::string first = qt::convert(first_);
-    const std::string second = qt::convert(second_);
+	const std::string first  = qt::convert(first_);
+	const std::string second = qt::convert(second_);
 
 	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
 	{
@@ -1031,31 +1077,36 @@ void DirDiffForm::showOnlyRight(bool checked)
 void DirDiffForm::on_actionIgnore_triggered()
 {
 	const QList< int > l = ui->multilistview->selectedRows();
-	
-	bool some_ignored = false;
+
+	bool some_ignored     = false;
 	bool some_not_ignored = false;
 
-	for (int i = 0, n = l.count(); i < n; ++i)
+	for ( int i = 0, n = l.count(); i < n; ++i )
 	{
 		const int idx = l.at(i);
-		
-		if (idx >= 0 && static_cast<unsigned>(idx) < list.size())
+
+		if ( idx >= 0 && static_cast< unsigned >( idx ) < list.size())
 		{
-			if (list[idx].ignore)
+			if ( list[idx].ignore )
+			{
 				some_ignored = true;
+			}
 			else
+			{
 				some_not_ignored = true;
+			}
 		}
 	}
-	
+
 	bool all_ignored = some_ignored && !some_not_ignored;
-	
-	bool ignore = (all_ignored ? false : true);
-	
-	for (int i = 0, n = l.count(); i < n; ++i)
+
+	bool ignore = ( all_ignored ? false : true );
+
+	for ( int i = 0, n = l.count(); i < n; ++i )
 	{
 		const int idx = l.at(i);
-		if (idx >= 0 && static_cast<unsigned>(idx) < list.size())
+
+		if ( idx >= 0 && static_cast< unsigned >( idx ) < list.size())
 		{
 			list[idx].ignore = ignore;
 		}
@@ -1077,7 +1128,7 @@ void DirDiffForm::on_actionCopy_To_Clipboard_triggered()
 		if ( !hidden(i))
 		{
 			// items
-            ts << qt::convert(list[i].items.left) << '\t' << qt::convert(list[i].items.right) << '\t';
+			ts << qt::convert(list[i].items.left) << '\t' << qt::convert(list[i].items.right) << '\t';
 
 			// result of comparison
 			if ( list[i].left_only())
@@ -1119,31 +1170,31 @@ void DirDiffForm::on_actionCopy_To_Clipboard_triggered()
 }
 
 void DirDiffForm::setLeftAndRight(
-    const std::string&     leftname_,
-    const std::string&     rightname_,
-    const std::vector< std::string >& leftitems,
-    const std::vector< std::string >& rightitems
+	const std::string&                leftname_,
+	const std::string&                rightname_,
+	const std::vector< std::string >& leftitems,
+	const std::vector< std::string >& rightitems
 )
 {
 	derp.stopComparison();
 
 	{
 		// Update internal list
-        std::set< std::string> ignore_left;
-        std::set< std::string > ignore_right;
+		std::set< std::string > ignore_left;
+		std::set< std::string > ignore_right;
 
 		for ( std::size_t i = 0, n = list.size(); i < n; ++i )
 		{
 			if ( list[i].ignore )
 			{
-                if ( !list[i].items.left.empty())
+				if ( !list[i].items.left.empty())
 				{
-                    ignore_left.insert(list[i].items.left);
+					ignore_left.insert(list[i].items.left);
 				}
 
-                if ( !list[i].items.right.empty())
+				if ( !list[i].items.right.empty())
 				{
-                    ignore_right.insert(list[i].items.right);
+					ignore_right.insert(list[i].items.right);
 				}
 			}
 		}
@@ -1156,7 +1207,7 @@ void DirDiffForm::setLeftAndRight(
 		{
 			comparison_t c = { filepairs[i], false, false, false };
 
-            if ( ignore_left.count(filepairs[i].left) != 0 || ignore_right.count(filepairs[i].right)!= 0)
+			if ( ignore_left.count(filepairs[i].left) != 0 || ignore_right.count(filepairs[i].right) != 0 )
 			{
 				c.ignore = true;
 			}
@@ -1165,16 +1216,17 @@ void DirDiffForm::setLeftAndRight(
 		}
 
 		list      = temp;
-        leftname  = qt::convert(leftname_);
-        rightname = qt::convert(rightname_);
+		leftname  = qt::convert(leftname_);
+		rightname = qt::convert(rightname_);
 	}
 
-    ui->multilistview->clear();
+	ui->multilistview->clear();
+
 	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
 	{
-        QStringList items;
-        items << qt::convert(list[i].items.left) << qt::convert(list[i].items.right);
-        ui->multilistview->addItem(items);
+		QStringList items;
+		items << qt::convert(list[i].items.left) << qt::convert(list[i].items.right);
+		ui->multilistview->addItem(items);
 	}
 
 	applyFilters();
@@ -1182,25 +1234,25 @@ void DirDiffForm::setLeftAndRight(
 }
 
 std::vector< items_t > DirDiffForm::match(
-    const std::vector< std::string >& leftitems,
-    const std::vector< std::string >& rightitems
+	const std::vector< std::string >& leftitems,
+	const std::vector< std::string >& rightitems
 ) const
 {
 	std::map< int, std::vector< items_t > > score;
 
-    for ( std::size_t il = 0, nl = leftitems.size(); il < nl; ++il )
+	for ( std::size_t il = 0, nl = leftitems.size(); il < nl; ++il )
 	{
-        for ( std::size_t ir = 0, nr = rightitems.size(); ir < nr; ++ir )
+		for ( std::size_t ir = 0, nr = rightitems.size(); ir < nr; ++ir )
 		{
-            score[derp.match(leftitems[il], rightitems[ir])].push_back(
-                items_t(leftitems[il], rightitems[ir]));
+			score[derp.match(leftitems[il], rightitems[ir])].push_back(
+				items_t(leftitems[il], rightitems[ir]));
 		}
 	}
 
 	std::vector< items_t > matching;
 
-    std::set< std::string > leftmatched;
-    std::set< std::string > rightmatched;
+	std::set< std::string > leftmatched;
+	std::set< std::string > rightmatched;
 
 	for ( std::map< int, std::vector< items_t > >::iterator it = score.begin(); it != score.end(); ++it )
 	{
@@ -1210,29 +1262,29 @@ std::vector< items_t > DirDiffForm::match(
 
 			for ( std::size_t i = 0; i < l.size(); ++i )
 			{
-                if ( leftmatched.count(l[i].left) == 0 && rightmatched.count(l[i].right) == 0)
+				if ( leftmatched.count(l[i].left) == 0 && rightmatched.count(l[i].right) == 0 )
 				{
 					matching.push_back(l[i]);
-                    leftmatched.insert(l[i].left);
-                    rightmatched.insert(l[i].right);
+					leftmatched.insert(l[i].left);
+					rightmatched.insert(l[i].right);
 				}
 			}
 		}
 	}
 
-    for ( std::size_t i = 0, n = leftitems.size(); i < n; ++i )
+	for ( std::size_t i = 0, n = leftitems.size(); i < n; ++i )
 	{
-        if ( leftmatched.count(leftitems[i]) == 0)
+		if ( leftmatched.count(leftitems[i]) == 0 )
 		{
-            matching.push_back(items_t(leftitems[i], std::string()));
+			matching.push_back(items_t(leftitems[i], std::string()));
 		}
 	}
 
-    for ( std::size_t i = 0, n = rightitems.size(); i < n; ++i )
+	for ( std::size_t i = 0, n = rightitems.size(); i < n; ++i )
 	{
-        if ( rightmatched.count(rightitems[i]) == 0)
+		if ( rightmatched.count(rightitems[i]) == 0 )
 		{
-            matching.push_back(items_t(std::string(), rightitems[i]));
+			matching.push_back(items_t(std::string(), rightitems[i]));
 		}
 	}
 
@@ -1264,7 +1316,7 @@ void DirDiffForm::startComparison()
 
 	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
 	{
-        if ( !list[i].items.left.empty() && !list[i].items.right.empty() && !list[i].compared )
+		if ( !list[i].items.left.empty() && !list[i].items.right.empty() && !list[i].compared )
 		{
 			matches.push_back(list[i].items);
 		}
@@ -1277,78 +1329,79 @@ void DirDiffForm::startComparison()
 	}
 }
 
-std::vector< std::string> DirDiffForm::getAllLeft() const
+std::vector< std::string > DirDiffForm::getAllLeft() const
 {
-    std::vector< std::string> l;
+	std::vector< std::string > l;
 
 	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
 	{
-        if ( !list[i].items.left.empty())
+		if ( !list[i].items.left.empty())
 		{
-            l.push_back(list[i].items.left);
+			l.push_back(list[i].items.left);
 		}
 	}
 
 	return l;
 }
 
-std::vector< std::string> DirDiffForm::getAllRight() const
+std::vector< std::string > DirDiffForm::getAllRight() const
 {
-    std::vector< std::string> l;
+	std::vector< std::string > l;
 
 	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
 	{
-        if ( !list[i].items.right.empty())
+		if ( !list[i].items.right.empty())
 		{
-            l.push_back(list[i].items.right);
+			l.push_back(list[i].items.right);
 		}
 	}
 
 	return l;
 }
 
-void DirDiffForm::updateLeft(const std::string &added_or_changed)
+void DirDiffForm::updateLeft(const std::string& added_or_changed)
 {
-    std::vector< std::string > v(1, added_or_changed);
-    updateLeft(v);
+	std::vector< std::string > v(1, added_or_changed);
+
+	updateLeft(v);
 }
 
 void DirDiffForm::updateLeft(
-    const std::vector< std::string >& added_or_changed,
-    const std::vector< std::string >& remove
+	const std::vector< std::string >& added_or_changed,
+	const std::vector< std::string >& remove
 )
 {
-    std::set< std::string > oldleft;
+	std::set< std::string > oldleft;
 
 	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
 	{
-        if ( !list[i].items.left.empty())
+		if ( !list[i].items.left.empty())
 		{
-            if ( pbl::contains(remove,list[i].items.left))
+			if ( pbl::contains(remove, list[i].items.left))
 			{
-                list[i].items.left = std::string();
+				list[i].items.left = std::string();
 				list[i].compared   = false;
 				list[i].same       = false;
-                ui->multilistview->clearText(0, i);
+				ui->multilistview->clearText(0, i);
 			}
-            else if ( pbl::contains(added_or_changed,list[i].items.left))
+			else if ( pbl::contains(added_or_changed, list[i].items.left))
 			{
 				list[i].compared = false;
 				list[i].same     = false;
 			}
 
-            oldleft.insert(list[i].items.left);
+			oldleft.insert(list[i].items.left);
 		}
 	}
 
-    for ( std::size_t i = 0, n = added_or_changed.size(); i < n; ++i )
+	for ( std::size_t i = 0, n = added_or_changed.size(); i < n; ++i )
 	{
-        const std::string item = added_or_changed.at(i);
+		const std::string item = added_or_changed.at(i);
 
 		// was item added?
-        if ( oldleft.count(item) == 0)
+		if ( oldleft.count(item) == 0 )
 		{
-            items_t x(item, std::string());
+			items_t x(item, std::string());
 
 			std::size_t j = 0;
 
@@ -1362,18 +1415,18 @@ void DirDiffForm::updateLeft(
 			// insert into the list
 			list.insert(list.begin() + j, y);
 
-            QStringList items;
-            items << qt::convert(item) << QString();
-            ui->multilistview->insertItem(j, items);
+			QStringList items;
+			items << qt::convert(item) << QString();
+			ui->multilistview->insertItem(j, items);
 		}
 	}
 
 	// remove empty items
 	for ( std::size_t i = 0; i < list.size();)
 	{
-        if ( list[i].items.right.empty() && list[i].items.left.empty())
+		if ( list[i].items.right.empty() && list[i].items.left.empty())
 		{
-            ui->multilistview->removeItem(i);
+			ui->multilistview->removeItem(i);
 			list.erase(list.begin() + i);
 		}
 		else
@@ -1385,49 +1438,47 @@ void DirDiffForm::updateLeft(
 	rematch();
 }
 
-void DirDiffForm::updateRight(
-    const std::string & added_or_changed
-)
+void DirDiffForm::updateRight(const std::string& added_or_changed)
 {
-    updateRight(std::vector< std::string >(1, added_or_changed));
+	updateRight(std::vector< std::string >(1, added_or_changed));
 }
 
 void DirDiffForm::updateRight(
-    const std::vector< std::string >& added_or_changed,
-    const std::vector< std::string >& remove
+	const std::vector< std::string >& added_or_changed,
+	const std::vector< std::string >& remove
 )
 {
-    std::set< std::string > oldright;
+	std::set< std::string > oldright;
 
 	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
 	{
-        if ( !list[i].items.right.empty())
+		if ( !list[i].items.right.empty())
 		{
-            if ( pbl::contains(remove, list[i].items.right))
+			if ( pbl::contains(remove, list[i].items.right))
 			{
-                list[i].items.right = std::string();
+				list[i].items.right = std::string();
 				list[i].compared    = false;
 				list[i].same        = false;
-                ui->multilistview->clearText(1, i);
+				ui->multilistview->clearText(1, i);
 			}
-            else if ( pbl::contains(added_or_changed, list[i].items.right))
+			else if ( pbl::contains(added_or_changed, list[i].items.right))
 			{
 				list[i].compared = false;
 				list[i].same     = false;
 			}
 
-            oldright.insert(list[i].items.right);
+			oldright.insert(list[i].items.right);
 		}
 	}
 
-    for ( std::size_t i = 0, n = added_or_changed.size(); i < n; ++i )
+	for ( std::size_t i = 0, n = added_or_changed.size(); i < n; ++i )
 	{
-        const std::string item = added_or_changed[i];
+		const std::string item = added_or_changed[i];
 
 		// was item added?
-        if ( oldright.count(item) == 0)
+		if ( oldright.count(item) == 0 )
 		{
-            items_t x(std::string(), item);
+			items_t x(std::string(), item);
 
 			std::size_t j = 0;
 
@@ -1441,18 +1492,18 @@ void DirDiffForm::updateRight(
 			// insert into the list
 			list.insert(list.begin() + j, y);
 
-            QStringList items;
-            items << QString() << qt::convert(item);
-            ui->multilistview->insertItem(j, items);
+			QStringList items;
+			items << QString() << qt::convert(item);
+			ui->multilistview->insertItem(j, items);
 		}
 	}
 
 	// remove empty items
 	for ( std::size_t i = 0; i < list.size();)
 	{
-        if ( list[i].items.left.empty() && list[i].items.right.empty())
+		if ( list[i].items.left.empty() && list[i].items.right.empty())
 		{
-            ui->multilistview->removeItem(i);
+			ui->multilistview->removeItem(i);
 			list.erase(list.begin() + i);
 		}
 		else
@@ -1481,7 +1532,7 @@ void DirDiffForm::rematch()
 
 		if ( j == matching.size())
 		{
-            ui->multilistview->removeItem(i);
+			ui->multilistview->removeItem(i);
 			list.erase(list.begin() + i);
 		}
 		else
@@ -1498,9 +1549,9 @@ void DirDiffForm::rematch()
 			comparison_t c = { matching[i], false, false, false };
 			list.insert(list.begin() + i, c);
 
-            QStringList items;
-            items <<  qt::convert(matching[i].left) << qt::convert(matching[i].right);
-            ui->multilistview->insertItem(i, items);
+			QStringList items;
+			items << qt::convert(matching[i].left) << qt::convert(matching[i].right);
+			ui->multilistview->insertItem(i, items);
 		}
 	}
 
@@ -1511,36 +1562,60 @@ void DirDiffForm::rematch()
 
 void DirDiffForm::on_actionSelect_Different_triggered()
 {
-    QList< int > indices;
-    for (std::size_t i = 0, n = list.size(); i < n; ++i)
-        if (list[i].compared && !list[i].same)
-            indices << i;
-    ui->multilistview->setSelectedRows(indices);
+	QList< int > indices;
+
+	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
+	{
+		if ( list[i].compared && !list[i].same )
+		{
+			indices << i;
+		}
+	}
+
+	ui->multilistview->setSelectedRows(indices);
 }
 
 void DirDiffForm::on_actionSelect_Same_triggered()
 {
-    QList< int > indices;
-    for (std::size_t i = 0, n = list.size(); i < n; ++i)
-        if (list[i].compared && list[i].same)
-            indices << i;
-    ui->multilistview->setSelectedRows(indices);
+	QList< int > indices;
+
+	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
+	{
+		if ( list[i].compared && list[i].same )
+		{
+			indices << i;
+		}
+	}
+
+	ui->multilistview->setSelectedRows(indices);
 }
 
 void DirDiffForm::on_actionSelect_Left_Only_triggered()
 {
-    QList< int > indices;
-    for (std::size_t i = 0, n = list.size(); i < n; ++i)
-        if (!list[i].items.left.empty() && list[i].items.right.empty())
-            indices << i;
-    ui->multilistview->setSelectedRows(indices);
+	QList< int > indices;
+
+	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
+	{
+		if ( !list[i].items.left.empty() && list[i].items.right.empty())
+		{
+			indices << i;
+		}
+	}
+
+	ui->multilistview->setSelectedRows(indices);
 }
 
 void DirDiffForm::on_actionSelect_Right_Only_triggered()
 {
-    QList< int > indices;
-    for (std::size_t i = 0, n = list.size(); i < n; ++i)
-        if (list[i].items.left.empty() && !list[i].items.right.empty())
-            indices << i;
-    ui->multilistview->setSelectedRows(indices);
+	QList< int > indices;
+
+	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
+	{
+		if ( list[i].items.left.empty() && !list[i].items.right.empty())
+		{
+			indices << i;
+		}
+	}
+
+	ui->multilistview->setSelectedRows(indices);
 }

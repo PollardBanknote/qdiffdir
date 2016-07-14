@@ -1,7 +1,8 @@
 #ifndef CPP_VERSION_H
 #define CPP_VERSION_H
 
-namespace cpp17 { }
+namespace cpp17
+{}
 
 namespace cpp
 {

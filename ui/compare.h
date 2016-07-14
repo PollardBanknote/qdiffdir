@@ -40,8 +40,8 @@ public:
 	{
 	}
 
-    virtual bool equal(const std::string&, const std::string&) = 0;
-	virtual Compare* clone() const                     = 0;
+	virtual bool equal(const std::string&, const std::string&) = 0;
+	virtual Compare* clone() const                             = 0;
 };
 
 #endif // COMPARE_H

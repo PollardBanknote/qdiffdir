@@ -36,8 +36,8 @@
 struct items_t
 {
 	items_t(
-        const std::string& l,
-        const std::string& r
+	    const std::string& l,
+	    const std::string& r
 	)
 		: left(l), right(r)
 	{
@@ -46,7 +46,7 @@ struct items_t
 
 	bool operator<(const items_t& o) const
 	{
-        return ( left.empty() ? right : left ) < ( o.left.empty() ? o.right : o.left );
+		return ( left.empty() ? right : left ) < ( o.left.empty() ? o.right : o.left );
 	}
 
 	bool operator==(const items_t& o) const
@@ -59,8 +59,8 @@ struct items_t
 		return left != o.left || right != o.right;
 	}
 
-    std::string left;
-    std::string right;
+	std::string left;
+	std::string right;
 };
 
 

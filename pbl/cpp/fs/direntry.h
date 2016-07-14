@@ -46,15 +46,15 @@ public:
 	directory_entry(const directory_entry&);
 	explicit directory_entry(const path&, file_status = file_status(), file_status = file_status());
 	directory_entry& operator=(const directory_entry&);
-	void             assign(const path &, file_status = file_status(), file_status = file_status());
-    const ::cpp17::filesystem::path& get_path() const;
+	void assign(const path &, file_status = file_status(), file_status = file_status());
+	const ::cpp17::filesystem::path& get_path() const;
 
 	file_status status() const;
 
 	file_status symbolic_status() const;
-    ::cpp17::filesystem::path filename() const;
+	::cpp17::filesystem::path filename() const;
 private:
-    ::cpp17::filesystem::path path_;
+	::cpp17::filesystem::path path_;
 	file_status mstatus;
 	file_status sym_status;
 

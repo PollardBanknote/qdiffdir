@@ -40,9 +40,9 @@ namespace
 {
 ::cpp17::filesystem::file_status from_mode_t(mode_t m)
 {
-    ::cpp17::filesystem::perms p = static_cast< ::cpp17::filesystem::perms >( m & 0xFFF );
+	::cpp17::filesystem::perms p = static_cast< ::cpp17::filesystem::perms >( m & 0xFFF );
 
-    ::cpp17::filesystem::file_type t = file_type::unknown;
+	::cpp17::filesystem::file_type t = file_type::unknown;
 
 	if ( S_ISREG(m))
 	{
@@ -73,7 +73,7 @@ namespace
 		t = file_type::socket;
 	}
 
-    return ::cpp17::filesystem::file_status(t, p);
+	return ::cpp17::filesystem::file_status(t, p);
 
 }
 
@@ -89,7 +89,10 @@ file_status::file_status(const file_status& s)
 
 }
 
-file_status::file_status(file_type t_, perms p_)
+file_status::file_status(
+    file_type t_,
+    perms     p_
+)
 	: t(t_), p(p_)
 {
 
@@ -163,17 +166,17 @@ file_status symlink_status(const path& path_)
 
 bool status_known(file_status s)
 {
-    return s.type() != file_type::none;
+	return s.type() != file_type::none;
 }
 
 bool exists(file_status s)
 {
-    return status_known(s) && s.type() != file_type::not_found;
+	return status_known(s) && s.type() != file_type::not_found;
 }
 
-bool exists(const path & p)
+bool exists(const path& p)
 {
-    return exists(status(p));
+	return exists(status(p));
 }
 
 bool is_symlink(file_status s)
@@ -181,19 +184,19 @@ bool is_symlink(file_status s)
 	return s.type() == file_type::symlink;
 }
 
-bool is_symlink(const path & p)
+bool is_symlink(const path& p)
 {
-    return is_symlink(status(p));
+	return is_symlink(status(p));
 }
 
 bool is_directory(file_status s)
 {
-    return s.type() == file_type::directory;
+	return s.type() == file_type::directory;
 }
 
 bool is_directory(const path& p)
 {
-    return is_directory(status(p));
+	return is_directory(status(p));
 }
 
 }

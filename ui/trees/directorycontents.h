@@ -40,45 +40,45 @@ class DirectoryContents
 public:
 	struct update_t
 	{
-        std::vector< std::string > added;
-        std::vector< std::string > removed;
-        std::vector< std::string > changed;
+		std::vector< std::string > added;
+		std::vector< std::string > removed;
+		std::vector< std::string > changed;
 	};
 
 	DirectoryContents();
 
-    std::string absolutePath() const;
+	std::string absolutePath() const;
 
-    std::string absoluteFilePath(const std::string& s) const;
+	std::string absoluteFilePath(const std::string& s) const;
 
-    std::string relativeFilePath(const std::string& s) const;
+	std::string relativeFilePath(const std::string& s) const;
 
-    std::string name() const;
+	std::string name() const;
 
-    bool cd(const std::string& path);
+	bool cd(const std::string& path);
 
-    std::vector< std::string > setDepth(int d);
+	std::vector< std::string > setDepth(int d);
 
-    std::vector< std::string > getRelativeFileNames() const;
+	std::vector< std::string > getRelativeFileNames() const;
 
-    std::vector< std::string > getDirectories() const;
+	std::vector< std::string > getDirectories() const;
 
-    std::vector< std::string > getAbsoluteFileNames() const;
+	std::vector< std::string > getAbsoluteFileNames() const;
 
-    update_t update(const std::string& d);
+	update_t update(const std::string& d);
 private:
 	void refresh();
 
-    // an absolute path to the top directory
-    std::string dir;
+	// an absolute path to the top directory
+	std::string dir;
 
 	int maxdepth;
 
 	// relative paths of each file
-    std::vector< std::string > files;
+	std::vector< std::string > files;
 
 	// absolute paths of directories that we should watch
-    std::vector< std::string > subdirs;
+	std::vector< std::string > subdirs;
 };
 
 

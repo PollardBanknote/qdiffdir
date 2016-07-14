@@ -55,43 +55,43 @@ public:
 	 */
 	void stopComparison();
 
-    std::string getLeftLocation() const;
+	std::string getLeftLocation() const;
 
-    void setLeftLocation(const std::string& s);
+	void setLeftLocation(const std::string& s);
 
-    std::string getLeftLocation(const std::string& s) const;
+	std::string getLeftLocation(const std::string& s) const;
 
-    std::string getLeftName() const;
+	std::string getLeftName() const;
 
-    std::string getRightLocation() const;
+	std::string getRightLocation() const;
 
-    void setRightLocation(const std::string& s);
+	void setRightLocation(const std::string& s);
 
-    std::string getRightLocation(const std::string& s) const;
+	std::string getRightLocation(const std::string& s) const;
 
-    std::string getRightName() const;
+	std::string getRightName() const;
 
-    std::pair< std::vector< std::string >, std::vector< std::string > > setDepth(int d);
+	std::pair< std::vector< std::string >, std::vector< std::string > > setDepth(int d);
 
-    std::vector< std::string > getLeftRelativeFileNames() const;
+	std::vector< std::string > getLeftRelativeFileNames() const;
 
-    std::vector< std::string > getRightRelativeFileNames() const;
+	std::vector< std::string > getRightRelativeFileNames() const;
 
-    std::string getLeftRelativeFilePath(const std::string& s) const;
+	std::string getLeftRelativeFilePath(const std::string& s) const;
 
-    std::string getRightRelativeFilePath(const std::string& s) const;
+	std::string getRightRelativeFilePath(const std::string& s) const;
 
-    DirectoryContents::update_t updateLeft(const std::string &s);
+	DirectoryContents::update_t updateLeft(const std::string& s);
 
-    DirectoryContents::update_t updateRight(const std::string &s);
+	DirectoryContents::update_t updateRight(const std::string& s);
 
-    std::vector<std::string> getDirectories() const;
+	std::vector< std::string > getDirectories() const;
 
 	void startWorker(const std::vector< items_t >& matches);
 
 	void setMatcher(const Matcher& m);
 
-    int match(const std::string& l, const std::string& r) const;
+	int match(const std::string& l, const std::string& r) const;
 signals:
 	void compared(QString, QString, bool);
 public slots:

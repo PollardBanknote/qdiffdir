@@ -35,16 +35,16 @@ namespace copy_options
 {
 enum copy_options
 {
-    none = 0,
-    skip_existing = 1,
-    overwrite_existing = 2,
-    update_existing = 4,
-    recursive = 8,
-    copy_symlinks = 16,
-    skip_symlinks = 32,
-    directories_only = 64,
-    create_symlinks = 128,
-    create_hard_links = 256
+	none               = 0,
+	skip_existing      = 1,
+	overwrite_existing = 2,
+	update_existing    = 4,
+	recursive          = 8,
+	copy_symlinks      = 16,
+	skip_symlinks      = 32,
+	directories_only   = 64,
+	create_symlinks    = 128,
+	create_hard_links  = 256
 };
 }
 
@@ -71,7 +71,7 @@ typedef ::copy_options::copy_options copy_options;
  * @todo The std::experimental::fs namespace defines copy and copy_file. This
  * function should be renamed accordingly.
  */
-bool copy_file(const std::string& source, const std::string& dest, copy_options);
+bool copy_file(const std::string & source, const std::string & dest, copy_options);
 
 bool copy_file(const std::string& source, const std::string& dest);
 

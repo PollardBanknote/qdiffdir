@@ -39,9 +39,9 @@ class MySettings
 public:
 	static MySettings& instance();
 
-    QString getEditor() const;
-    QString getEditorSetting() const;
-    void setEditor(const QString&);
+	QString getEditor() const;
+	QString getEditorSetting() const;
+	void setEditor(const QString&);
 
 	QString getDiffTool() const;
 	QString getDiffToolSetting() const;

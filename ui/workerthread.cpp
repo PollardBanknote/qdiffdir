@@ -64,13 +64,13 @@ void WorkerThread::run()
 		}
 		else
 		{
-            std::string left  = it->left;
-            std::string right = it->right;
+			std::string left  = it->left;
+			std::string right = it->right;
 			todo.erase(it);
 			lock.unlock();
 
-            const bool res = ( compare ? compare->equal(left, right) : false );
-            emit       compared(QString::fromStdString(left), QString::fromStdString(right), res);
+			const bool res = ( compare ? compare->equal(left, right) : false );
+			emit       compared(QString::fromStdString(left), QString::fromStdString(right), res);
 		}
 	}
 }

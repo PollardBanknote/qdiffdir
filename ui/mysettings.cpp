@@ -32,7 +32,7 @@
 #include <QString>
 
 const char difftool_key[] = "difftool";
-const char editor_key[] = "editor";
+const char editor_key[]   = "editor";
 
 MySettings& MySettings::instance()
 {
@@ -43,26 +43,25 @@ MySettings& MySettings::instance()
 
 QString MySettings::getEditor() const
 {
-    QString s = getEditorSetting();
+	QString s = getEditorSetting();
 
-    if ( s.isEmpty())
-    {
-        s = "gvim";
-    }
+	if ( s.isEmpty())
+	{
+		s = "gvim";
+	}
 
-    return s;
+	return s;
 }
 
 QString MySettings::getEditorSetting() const
 {
-    return store->value(editor_key).toString();
+	return store->value(editor_key).toString();
 }
 
 void MySettings::setEditor(const QString& s)
 {
-    setValue(editor_key, s);
+	setValue(editor_key, s);
 }
-
 
 QString MySettings::getDiffTool() const
 {

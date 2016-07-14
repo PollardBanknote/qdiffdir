@@ -39,7 +39,7 @@ SettingsDialog::SettingsDialog(QWidget* parent) :
 
 	MySettings& settings = MySettings::instance();
 	ui->diffToolLineEdit->setText(settings.getDiffToolSetting());
-    ui->editorLineEdit->setText(settings.getEditorSetting());
+	ui->editorLineEdit->setText(settings.getEditorSetting());
 }
 
 SettingsDialog::~SettingsDialog()
@@ -52,7 +52,7 @@ void SettingsDialog::on_save_clicked()
 	MySettings& settings = MySettings::instance();
 
 	settings.setDiffTool(ui->diffToolLineEdit->text());
-    settings.setEditor(ui->editorLineEdit->text());
+	settings.setEditor(ui->editorLineEdit->text());
 
 	accept();
 }

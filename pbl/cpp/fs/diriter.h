@@ -124,7 +124,7 @@ public:
 	~recursive_directory_iterator();
 
 	recursive_directory_iterator& operator++();
-	const directory_entry&        operator*() const;
+	const directory_entry& operator*() const;
 	const directory_entry* operator->() const;
 	bool operator==(const recursive_directory_iterator& i) const;
 	bool operator!=(const recursive_directory_iterator& i) const;

@@ -62,7 +62,7 @@ public:
 
 	file();
 	file(const std::string& name, int flags);
-    file(const std::string& name, int flags, ::cpp::filesystem::perms);
+	file(const std::string& name, int flags, ::cpp::filesystem::perms);
 	~file();
 
 	bool is_open() const;
@@ -74,13 +74,13 @@ public:
 
 	size_type write(const char* buffer, std::size_t n);
 
-    ::cpp::filesystem::perms permissions() const;
+	::cpp::filesystem::perms permissions() const;
 
 	void flush();
 
 	void remove();
 
-    void chmod(::cpp::filesystem::perms m);
+	void chmod(::cpp::filesystem::perms m);
 
 	void chmod(const file&);
 
@@ -98,9 +98,9 @@ public:
 
 	size_type size() const;
 
-    // 0 - files are not the same, 1 files are the same
-    // -1 some kind of error happened
-    int compare(const file&);
+	// 0 - files are not the same, 1 files are the same
+	// -1 some kind of error happened
+	int compare(const file&);
 private:
 	class seek_guard;
 
@@ -110,7 +110,7 @@ private:
 
 	std::string filename;
 
-    int                  fd;
+	int                  fd;
 	bool                 is_temp;
 	mutable struct stat* filestat;
 };

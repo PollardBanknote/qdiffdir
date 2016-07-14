@@ -46,15 +46,15 @@ public:
 	explicit MultiList(QWidget* parent = 0);
 	~MultiList();
 
-    void addItem(const QStringList& left);
+	void addItem(const QStringList& left);
 
-    void insertItem(int, const QStringList&);
+	void insertItem(int, const QStringList&);
 
 	void removeItem(int);
 
 	void clear();
 
-    void clearText(int col, int row);
+	void clearText(int col, int row);
 
 	void style(int, bool, bool, bool, bool);
 
@@ -78,15 +78,15 @@ private slots:
 	 */
 	void sync_scroll(int);
 
-    void update_selection();
-    void current_row_changed(int);
+	void update_selection();
+	void current_row_changed(int);
 private:
 	void styleitem(QListWidgetItem*, bool, bool, bool, bool);
 
-    void update_scroll_range();
+	void update_scroll_range();
 
-    std::vector< QListWidget* > dirs;
-	QScrollBar*  verticalScrollBar;
+	std::vector< QListWidget* > dirs;
+	QScrollBar*                 verticalScrollBar;
 };
 
 #endif // MULTILIST_H

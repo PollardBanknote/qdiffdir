@@ -42,11 +42,11 @@ bool is_hidden(const cpp::filesystem::path& p)
 
 /// @todo Turn into a find-like function
 void descend(
-    std::vector< std::string >&         files,
-    std::vector< std::string >&         subdirs,
-    const cpp::filesystem::path& path,
-	unsigned             depth,
-	unsigned             maxdepth
+	std::vector< std::string >&  files,
+	std::vector< std::string >&  subdirs,
+	const cpp::filesystem::path& path,
+	unsigned                     depth,
+	unsigned                     maxdepth
 )
 {
 	const bool hidden_dirs  = false;
@@ -54,9 +54,9 @@ void descend(
 
 	if ( depth < maxdepth )
 	{
-        subdirs.push_back(path.native());
+		subdirs.push_back(path.native());
 
-        for ( cpp::filesystem::directory_iterator it(path), last; it != last; ++it )
+		for ( cpp::filesystem::directory_iterator it(path), last; it != last; ++it )
 		{
 			if ( it->status().type() == file_type::directory )
 			{
@@ -101,7 +101,7 @@ void descend(
 						i = j + 1;
 					}
 
-                    files.push_back(s.substr(i));
+					files.push_back(s.substr(i));
 				}
 			}
 		}
@@ -109,15 +109,15 @@ void descend(
 }
 
 std::pair< std::vector< std::string >, std::vector< std::string > > descend(
-    const cpp::filesystem::path& dir,
-	int         maxdepth
+	const cpp::filesystem::path& dir,
+	int                          maxdepth
 )
 {
-    std::pair< std::vector< std::string >, std::vector< std::string > > res;
+	std::pair< std::vector< std::string >, std::vector< std::string > > res;
 
 	if ( maxdepth >= 0 )
 	{
-        descend(res.first, res.second, dir, 0, maxdepth);
+		descend(res.first, res.second, dir, 0, maxdepth);
 	}
 
 	return res;
@@ -135,35 +135,36 @@ DirectoryContents::DirectoryContents() : maxdepth(0)
 
 std::string DirectoryContents::absolutePath() const
 {
-    return dir;
+	return dir;
 }
 
 std::string DirectoryContents::absoluteFilePath(const std::string& s) const
 {
-    cpp::filesystem::path p(dir);
-    return p / cpp::filesystem::path(s);
+	cpp::filesystem::path p(dir);
+
+	return p / cpp::filesystem::path(s);
 }
 
 std::string DirectoryContents::relativeFilePath(const std::string& s) const
 {
-    const cpp::filesystem::path p(s);
+	const cpp::filesystem::path p(s);
 
-    return p.lexically_relative(dir);
+	return p.lexically_relative(dir);
 }
 
 std::string DirectoryContents::name() const
 {
-    return cpp::filesystem::basename(dir);
+	return cpp::filesystem::basename(dir);
 }
 
 /// @bug A relative path will change relative to the last directory, not cwd
 bool DirectoryContents::cd(const std::string& path)
 {
-    const cpp::filesystem::path p(path);
+	const cpp::filesystem::path p(path);
 
-    if ( p.is_absolute() && cpp::filesystem::is_directory(p))
+	if ( p.is_absolute() && cpp::filesystem::is_directory(p))
 	{
-        dir = cpp::filesystem::cleanpath(path) + "/";
+		dir      = cpp::filesystem::cleanpath(path) + "/";
 		maxdepth = 0;
 		files.clear();
 		subdirs.clear();
@@ -192,11 +193,11 @@ std::vector< std::string > DirectoryContents::getRelativeFileNames() const
 
 std::vector< std::string > DirectoryContents::getAbsoluteFileNames() const
 {
-    std::vector< std::string > l;
+	std::vector< std::string > l;
 
-    for ( std::size_t i = 0, n = files.size(); i < n; ++i )
+	for ( std::size_t i = 0, n = files.size(); i < n; ++i )
 	{
-        l.push_back(absoluteFilePath(files[i]));
+		l.push_back(absoluteFilePath(files[i]));
 	}
 
 	return l;
@@ -209,7 +210,7 @@ std::vector< std::string > DirectoryContents::getDirectories() const
 
 void DirectoryContents::refresh()
 {
-    const std::pair< std::vector< std::string >, std::vector< std::string > > res = descend(dir, maxdepth);
+	const std::pair< std::vector< std::string >, std::vector< std::string > > res = descend(dir, maxdepth);
 
 	files   = res.first;
 	subdirs = res.second;
@@ -220,31 +221,31 @@ DirectoryContents::update_t DirectoryContents::update(const std::string&)
 {
 	update_t u;
 
-    const std::vector< std::string > old = files;
+	const std::vector< std::string > old = files;
 
 	/// @todo Only need to search from changed directory and down
 	refresh();
 
-    for ( std::size_t i = 0, n = old.size(); i < n; ++i )
+	for ( std::size_t i = 0, n = old.size(); i < n; ++i )
 	{
-        if ( pbl::contains(files, old[i]))
+		if ( pbl::contains(files, old[i]))
 		{
 			// changed
-            u.changed.push_back(old[i]);
+			u.changed.push_back(old[i]);
 		}
 		else
 		{
 			// removed
-            u.removed.push_back(old[i]);
+			u.removed.push_back(old[i]);
 		}
 	}
 
-    for ( std::size_t i = 0, n = files.size(); i < n; ++i )
+	for ( std::size_t i = 0, n = files.size(); i < n; ++i )
 	{
 		// added
-        if ( !pbl::contains(old, files[i]))
+		if ( !pbl::contains(old, files[i]))
 		{
-            u.added.push_back(files[i]);
+			u.added.push_back(files[i]);
 		}
 	}
 

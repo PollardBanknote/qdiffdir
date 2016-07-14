@@ -45,113 +45,125 @@ namespace filesystem
  */
 bool copy_file(
 	const std::string& source,
-    const std::string& dest,
-    copy_options opt
+	const std::string& dest,
+	copy_options       opt
 )
 {
-    const int in = ::open(source.c_str(), O_RDONLY);
+	const int in = ::open(source.c_str(), O_RDONLY);
 
-    if (in != -1 )
-    {
-        struct stat instat;
-        if (::fstat(in, &instat) == 0 && (S_ISREG(instat.st_mode) || S_ISLNK(instat.st_mode)))
-        {
-            // Get the destination file
-            int out = ::open(dest.c_str(), O_CREAT | O_EXCL | O_WRONLY, S_IWUSR);
+	if ( in != -1 )
+	{
+		struct stat instat;
 
-            if (out == -1 && errno == EEXIST)
-            {
-                // File already exists -- maybe we will overwrite it
-                out = ::open(dest.c_str(), O_WRONLY);
-                if (out != -1)
-                {
-                    bool err = false;
+		if ( ::fstat(in, &instat) == 0 && ( S_ISREG(instat.st_mode) || S_ISLNK(instat.st_mode)))
+		{
+			// Get the destination file
+			int out = ::open(dest.c_str(), O_CREAT | O_EXCL | O_WRONLY, S_IWUSR);
 
-                    struct stat outstat;
-                    if ((::fstat(out, &outstat) != 0) || (instat.st_dev == outstat.st_dev && instat.st_ino == outstat.st_ino) || ((opt & 7) == 0))
-                    {
-                        // Couldn't stat, Same file, or bad copy_options
-                        err = true;
-                    }
-                    else
-                    {
-                        // Replace file or not, depending on flags
-                        if ((opt & copy_options::overwrite_existing) || ((opt & copy_options::update_existing) && (instat.st_mtime > outstat.st_mtime)))
-                        {
-                            // replace the existing file
-                            if (::ftruncate(out, 0) != 0)
-                                err = true;
-                        }
-                        else
-                        {
-                            // do nothing
-                            ::close(out);
-                            ::close(in);
-                            return false;
-                        }
-                    }
+			if ( out == -1 && errno == EEXIST )
+			{
+				// File already exists -- maybe we will overwrite it
+				out = ::open(dest.c_str(), O_WRONLY);
 
-                    if (err)
-                    {
-                        ::close(out);
-                        out = -1;
-                    }
-                }
-            }
+				if ( out != -1 )
+				{
+					bool err = false;
 
-            // Do we have a destination file?
-            if (out != -1)
-            {
-                bool err = false;
+					struct stat outstat;
 
-                while (!err)
-                {
-                    char buf[4096];
+					if (( ::fstat(out, &outstat) != 0 ) || ( instat.st_dev == outstat.st_dev && instat.st_ino == outstat.st_ino ) || (( opt & 7 ) == 0 ))
+					{
+						// Couldn't stat, Same file, or bad copy_options
+						err = true;
+					}
+					else
+					{
+						// Replace file or not, depending on flags
+						if ((opt& copy_options::overwrite_existing) || ((opt& copy_options::update_existing) && ( instat.st_mtime > outstat.st_mtime )))
+						{
+							// replace the existing file
+							if ( ::ftruncate(out, 0) != 0 )
+							{
+								err = true;
+							}
+						}
+						else
+						{
+							// do nothing
+							::close(out);
+							::close(in);
+							return false;
+						}
+					}
 
-                    const ssize_t n = ::read(in, buf, sizeof(buf));
+					if ( err )
+					{
+						::close(out);
+						out = -1;
+					}
+				}
+			}
 
-                    if (n == -1)
-                    {
-                        err = true;
-                    }
-                    else if (n == 0)
-                    {
-                        // EOF - copy has been successful
-                        ::fchmod(out, instat.st_mode & 0777);
-                        ::close(out);
-                        ::close(in);
-                        return true;
-                    }
-                    else
-                    {
-                        const char* p = buf;
-                        while (p - buf < n)
-                        {
-                            const ssize_t m = ::write(out, p, n - (p - buf));
-                            if (m == -1)
-                            {
-                                err = true;
-                                break;
-                            }
-                            p += m;
-                        }
-                    }
-                }
+			// Do we have a destination file?
+			if ( out != -1 )
+			{
+				bool err = false;
 
-                // Remove the incomplete file
-                ::unlink(dest.c_str());
-                ::close(out);
-            }
-        }
-        ::close(in);
-    }
+				while ( !err )
+				{
+					char buf[4096];
 
-    return false;
+					const ssize_t n = ::read(in, buf, sizeof( buf ));
+
+					if ( n == -1 )
+					{
+						err = true;
+					}
+					else if ( n == 0 )
+					{
+						// EOF - copy has been successful
+						::fchmod(out, instat.st_mode & 0777);
+						::close(out);
+						::close(in);
+						return true;
+					}
+					else
+					{
+						const char* p = buf;
+
+						while ( p - buf < n )
+						{
+							const ssize_t m = ::write(out, p, n - ( p - buf ));
+
+							if ( m == -1 )
+							{
+								err = true;
+								break;
+							}
+
+							p += m;
+						}
+					}
+				}
+
+				// Remove the incomplete file
+				::unlink(dest.c_str());
+				::close(out);
+			}
+		}
+
+		::close(in);
+	}
+
+	return false;
 }
 
-bool copy_file(const std::string& source, const std::string& dest)
+bool copy_file(
+	const std::string& source,
+	const std::string& dest
+)
 {
-    return copy_file(source, dest, ::copy_options::none);
+	return copy_file(source, dest, ::copy_options::none);
 }
 
 }

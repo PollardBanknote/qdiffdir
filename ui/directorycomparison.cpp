@@ -33,7 +33,7 @@
 
 
 DirectoryComparison::DirectoryComparison(QObject* parent)
-    : QObject(parent), compare(0), worker(0), matcher(new DefaultMatcher)
+	: QObject(parent), compare(0), worker(0), matcher(new DefaultMatcher)
 {
 
 }
@@ -45,8 +45,8 @@ DirectoryComparison::~DirectoryComparison()
 }
 
 int DirectoryComparison::match(
-    const std::string& l,
-    const std::string& r
+	const std::string& l,
+	const std::string& r
 ) const
 {
 	return matcher->compare(l, r);
@@ -70,13 +70,14 @@ void DirectoryComparison::startWorker(const std::vector< items_t >& matches)
 
 std::vector< std::string > DirectoryComparison::getDirectories() const
 {
-    std::vector< std::string > l = ldir.getDirectories();
-    const std::vector< std::string > r = rdir.getDirectories();
-    l.insert(l.end(), r.begin(), r.end());
-    std::sort(l.begin(), l.end());
-    l.erase(std::unique(l.begin(), l.end()), l.end());
+	std::vector< std::string >       l = ldir.getDirectories();
+	const std::vector< std::string > r = rdir.getDirectories();
 
-    return l;
+	l.insert(l.end(), r.begin(), r.end());
+	std::sort(l.begin(), l.end());
+	l.erase(std::unique(l.begin(), l.end()), l.end());
+
+	return l;
 }
 
 DirectoryContents::update_t DirectoryComparison::updateRight(const std::string& s)
@@ -111,7 +112,7 @@ std::vector< std::string > DirectoryComparison::getLeftRelativeFileNames() const
 
 std::pair< std::vector< std::string >, std::vector< std::string > > DirectoryComparison::setDepth(int d)
 {
-    return std::make_pair(ldir.setDepth(d), rdir.setDepth(d));
+	return std::make_pair(ldir.setDepth(d), rdir.setDepth(d));
 }
 
 std::string DirectoryComparison::getRightName() const
