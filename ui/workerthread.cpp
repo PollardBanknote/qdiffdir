@@ -69,7 +69,7 @@ void WorkerThread::run()
 			todo.erase(it);
 			lock.unlock();
 
-			const bool res = ( compare ? compare->equal(left, right) : false );
+            const bool res = ( compare ? compare->equal(left, right) : false );
             emit       compared(QString::fromStdString(left), QString::fromStdString(right), res);
 		}
 	}

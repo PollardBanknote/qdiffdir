@@ -40,7 +40,7 @@ class QListWidgetItem;
 class QString;
 class QFileSystemWatcher;
 
-#include "directorycontents.h"
+#include "trees/directorycontents.h"
 #include "directorycomparison.h"
 
 namespace Ui
@@ -171,7 +171,7 @@ private slots:
 	 * @param r The identifier of the right item
 	 * @param same True iff items compared "the same"
 	 */
-    void items_compared(std::string l, std::string r, bool same);
+    void items_compared(QString l, QString r, bool same);
     void on_actionSelect_Different_triggered();
 
     void on_actionSelect_Same_triggered();

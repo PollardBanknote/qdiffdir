@@ -10,8 +10,11 @@ template< typename Iterator, typename T >
 bool contains(Iterator first, Iterator last, const T& value)
 {
     while (first != last)
+    {
         if (*first == value)
             return true;
+        ++first;
+    }
     return false;
 }
 

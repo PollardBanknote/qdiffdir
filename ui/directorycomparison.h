@@ -35,7 +35,7 @@
 #include <QPair>
 
 #include "items.h"
-#include "directorycontents.h"
+#include "trees/directorycontents.h"
 class Matcher;
 class WorkerThread;
 class Compare;

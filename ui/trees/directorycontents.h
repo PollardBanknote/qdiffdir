@@ -34,8 +34,6 @@
 #include "cpp/filesystem.h"
 
 /** Used to observe the files/subdirectories of a directory
- *
- * @todo Remove all traces of Qt
  */
 class DirectoryContents
 {

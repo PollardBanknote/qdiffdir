@@ -973,11 +973,14 @@ void DirDiffForm::applyFilters()
 }
 
 void DirDiffForm::items_compared(
-    std::string first,
-    std::string second,
+    QString first_,
+    QString second_,
 	bool    equal
 )
 {
+    const std::string first = qt::convert(first_);
+    const std::string second = qt::convert(second_);
+
 	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
 	{
 		if ( list[i].items.left == first && list[i].items.right == second )
