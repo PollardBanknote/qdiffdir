@@ -168,6 +168,7 @@ bool DirectoryContents::cd(const std::string& path)
 		maxdepth = 0;
 		files.clear();
 		subdirs.clear();
+
 		return true;
 	}
 

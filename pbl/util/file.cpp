@@ -48,8 +48,8 @@ file::file()
 }
 
 file::file(
-    const std::string& name,
-    int                flags
+	const std::string& name,
+	int                flags
 ) : is_temp(false), filestat(0)
 {
 	fd = ::open(name.c_str(), flags);
@@ -61,9 +61,9 @@ file::file(
 }
 
 file::file(
-    const std::string&       name,
-    int                      flags,
-    ::cpp::filesystem::perms m
+	const std::string&       name,
+	int                      flags,
+	::cpp::filesystem::perms m
 ) : filename(), is_temp(false), filestat(0)
 {
 	fd = ::open(name.c_str(), flags, m);
@@ -104,6 +104,7 @@ bool file::get_stat() const
 
 			::fstat(fd, p);
 			filestat = p;
+
 			return true;
 		}
 		else
@@ -157,6 +158,7 @@ file::size_type file::write(
 
 		if ( m == -1 )
 		{
+
 			// error
 			return -1;
 		}
@@ -232,6 +234,7 @@ bool file::mkstemp(const std::string& name)
 			is_temp  = true;
 			filename = temp_file_name;
 			::fchmod(fd, S_IWUSR | S_IRUSR);
+
 			return true;
 		}
 	}
@@ -248,6 +251,7 @@ bool file::rename(const std::string& dest)
 		if ( res == 0 )
 		{
 			filename = dest;
+
 			return true;
 		}
 	}
@@ -262,6 +266,7 @@ bool file::realize(const std::string& dest)
 		if ( rename(dest))
 		{
 			is_temp = false;
+
 			return true;
 		}
 	}
@@ -284,6 +289,7 @@ bool file::copy(file& in)
 
 			if ( n < 0 )
 			{
+
 				// error
 				return false;
 			}
@@ -302,6 +308,7 @@ bool file::copy(file& in)
 
 		// flush to disk
 		flush();
+
 		return true;
 	}
 

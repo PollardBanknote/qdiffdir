@@ -52,6 +52,7 @@ std::pair< std::size_t, std::size_t > locate_last_path_component(const std::stri
 {
 	if ( s.empty())
 	{
+
 		// error
 		return std::pair< std::size_t, std::size_t >(std::string::npos, 0);
 	}
@@ -91,11 +92,13 @@ std::pair< std::size_t, std::size_t > locate_last_path_component(const std::stri
 		{
 			if ( depth == 0 )
 			{
+
 				// "."
 				return std::pair< std::size_t, std::size_t >(0, 0);
 			}
 			else
 			{
+
 				// error, path is malformed
 				return std::pair< std::size_t, std::size_t >(std::string::npos, 0);
 			}
@@ -152,6 +155,7 @@ std::string dirname_posix(const std::string& s)
 	}
 	else
 	{
+
 		// leading directory
 		return s.substr(0, range.first);
 	}
@@ -167,6 +171,7 @@ namespace filesystem
 std::string basename(const std::string& s)
 {
 	#ifdef _POSIX_VERSION
+
 	return basename_posix(s);
 
 	#else

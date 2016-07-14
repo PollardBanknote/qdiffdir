@@ -55,6 +55,7 @@ std::string absolute_path(const std::string& filename)
 		{
 			std::string s = res;
 			::free(res);
+
 			return s;
 		}
 
@@ -67,6 +68,7 @@ std::string absolute_path(const std::string& filename)
 		{
 			std::string s = res;
 			::free(res);
+
 			return s;
 		}
 

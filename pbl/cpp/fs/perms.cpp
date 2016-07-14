@@ -41,6 +41,7 @@ std::ostream& operator<<(
 	std::ostream t(os.rdbuf());
 
 	t << "mode: " << std::oct << static_cast< int >( p );
+
 	return os;
 }
 

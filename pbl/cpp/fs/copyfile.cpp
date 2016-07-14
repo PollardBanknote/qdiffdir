@@ -92,6 +92,7 @@ bool copy_file(
 							// do nothing
 							::close(out);
 							::close(in);
+
 							return false;
 						}
 					}
@@ -125,6 +126,7 @@ bool copy_file(
 						::fchmod(out, instat.st_mode & 0777);
 						::close(out);
 						::close(in);
+
 						return true;
 					}
 					else

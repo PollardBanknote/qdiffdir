@@ -93,6 +93,7 @@ public:
 				{
 					// error, or end of directory
 					release();
+
 					return false;
 				}
 			}
@@ -116,24 +117,31 @@ public:
 			switch ( e->d_type )
 			{
 			case DT_FIFO:
+
 				return file_type::fifo;
 
 			case DT_CHR:
+
 				return file_type::character;
 
 			case DT_DIR:
+
 				return file_type::directory;
 
 			case DT_BLK:
+
 				return file_type::block;
 
 			case DT_REG:
+
 				return file_type::regular;
 
 			case DT_LNK:
+
 				return file_type::symlink;
 
 			case DT_SOCK:
+
 				return file_type::socket;
 
 			default:
@@ -148,12 +156,14 @@ public:
 	const directory_entry& get_reference()
 	{
 		update();
+
 		return info;
 	}
 
 	const directory_entry* get_pointer()
 	{
 		update();
+
 		return &info;
 	}
 
@@ -227,6 +237,7 @@ directory_iterator::~directory_iterator()
 
 bool directory_iterator::operator==(const directory_iterator& i) const
 {
+
 	// only equal if both are end iterators
 	return pimpl->is_end() && i.pimpl->is_end();
 }
@@ -239,6 +250,7 @@ bool directory_iterator::operator!=(const directory_iterator& i) const
 directory_iterator& directory_iterator::operator++()
 {
 	pimpl->next();
+
 	return *this;
 }
 
@@ -288,6 +300,7 @@ bool recursive_directory_iterator::descend(const path& p)
 		directory_iterator* jt = new directory_iterator();
 		jt->swap(it);
 		stack.push(jt);
+
 		return true;
 	}
 

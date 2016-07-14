@@ -39,6 +39,7 @@ std::string cleanpath(const std::string& s)
 
 	if ( s.empty())
 	{
+
 		// error
 		return t;
 	}

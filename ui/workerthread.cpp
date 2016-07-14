@@ -29,8 +29,8 @@
 #include "workerthread.h"
 
 WorkerThread::WorkerThread(
-    Compare*                      cmp,
-    const std::vector< items_t >& t
+	Compare*                      cmp,
+	const std::vector< items_t >& t
 )
 	: QThread(0), compare(cmp ? cmp->clone() : 0), todo(t)
 {
@@ -60,6 +60,7 @@ void WorkerThread::run()
 		if ( it == todo.end())
 		{
 			lock.unlock();
+
 			return;
 		}
 		else

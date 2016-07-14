@@ -41,6 +41,7 @@ std::set< typename Container::value_type > make_set(const Container& c)
 	std::set< typename Container::value_type > s;
 
 	s.insert(c.begin(), c.end());
+
 	return s;
 }
 

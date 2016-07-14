@@ -90,8 +90,8 @@ file_status::file_status(const file_status& s)
 }
 
 file_status::file_status(
-    file_type t_,
-    perms     p_
+	file_type t_,
+	perms     p_
 )
 	: t(t_), p(p_)
 {
@@ -102,6 +102,7 @@ file_status& file_status::operator=(const file_status& s)
 {
 	t = s.t;
 	p = s.p;
+
 	return *this;
 }
 
@@ -131,6 +132,7 @@ std::ostream& operator<<(
 )
 {
 	os << fs.type() << "; " << fs.permissions();
+
 	return os;
 }
 

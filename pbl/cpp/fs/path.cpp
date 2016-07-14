@@ -53,12 +53,14 @@ path::path(const path& p) : s(p.s)
 path& path::operator=(const path& p)
 {
 	s = p.s;
+
 	return *this;
 }
 
 path& path::operator=(const string_type& s_)
 {
 	s = s_;
+
 	return *this;
 }
 
@@ -134,6 +136,7 @@ path& path::append(const path& p)
 	}
 
 	s.append(p.native());
+
 	return *this;
 }
 
@@ -193,6 +196,7 @@ bool path::next_path_component(std::pair< std::size_t, std::size_t >& r) const
 
 		r.first  = i;
 		r.second = j;
+
 		return true;
 	}
 	else
@@ -224,6 +228,7 @@ path path::lexically_relative(const path& base) const
 
 		if ( !ok1 && !ok2 )
 		{
+
 			// paths are identical
 			return path(".");
 		}
@@ -262,6 +267,7 @@ path operator/(
 	path res = lhs;
 
 	res.append(rhs);
+
 	return res;
 }
 

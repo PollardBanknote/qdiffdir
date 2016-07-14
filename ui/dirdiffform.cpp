@@ -64,8 +64,8 @@ class FileCompare : public Compare
 {
 public:
 	FileCompare(
-	    const std::string& l,
-	    const std::string& r
+		const std::string& l,
+		const std::string& r
 	)
 		: left(l), right(r)
 	{
@@ -185,6 +185,7 @@ private:
 		}
 
 		std::string t(s, 0, s.length() - 3);
+
 		return t;
 	}
 
@@ -194,6 +195,7 @@ private:
 		if ( pbl::ends_with(s, ".cpp"))
 		{
 			std::string t(s, 0, s.length() - 2);
+
 			return t;
 		}
 
@@ -211,6 +213,7 @@ private:
 		if ( pbl::ends_with(s, ".cpp"))
 		{
 			std::string t(s, 0, s.length() - 2);
+
 			return t + ".gz";
 		}
 
@@ -222,12 +225,14 @@ private:
 		if ( pbl::ends_with(s, ".c.gz"))
 		{
 			std::string t(s, 0, s.length() - 3);
+
 			return t + "pp";
 		}
 
 		if ( pbl::ends_with(s, ".cpp.gz"))
 		{
 			std::string t(s, 0, s.length() - 5);
+
 			return t;
 		}
 
@@ -273,7 +278,7 @@ DirDiffForm::DirDiffForm(QWidget* parent_) :
 	ui->multilistview->addAction(ui->actionSelect_Right_Only);
 	connect(ui->multilistview, SIGNAL(itemActivated(int)), SLOT(viewfiles(int)));
 
-	connect(&derp, SIGNAL(compared(QString, QString, bool)), SLOT(items_compared(QString, QString, bool)));
+	connect(&derp, SIGNAL(compared(QString,QString,bool)), SLOT(items_compared(QString,QString,bool)));
 
 	derp.setMatcher(FileNameMatcher());
 	changeDirectories(derp.getLeftLocation(), derp.getRightLocation());
@@ -308,6 +313,7 @@ void DirDiffForm::on_viewdiff_clicked()
 		if ( s1.empty() && s2.empty())
 		{
 			QMessageBox::warning(this, "No file selected", "Cannot complete action");
+
 			return;
 		}
 
@@ -422,6 +428,7 @@ void DirDiffForm::on_copytoright_clicked()
 	if ( !nonempty )
 	{
 		QMessageBox::warning(this, "No file selected", "Cannot complete action");
+
 		return;
 	}
 
@@ -466,6 +473,7 @@ void DirDiffForm::on_copytoleft_clicked()
 	if ( !nonempty )
 	{
 		QMessageBox::warning(this, "No file selected", "Cannot complete action");
+
 		return;
 	}
 
@@ -477,7 +485,8 @@ void DirDiffForm::on_copytoleft_clicked()
 
 void DirDiffForm::on_renametoright_clicked()
 {
-	const QList< int >         indices = ui->multilistview->selectedRows();
+	const QList< int > indices = ui->multilistview->selectedRows();
+
 	std::vector< std::string > files;
 
 	for ( int i = 0, n = indices.count(); i < n; ++i )
@@ -493,7 +502,8 @@ void DirDiffForm::on_renametoright_clicked()
 
 void DirDiffForm::on_renametoleft_clicked()
 {
-	const QList< int >         indices = ui->multilistview->selectedRows();
+	const QList< int > indices = ui->multilistview->selectedRows();
+
 	std::vector< std::string > files;
 
 	for ( int i = 0, n = indices.count(); i < n; ++i )
@@ -510,6 +520,7 @@ void DirDiffForm::on_renametoleft_clicked()
 QString DirDiffForm::getDirectory(const QString& dir)
 {
 	#if 1
+
 	return QFileDialog::getExistingDirectory(this, "Choose a directory", dir);
 
 	#else
@@ -713,8 +724,10 @@ std::pair< bool, DirDiffForm::overwrite_t > DirDiffForm::copyTo(
 		case OVERWRITE_YES:
 			break;
 		case OVERWRITE_NO:
+
 			return std::make_pair(false, OVERWRITE_NO);
 		} // switch
+
 	}
 
 	if ( cpp::filesystem::copy_file(file, s, copy_options::overwrite_existing))
@@ -1034,6 +1047,7 @@ void DirDiffForm::items_compared(
 			list[i].compared = true;
 			list[i].same     = equal;
 			applyFilters();
+
 			return;
 		}
 	}

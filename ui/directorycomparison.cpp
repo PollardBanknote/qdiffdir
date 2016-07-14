@@ -64,7 +64,7 @@ void DirectoryComparison::setMatcher(const Matcher& m)
 void DirectoryComparison::startWorker(const std::vector< items_t >& matches)
 {
 	worker = new WorkerThread(compare, matches);
-	connect(worker, SIGNAL(compared(QString, QString, bool)), SIGNAL(compared(QString, QString, bool)));
+	connect(worker, SIGNAL(compared(QString,QString,bool)), SIGNAL(compared(QString,QString,bool)));
 	worker->start();
 }
 

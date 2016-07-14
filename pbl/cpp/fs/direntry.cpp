@@ -43,9 +43,9 @@ directory_entry::directory_entry(const directory_entry& e)
 }
 
 directory_entry::directory_entry(
-    const ::cpp17::filesystem::path& p,
-    file_status                      status_,
-    file_status                      sym_status_
+	const ::cpp17::filesystem::path& p,
+	file_status                      status_,
+	file_status                      sym_status_
 )
 	: path_(p), mstatus(status_), sym_status(sym_status_)
 {
@@ -57,6 +57,7 @@ directory_entry& directory_entry::operator=(const directory_entry& e)
 	path_      = e.path_;
 	mstatus    = e.mstatus;
 	sym_status = e.sym_status;
+
 	return *this;
 }
 
@@ -97,6 +98,7 @@ std::ostream& operator<<(
 )
 {
 	os << de.get_path();
+
 	return os;
 }
 

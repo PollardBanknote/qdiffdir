@@ -36,8 +36,8 @@
 struct items_t
 {
 	items_t(
-	    const std::string& l,
-	    const std::string& r
+		const std::string& l,
+		const std::string& r
 	)
 		: left(l), right(r)
 	{
