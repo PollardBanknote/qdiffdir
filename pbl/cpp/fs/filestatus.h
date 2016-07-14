@@ -26,8 +26,8 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef FILESTATUS_H
-#define FILESTATUS_H
+#ifndef PBL_CPP_FS_FILESTATUS_H
+#define PBL_CPP_FS_FILESTATUS_H
 
 #include <iosfwd>
 #include "filetype.h"
@@ -75,4 +75,4 @@ std::ostream& operator<<(std::ostream&, const file_status&);
 }
 }
 
-#endif // FILESTATUS_H
+#endif // PBL_CPP_FS_FILESTATUS_H

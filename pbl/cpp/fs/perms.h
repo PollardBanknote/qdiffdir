@@ -26,8 +26,8 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef PERMS_H
-#define PERMS_H
+#ifndef PBL_CPP_FS_PERMS_H
+#define PBL_CPP_FS_PERMS_H
 
 #include <iosfwd>
 
@@ -98,4 +98,4 @@ namespace filesystem
 typedef ::perms::perms perms;
 }
 }
-#endif // PERMS_H
+#endif // PBL_CPP_FS_PERMS_H

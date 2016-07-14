@@ -26,10 +26,10 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef ABSPATH_H
-#define ABSPATH_H
+#ifndef PBL_FS_ABSOLUTE_H
+#define PBL_FS_ABSOLUTE_H
 
-#include <string>
+#include "path.h"
 
 namespace cpp17
 {
@@ -42,9 +42,9 @@ namespace filesystem
  * @returns An absolute path that corresponds to the same file as filepath, or
  *   an empty string if there is an error.
  */
-std::string absolute_path(const std::string& filepath);
+path absolute(const path& filepath);
 
 }
 }
 
-#endif // ABSPATH_H
+#endif // PBL_FS_ABSOLUTE_H

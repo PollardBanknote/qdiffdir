@@ -26,8 +26,8 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef BASENAME_H
-#define BASENAME_H
+#ifndef PBL_CPP_FS_BASENAME_H
+#define PBL_CPP_FS_BASENAME_H
 
 #include <string>
 
@@ -82,4 +82,4 @@ std::string dirname(const std::string& path);
 }
 }
 
-#endif // BASENAME_H
+#endif // PBL_FS_BASENAME_H

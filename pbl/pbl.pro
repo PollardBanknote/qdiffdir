@@ -12,7 +12,6 @@ CONFIG += staticlib
 
 SOURCES += \
     process/detach.cpp \
-    cpp/fs/abspath.cpp \
     cpp/fs/basename.cpp \
     cpp/fs/copyfile.cpp \
     cpp/fs/diriter.cpp \
@@ -23,7 +22,8 @@ SOURCES += \
     cpp/fs/perms.cpp \
     cpp/fs/filetype.cpp \
     util/file.cpp \
-    util/strings.cpp
+    util/strings.cpp \
+    cpp/fs/absolute.cpp
 
 HEADERS += \
     cpp/fs/diriter.h \
@@ -32,7 +32,6 @@ HEADERS += \
     cpp/fs/perms.h \
     cpp/fs/path.h \
     cpp/fs/direntry.h \
-    cpp/fs/abspath.h \
     cpp/fs/basename.h \
     cpp/fs/copyfile.h \
     cpp/fs/cleanpath.h \
@@ -41,7 +40,9 @@ HEADERS += \
     util/file.h \
     cpp/version.h \
     util/strings.h \
-    util/containers.h
+    util/containers.h \
+    cpp/fs/absolute.h \
+    cpp/os.h
 
 unix {
     target.path = /usr/lib

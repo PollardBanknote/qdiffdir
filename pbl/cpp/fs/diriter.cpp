@@ -46,11 +46,13 @@ namespace filesystem
 class directory_iterator::impl
 {
 public:
-	impl() : p(), d(0), e(0), info(), valid_info(false)
+	impl()
+		: p(), d(0), e(0), info(), valid_info(false)
 	{
 	}
 
-	explicit impl(const path& path_) : p(path_), d(0), e(0), info(), valid_info(false)
+	explicit impl(const path& path_)
+		: p(path_), d(0), e(0), info(), valid_info(false)
 	{
 		d = ::opendir(path_.c_str());
 
@@ -222,11 +224,13 @@ private:
 	bool valid_info; // info has been populated
 };
 
-directory_iterator::directory_iterator() : pimpl(new impl)
+directory_iterator::directory_iterator()
+	: pimpl(new impl)
 {
 }
 
-directory_iterator::directory_iterator(const path& path_) : pimpl(new impl(path_))
+directory_iterator::directory_iterator(const path& path_)
+	: pimpl(new impl(path_))
 {
 }
 

@@ -26,8 +26,8 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef PBL_FS_PATH_H
-#define PBL_FS_PATH_H
+#ifndef PBL_CPP_FS_PATH_H
+#define PBL_CPP_FS_PATH_H
 #include <string>
 #include <iosfwd>
 
@@ -80,6 +80,7 @@ public:
 	const std::string& native() const;
 
 	path filename() const;
+	path parent_path() const;
 
 	operator string_type() const;
 

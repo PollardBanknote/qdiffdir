@@ -26,24 +26,19 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#include "abspath.h"
+#include "absolute.h"
 
 #include <climits>
 #include <cstdlib>
 
-#ifdef _POSIX_C_SOURCE
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#endif
+#include "../os.h"
 
 namespace cpp17
 {
 namespace filesystem
 {
 
-std::string absolute_path(const std::string& filename)
+path absolute(const path& filename)
 {
 	if ( !filename.empty())
 	{
@@ -53,7 +48,7 @@ std::string absolute_path(const std::string& filename)
 
 		if ( res )
 		{
-			std::string s = res;
+			path s = res;
 			::free(res);
 
 			return s;
@@ -88,7 +83,7 @@ std::string absolute_path(const std::string& filename)
 		#endif // if ( defined( _POSIX_VERSION ) && _POSIX_VERSION >= 200809l )
 	}
 
-	return std::string();
+	return path();
 }
 
 }

@@ -26,8 +26,8 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef COPYFILE_H
-#define COPYFILE_H
+#ifndef PBL_CPP_FS_COPYFILE_H
+#define PBL_CPP_FS_COPYFILE_H
 
 #include <string>
 
@@ -78,4 +78,4 @@ bool copy_file(const std::string& source, const std::string& dest);
 }
 }
 
-#endif // COPYFILE_H
+#endif // PBL_CPP_FS_COPYFILE_H

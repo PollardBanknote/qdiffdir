@@ -26,8 +26,8 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef FILETYPE_H
-#define FILETYPE_H
+#ifndef PBL_CPP_FS_FILETYPE_H
+#define PBL_CPP_FS_FILETYPE_H
 #include <iosfwd>
 
 namespace file_type
@@ -51,4 +51,4 @@ typedef ::file_type::file_type file_type;
 }
 }
 
-#endif // FILETYPE_H
+#endif // PBL_CPP_FS_FILETYPE_H

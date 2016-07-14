@@ -36,16 +36,19 @@ path::path()
 {
 }
 
-path::path(const string_type& s_) : s(s_)
+path::path(const string_type& s_)
+	: s(s_)
 {
 
 }
 
-path::path(const char* s_) : s(s_)
+path::path(const char* s_)
+	: s(s_)
 {
 }
 
-path::path(const path& p) : s(p.s)
+path::path(const path& p)
+	: s(p.s)
 {
 
 }
@@ -104,8 +107,20 @@ path path::filename() const
 	}
 	else
 	{
-		return "/";
+		return ".";
 	}
+}
+
+path path::parent_path() const
+{
+	const std::size_t i = s.find_last_of(preferred_separator);
+
+	if ( i == std::string::npos )
+	{
+		return path();
+	}
+
+	return path(s.substr(0, i));
 }
 
 path::operator string_type() const

@@ -28,7 +28,7 @@
  */
 #include "basename.h"
 
-#include <unistd.h>
+#include "../os.h"
 #include "cleanpath.h"
 
 namespace
@@ -170,7 +170,7 @@ namespace filesystem
 // Calls the basename_xxx appropriate for this platform
 std::string basename(const std::string& s)
 {
-	#ifdef _POSIX_VERSION
+	#ifdef OS_POSIX
 
 	return basename_posix(s);
 
@@ -181,7 +181,7 @@ std::string basename(const std::string& s)
 
 std::string dirname(const std::string& s)
 {
-	#ifdef _POSIX_VERSION
+	#ifdef OS_POSIX
 	const std::string& t = dirname_posix(s);
 
 	if ( t == "." )

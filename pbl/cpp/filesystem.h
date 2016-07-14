@@ -3,7 +3,10 @@
 
 #include "version.h"
 
-#include "fs/abspath.h"
+#ifdef CPP17
+#include <filesystem.h>
+#else
+#include "fs/absolute.h"
 #include "fs/basename.h"
 #include "fs/cleanpath.h"
 #include "fs/copyfile.h"
@@ -13,5 +16,6 @@
 #include "fs/filetype.h"
 #include "fs/path.h"
 #include "fs/perms.h"
+#endif
 
 #endif // FILESYSTEM_H
