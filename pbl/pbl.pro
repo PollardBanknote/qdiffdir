@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       -= core gui
+QT       -= gui
 
 TARGET = pbl
 TEMPLATE = lib
@@ -22,7 +22,8 @@ SOURCES += \
     cpp/fs/direntry.cpp \
     cpp/fs/perms.cpp \
     cpp/fs/filetype.cpp \
-    util/file.cpp
+    util/file.cpp \
+    util/strings.cpp
 
 HEADERS += \
     cpp/fs/diriter.h \
@@ -37,7 +38,10 @@ HEADERS += \
     cpp/fs/cleanpath.h \
     process/detach.h \
     cpp/filesystem.h \
-    util/file.h
+    util/file.h \
+    cpp/version.h \
+    util/strings.h \
+    util/containers.h
 
 unix {
     target.path = /usr/lib

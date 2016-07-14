@@ -57,7 +57,7 @@ file::file(const std::string& name, int flags) : is_temp(false), filestat(0)
 	}
 }
 
-file::file(const std::string& name, int flags, ::cpp17::filesystem::perms m) : filename(), is_temp(false), filestat(0)
+file::file(const std::string& name, int flags, ::cpp::filesystem::perms m) : filename(), is_temp(false), filestat(0)
 {
 	fd = ::open(name.c_str(), flags, m);
 
@@ -168,17 +168,17 @@ void file::flush()
 	}
 }
 
-::cpp17::filesystem::perms file::permissions() const
+::cpp::filesystem::perms file::permissions() const
 {
 	if ( get_stat())
 	{
-        return static_cast< ::cpp17::filesystem::perms >( filestat->st_mode & ( S_IRWXU | S_IRWXG | S_IRWXO ));
+        return static_cast< ::cpp::filesystem::perms >( filestat->st_mode & ( S_IRWXU | S_IRWXG | S_IRWXO ));
 	}
 
 	return perms::none;
 }
 
-void file::chmod(::cpp17::filesystem::perms m)
+void file::chmod(::cpp::filesystem::perms m)
 {
 	if ( fd != -1 )
 	{
