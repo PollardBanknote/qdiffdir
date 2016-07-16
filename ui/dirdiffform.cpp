@@ -1502,13 +1502,24 @@ void DirDiffForm::startComparison()
 {
     if (!ltree.name.empty() && !rtree.name.empty())
     {
-        for ( std::size_t i = 0, n = list.size(); i < n; ++i )
+        const std::size_t n = list.size();
+        std::size_t j = n;
+
+        for ( std::size_t i = 0; i < n; ++i )
         {
             if ( !list[i].items.left.empty() && !list[i].items.right.empty() && list[i].res == NOT_COMPARED )
             {
-                emit compare_files(qt::convert(ltree.name + "/" + list[i].items.left), qt::convert(rtree.name + "/" + list[i].items.right));
-                break;
+                if (!hidden(i))
+                {
+                    emit compare_files(qt::convert(ltree.name + "/" + list[i].items.left), qt::convert(rtree.name + "/" + list[i].items.right));
+                    return;
+                }
+                j = i;
             }
+        }
+        if (j < n)
+        {
+            emit compare_files(qt::convert(ltree.name + "/" + list[j].items.left), qt::convert(rtree.name + "/" + list[j].items.right));
         }
     }
 }
