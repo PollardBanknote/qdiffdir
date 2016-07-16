@@ -119,19 +119,6 @@ public:
 	 */
 	void setMatcher(const Matcher&);
 
-	/** Set the object used to compare matched items
-	 *
-	 * After items are matched, they are compared and the result is shown in
-	 * the widget. This function allows one to control how items are considered
-	 * to be "the same". By default, no items are considerd "the same".
-	 */
-	void setComparison(const Compare&);
-
-// void setLeftAndRight(const std::string& leftname, const std::string& rightname, const std::vector< std::string >& leftitems, const std::vector< std::string >& rightitems);
-	void updateLeft(const std::string& added_or_changed);
-	void updateLeft(const std::vector< std::string >& added_or_changed, const std::vector< std::string >& remove = std::vector< std::string >( ));
-	void updateRight(const std::string& added_or_changed);
-	void updateRight(const std::vector< std::string >& added_or_changed, const std::vector< std::string >& remove = std::vector< std::string >( ));
 public slots:
 	/** The "show left only" checkbox was toggled
 	 */
@@ -255,8 +242,12 @@ private:
 		{
 			return items.left.empty() || items.right.empty();
 		}
-
 	};
+
+    static bool compare_by_items(const comparison_t& a, const comparison_t& b)
+    {
+        return a.items < b.items;
+    }
 
 	void saveAs(const std::string&, const std::string& source, const std::string& destination);
 	void saveAs(const std::vector< std::string >&, const std::string&, const std::string&);
@@ -266,7 +257,6 @@ private:
 	void fileChanged(const std::string&);
 	void filesChanged(const std::vector< std::string >&);
 	QString renumber(const QString& s_);
-	QString dirName(const QDir& dir);
 	std::string getDirectory(const std::string& dir);
 	void change_depth(int);
 	void change_depth(int, bool, bool);
@@ -278,18 +268,6 @@ private:
 	void find_subdirs(std::set< std::string >& subdirs, const dirnode& n, const std::string&, int, int);
 	void refresh();
 
-	/// Get a list of all items on the left
-	std::vector< std::string > getAllLeft() const;
-
-	/// Get a list of all items on the right
-	std::vector< std::string > getAllRight() const;
-
-	/** Perform a matching on the two lists of items
-	 * @param l Items on the left
-	 * @param r Items on the right
-	 */
-	std::vector< items_t > match(const std::vector< std::string >& l, const std::vector< std::string >& r) const;
-
 	bool rescan(dirnode&, const std::string&, const std::string&, int, int);
 	bool rescan(dirnode&, const std::string&, int);
 
@@ -298,10 +276,6 @@ private:
 	/** Start a worker thread for comparing matched items
 	 */
 	void startComparison();
-
-	/** Match left and right items, restart the comparisons
-	 */
-	void rematch();
 
 	/** Check if an item should be hidden, according to current view options
 	 */

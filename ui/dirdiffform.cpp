@@ -666,7 +666,7 @@ void DirDiffForm::rematch_right(
 	// Recursively apply to subdirectories
 	for ( std::size_t i = 0, n = r.children.size(); i < n; ++i )
 	{
-        rematch_right(m, r.children[i], prefix + r.children[i].name + "/");
+		rematch_right(m, r.children[i], prefix + r.children[i].name + "/");
 	}
 
 	for ( std::size_t i = 0, n = r.files.size(); i < n; ++i )
@@ -787,33 +787,47 @@ void DirDiffForm::file_list_changed(
 )
 {
 	// Rematch files
-	ui->multilistview->clear();
 	std::vector< comparison_t > matched;
 
-    if (!ltree.name.empty() && !rtree.name.empty())
-        rematch(matched, ltree, rtree, "");
-    else if(!ltree.name.empty())
-        rematch_left(matched, ltree, "");
-    else rematch_right(matched, rtree, "");
-
-	if ( rootchanged )
+	if ( !ltree.name.empty() && !rtree.name.empty())
 	{
-		list.swap(matched);
+		rematch(matched, ltree, rtree, "");
 	}
-	else
+	else if ( !ltree.name.empty())
 	{
-		// copy over comparison results
-		/// @todo Save time by not redoing comparisons
-		list.swap(matched);
+		rematch_left(matched, ltree, "");
+	}
+    else if ( !rtree.name.empty())
+	{
+		rematch_right(matched, rtree, "");
 	}
 
-	// Redraw items
-	for ( std::size_t i = 0; i < list.size(); ++i )
-	{
-		QStringList items;
-		items << qt::convert(list[i].items.left) << qt::convert(list[i].items.right);
-		ui->multilistview->addItem(items);
-	}
+    ui->multilistview->clear();
+    list.swap(matched);
+
+    if (!rootchanged)
+    {
+        // Reuse the previous information
+        std::sort(matched.begin(), matched.end(), compare_by_items);
+
+        for (std::size_t i = 0; i < list.size(); ++i)
+        {
+            std::vector< comparison_t >::iterator it = std::lower_bound(matched.begin(), matched.end(), list[i], compare_by_items);
+            if (it != matched.end() && list[i].items == it->items)
+            {
+                list[i] = *it;
+            }
+        }
+    }
+
+    for ( std::size_t i = 0; i < list.size(); ++i )
+    {
+        QStringList items;
+        items << qt::convert(list[i].items.left) << qt::convert(list[i].items.right);
+        ui->multilistview->addItem(items);
+    }
+
+    applyFilters();
 
 	// Update file system watcher
 	std::set< std::string > subdirs;
@@ -1015,34 +1029,37 @@ bool DirDiffForm::rescan(
 	int                maxdepth
 )
 {
-    /// @todo binary search because children is sorted
-    for ( std::size_t i = 0; i < n.children.size(); ++i )
-    {
-        const std::string s = current_path + "/" + n.children[i].name;
+	/// @todo binary search because children is sorted
+	for ( std::size_t i = 0; i < n.children.size(); ++i )
+	{
+		const std::string s = current_path + "/" + n.children[i].name;
 
-        if (dirname == s)
-        {
-            // Found the dir
-            if (cpp::filesystem::is_directory(s))
-            {
-                n.children[i].children.clear();
-                n.children[i].files.clear();
-                change_depth(n.children[i], s, depth + 1, maxdepth);
-            }
-            else
-            {
-                // no longer exists on disk
-                n.children.erase(n.children.begin() + i);
-            }
-            return true;
-        }
-        else if (pbl::starts_with(dirname, s + "/"))
-        {
-            // Descend
-            return rescan(n.children[i], s, dirname, depth + 1, maxdepth);
-        }
-    }
-    return false;
+		if ( dirname == s )
+		{
+			// Found the dir
+			if ( cpp::filesystem::is_directory(s))
+			{
+				n.children[i].children.clear();
+				n.children[i].files.clear();
+				change_depth(n.children[i], s, depth + 1, maxdepth);
+			}
+			else
+			{
+				// no longer exists on disk
+				n.children.erase(n.children.begin() + i);
+			}
+
+			return true;
+		}
+		else if ( pbl::starts_with(dirname, s + "/"))
+		{
+
+			// Descend
+			return rescan(n.children[i], s, dirname, depth + 1, maxdepth);
+		}
+	}
+
+	return false;
 }
 
 bool DirDiffForm::rescan(
@@ -1064,7 +1081,7 @@ bool DirDiffForm::rescan(
 
 		if ( cpp::filesystem::is_directory(dirname))
 		{
-            change_depth(n, maxdepth);
+			change_depth(n, maxdepth);
 
 			return true;
 		}
@@ -1078,8 +1095,10 @@ bool DirDiffForm::rescan(
 	}
 	else
 	{
-        if (pbl::starts_with(dirname, n.name + "/"))
-            rescan(n, n.name, dirname, 0, maxdepth);
+		if ( pbl::starts_with(dirname, n.name + "/"))
+		{
+			rescan(n, n.name, dirname, 0, maxdepth);
+		}
 
 		return true;
 	}
@@ -1138,45 +1157,10 @@ void DirDiffForm::fileChanged(const std::string& file)
 	startComparison();
 }
 
-void DirDiffForm::filesChanged(const std::vector< std::string >& files)
+void DirDiffForm::filesChanged(const std::vector< std::string >&)
 {
-	std::vector< std::string > l;
-	std::vector< std::string > r;
-
-	const std::string lloc = ltree.name.empty() ? "" : ltree.name + "/";
-	const std::string rloc = rtree.name.empty() ? "" : rtree.name + "/";
-
-	for ( std::size_t i = 0, n = files.size(); i < n; ++i )
-	{
-		std::string file = files[i];
-
-		if ( !lloc.empty() && pbl::starts_with(file, lloc))
-		{
-			l.push_back(file.substr(lloc.length()));
-		}
-
-		if ( !rloc.empty() && pbl::starts_with(file, rloc))
-		{
-			r.push_back(file.substr(rloc.length()));
-		}
-	}
-
-	updateLeft(l);
-	updateRight(r);
-}
-
-// sometimes QDir::dirName returns ".", so we use this instead
-// Includes the trailing backslash. Simplified.
-QString DirDiffForm::dirName(const QDir& dir)
-{
-	QString s = QDir::cleanPath(dir.absolutePath());
-
-	if ( !s.endsWith(QDir::separator()))
-	{
-		s += QDir::separator();
-	}
-
-	return s;
+    /// @todo Too much work
+    refresh();
 }
 
 void DirDiffForm::on_refresh_clicked()
@@ -1526,158 +1510,6 @@ void DirDiffForm::on_actionCopy_To_Clipboard_triggered()
 	clipboard->setText(temp);
 }
 
-/*
-   void DirDiffForm::setLeftAndRight(
-    const std::string&                leftname_,
-    const std::string&                rightname_,
-    const std::vector< std::string >& leftitems,
-    const std::vector< std::string >& rightitems
-   )
-   {
-    derp.stopComparison();
-
-    {
-        // Update internal list
-        std::set< std::string > ignore_left;
-        std::set< std::string > ignore_right;
-
-        for ( std::size_t i = 0, n = list.size(); i < n; ++i )
-        {
-            if ( list[i].ignore )
-            {
-                if ( !list[i].items.left.empty())
-                {
-                    ignore_left.insert(list[i].items.left);
-                }
-
-                if ( !list[i].items.right.empty())
-                {
-                    ignore_right.insert(list[i].items.right);
-                }
-            }
-        }
-
-        std::vector< items_t > filepairs = match(leftitems, rightitems);
-
-        std::vector< comparison_t > temp;
-
-        for ( std::size_t i = 0, n = filepairs.size(); i < n; ++i )
-        {
-            comparison_t c = { filepairs[i], false, false, false };
-
-            if ( ignore_left.count(filepairs[i].left) != 0 || ignore_right.count(filepairs[i].right) != 0 )
-            {
-                c.ignore = true;
-            }
-
-            temp.push_back(c);
-        }
-
-        list      = temp;
-        leftname  = qt::convert(leftname_);
-        rightname = qt::convert(rightname_);
-    }
-
-    ui->multilistview->clear();
-
-    for ( std::size_t i = 0, n = list.size(); i < n; ++i )
-    {
-        QStringList items;
-        items << qt::convert(list[i].items.left) << qt::convert(list[i].items.right);
-        ui->multilistview->addItem(items);
-    }
-
-    applyFilters();
-    setComparison(FileCompare2(leftname_, rightname_));
-   }
- */
-
-std::vector< items_t > DirDiffForm::match(
-	const std::vector< std::string >& leftitems,
-	const std::vector< std::string >& rightitems
-) const
-{
-	return std::vector< items_t >();
-
-	#if 0
-	std::map< int, std::vector< items_t > > score;
-
-	for ( std::size_t il = 0, nl = leftitems.size(); il < nl; ++il )
-	{
-		for ( std::size_t ir = 0, nr = rightitems.size(); ir < nr; ++ir )
-		{
-			score[derp.match(leftitems[il], rightitems[ir])].push_back(
-				items_t(leftitems[il], rightitems[ir]));
-		}
-	}
-
-	std::vector< items_t > matching;
-
-	std::set< std::string > leftmatched;
-	std::set< std::string > rightmatched;
-
-	for ( std::map< int, std::vector< items_t > >::iterator it = score.begin(); it != score.end(); ++it )
-	{
-		if ( it->first != Matcher::DO_NOT_MATCH )
-		{
-			std::vector< items_t > l = it->second;
-
-			for ( std::size_t i = 0; i < l.size(); ++i )
-			{
-				if ( leftmatched.count(l[i].left) == 0 && rightmatched.count(l[i].right) == 0 )
-				{
-					matching.push_back(l[i]);
-					leftmatched.insert(l[i].left);
-					rightmatched.insert(l[i].right);
-				}
-			}
-		}
-	}
-
-	for ( std::size_t i = 0, n = leftitems.size(); i < n; ++i )
-	{
-		if ( leftmatched.count(leftitems[i]) == 0 )
-		{
-			matching.push_back(items_t(leftitems[i], std::string()));
-		}
-	}
-
-	for ( std::size_t i = 0, n = rightitems.size(); i < n; ++i )
-	{
-		if ( rightmatched.count(rightitems[i]) == 0 )
-		{
-			matching.push_back(items_t(std::string(), rightitems[i]));
-		}
-	}
-
-	std::sort(matching.begin(), matching.end());
-
-	return matching;
-
-	#endif
-}
-
-void DirDiffForm::setComparison(const Compare& comp)
-{
-	#if 0
-
-	if ( Compare* p = comp.clone())
-	{
-		derp.stopComparison();
-		derp.setCompare(p);
-
-		for ( std::size_t i = 0; i < list.size(); ++i )
-		{
-			list[i].compared = false;
-		}
-
-		startComparison();
-
-	}
-
-	#endif
-}
-
 void DirDiffForm::startComparison()
 {
 	#if 0
@@ -1698,235 +1530,6 @@ void DirDiffForm::startComparison()
 	}
 
 	#endif
-}
-
-std::vector< std::string > DirDiffForm::getAllLeft() const
-{
-	std::vector< std::string > l;
-
-	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
-	{
-		if ( !list[i].items.left.empty())
-		{
-			l.push_back(list[i].items.left);
-		}
-	}
-
-	return l;
-}
-
-std::vector< std::string > DirDiffForm::getAllRight() const
-{
-	std::vector< std::string > l;
-
-	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
-	{
-		if ( !list[i].items.right.empty())
-		{
-			l.push_back(list[i].items.right);
-		}
-	}
-
-	return l;
-}
-
-void DirDiffForm::updateLeft(const std::string& added_or_changed)
-{
-	std::vector< std::string > v(1, added_or_changed);
-
-	updateLeft(v);
-}
-
-void DirDiffForm::updateLeft(
-	const std::vector< std::string >& added_or_changed,
-	const std::vector< std::string >& remove
-)
-{
-	std::set< std::string > oldleft;
-
-	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
-	{
-		if ( !list[i].items.left.empty())
-		{
-			if ( pbl::contains(remove, list[i].items.left))
-			{
-				list[i].items.left = std::string();
-				list[i].res        = NOT_COMPARED;
-				ui->multilistview->clearText(0, i);
-			}
-			else if ( pbl::contains(added_or_changed, list[i].items.left))
-			{
-				list[i].res = NOT_COMPARED;
-			}
-
-			oldleft.insert(list[i].items.left);
-		}
-	}
-
-	for ( std::size_t i = 0, n = added_or_changed.size(); i < n; ++i )
-	{
-		const std::string item = added_or_changed.at(i);
-
-		// was item added?
-		if ( oldleft.count(item) == 0 )
-		{
-			items_t x(item, std::string());
-
-			std::size_t j = 0;
-
-			while ( j < list.size() && list[j].items < x )
-			{
-				++j;
-			}
-
-			comparison_t y = { x, NOT_COMPARED, false };
-
-			// insert into the list
-			list.insert(list.begin() + j, y);
-
-			QStringList items;
-			items << qt::convert(item) << QString();
-			ui->multilistview->insertItem(j, items);
-		}
-	}
-
-	// remove empty items
-	for ( std::size_t i = 0; i < list.size();)
-	{
-		if ( list[i].items.right.empty() && list[i].items.left.empty())
-		{
-			ui->multilistview->removeItem(i);
-			list.erase(list.begin() + i);
-		}
-		else
-		{
-			++i;
-		}
-	}
-
-	rematch();
-}
-
-void DirDiffForm::updateRight(const std::string& added_or_changed)
-{
-	updateRight(std::vector< std::string >(1, added_or_changed));
-}
-
-void DirDiffForm::updateRight(
-	const std::vector< std::string >& added_or_changed,
-	const std::vector< std::string >& remove
-)
-{
-	std::set< std::string > oldright;
-
-	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
-	{
-		if ( !list[i].items.right.empty())
-		{
-			if ( pbl::contains(remove, list[i].items.right))
-			{
-				list[i].items.right = std::string();
-				list[i].res         = NOT_COMPARED;
-				ui->multilistview->clearText(1, i);
-			}
-			else if ( pbl::contains(added_or_changed, list[i].items.right))
-			{
-				list[i].res = NOT_COMPARED;
-			}
-
-			oldright.insert(list[i].items.right);
-		}
-	}
-
-	for ( std::size_t i = 0, n = added_or_changed.size(); i < n; ++i )
-	{
-		const std::string item = added_or_changed[i];
-
-		// was item added?
-		if ( oldright.count(item) == 0 )
-		{
-			items_t x(std::string(), item);
-
-			std::size_t j = 0;
-
-			while ( j < list.size() && list[j].items < x )
-			{
-				++j;
-			}
-
-			comparison_t y = { x, NOT_COMPARED, false };
-
-			// insert into the list
-			list.insert(list.begin() + j, y);
-
-			QStringList items;
-			items << QString() << qt::convert(item);
-			ui->multilistview->insertItem(j, items);
-		}
-	}
-
-	// remove empty items
-	for ( std::size_t i = 0; i < list.size();)
-	{
-		if ( list[i].items.left.empty() && list[i].items.right.empty())
-		{
-			ui->multilistview->removeItem(i);
-			list.erase(list.begin() + i);
-		}
-		else
-		{
-			++i;
-		}
-	}
-
-	rematch();
-}
-
-void DirDiffForm::rematch()
-{
-	#if 0
-	// rematch filenames
-	std::vector< items_t > matching = match(getAllLeft(), getAllRight());
-
-	// erase all existing rows that are not in the new matching
-	for ( std::size_t i = 0; i < list.size();)
-	{
-		std::size_t j = 0;
-
-		while ( j < matching.size() && list[i].items != matching[j] )
-		{
-			++j;
-		}
-
-		if ( j == matching.size())
-		{
-			ui->multilistview->removeItem(i);
-			list.erase(list.begin() + i);
-		}
-		else
-		{
-			++i;
-		}
-	}
-
-	// add all items in matching that aren't in the current view
-	for ( std::size_t i = 0; i < matching.size(); ++i )
-	{
-		if ( i >= list.size() || matching[i] != list[i].items )
-		{
-			comparison_t c = { matching[i], false, false, false };
-			list.insert(list.begin() + i, c);
-
-			QStringList items;
-			items << qt::convert(matching[i].left) << qt::convert(matching[i].right);
-			ui->multilistview->insertItem(i, items);
-		}
-	}
-
-	startComparison();
-	applyFilters();
-	#endif
-
 }
 
 void DirDiffForm::on_actionSelect_Different_triggered()
