@@ -244,10 +244,7 @@ private:
 		}
 	};
 
-    static bool compare_by_items(const comparison_t& a, const comparison_t& b)
-    {
-        return a.items < b.items;
-    }
+    static bool compare_by_items(const comparison_t& a, const comparison_t& b);
 
 	void saveAs(const std::string&, const std::string& source, const std::string& destination);
 	void saveAs(const std::vector< std::string >&, const std::string&, const std::string&);

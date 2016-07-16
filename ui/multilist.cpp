@@ -28,6 +28,8 @@
  */
 #include "multilist.h"
 
+#include <iostream>
+
 #include <QHBoxLayout>
 #include <QListWidget>
 #include <QScrollBar>
@@ -68,20 +70,23 @@ MultiList::MultiList(QWidget* parent) :
 
 	setLayout(layout);
 
-	verticalScrollBar = new QScrollBar(Qt::Vertical, this);
-	connect(verticalScrollBar, SIGNAL(valueChanged(int)), SLOT(sync_scroll(int)));
-
 	for ( int i = 0; i < 2; ++i )
 	{
 		if ( QListWidget* dir = new QListWidget(this))
 		{
 			dirs.push_back(dir);
 			dir->setContextMenuPolicy(Qt::NoContextMenu);
-			dir->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 			dir->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
 			// Sync scrollbar
-			connect(dir->verticalScrollBar(), SIGNAL(valueChanged(int)), verticalScrollBar, SLOT(setValue(int)));
+            if (i == 0)
+            {
+                connect(dir->verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(sync_scroll(int)));
+            }
+            else
+            {
+                dir->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+            }
 
 			// Keep selections in sync
 			connect(dir, SIGNAL(itemSelectionChanged()), SLOT(update_selection()));
@@ -92,8 +97,6 @@ MultiList::MultiList(QWidget* parent) :
 		}
 	}
 
-	layout->insertWidget(1, verticalScrollBar);
-
 	update_scroll_range();
 }
 
@@ -103,14 +106,11 @@ MultiList::~MultiList()
 
 void MultiList::sync_scroll(int val)
 {
-	for ( std::size_t i = 0; i < dirs.size(); ++i )
+    for ( std::size_t i = 1; i < dirs.size(); ++i )
 	{
 		if ( QListWidget* dir = dirs[i] )
 		{
-			if ( dir->verticalScrollBar()->value() != val )
-			{
-				dir->verticalScrollBar()->setValue(val);
-			}
+            dir->verticalScrollBar()->setValue(val);
 		}
 	}
 }
@@ -166,6 +166,7 @@ void MultiList::clear()
 	{
 		dirs[i]->clear();
 	}
+    update_scroll_range();
 }
 
 void MultiList::addItem(const QStringList& items)
@@ -189,13 +190,16 @@ void MultiList::addItem(const QStringList& items)
 
 void MultiList::update_scroll_range()
 {
+    /*
 	if ( !dirs.empty())
 	{
 		if ( QScrollBar* sb = dirs[0]->verticalScrollBar())
 		{
+            std::cout << sb->minimum() << " : " << sb->maximum() << std::endl;
 			verticalScrollBar->setRange(sb->minimum(), sb->maximum());
 		}
 	}
+    */
 }
 
 void MultiList::clearText(

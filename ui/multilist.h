@@ -86,7 +86,6 @@ private:
 	void update_scroll_range();
 
 	std::vector< QListWidget* > dirs;
-	QScrollBar*                 verticalScrollBar;
 };
 
 #endif // MULTILIST_H

@@ -802,29 +802,50 @@ void DirDiffForm::file_list_changed(
 		rematch_right(matched, rtree, "");
 	}
 
-    ui->multilistview->clear();
-    list.swap(matched);
-
+    /// @todo Save list widget items
     if (!rootchanged)
     {
         // Reuse the previous information
-        std::sort(matched.begin(), matched.end(), compare_by_items);
-
-        for (std::size_t i = 0; i < list.size(); ++i)
+        for (std::size_t i = 0, n = list.size(); i < n; )
         {
             std::vector< comparison_t >::iterator it = std::lower_bound(matched.begin(), matched.end(), list[i], compare_by_items);
             if (it != matched.end() && list[i].items == it->items)
             {
-                list[i] = *it;
+                // keep item
+                matched.erase(it);
+                ++i;
+            }
+            else
+            {
+                // remove item
+                list.erase(list.begin() + i);
+                --n;
+                ui->multilistview->removeItem(i);
             }
         }
-    }
 
-    for ( std::size_t i = 0; i < list.size(); ++i )
+        // Insert new items
+        for (std::size_t i = 0, n = matched.size(); i < n; ++i)
+        {
+            std::vector< comparison_t >::iterator it = std::upper_bound(list.begin(), list.end(), matched[i], compare_by_items);
+            const std::size_t j = it - list.begin();
+            list.insert(it, matched[i]);
+            QStringList labels;
+            labels << qt::convert(matched[i].items.left) << qt::convert(matched[i].items.right);
+            ui->multilistview->insertItem(j, labels);
+        }
+    }
+    else
     {
-        QStringList items;
-        items << qt::convert(list[i].items.left) << qt::convert(list[i].items.right);
-        ui->multilistview->addItem(items);
+        ui->multilistview->clear();
+        list.swap(matched);
+
+        for ( std::size_t i = 0; i < list.size(); ++i )
+        {
+            QStringList items;
+            items << qt::convert(list[i].items.left) << qt::convert(list[i].items.right);
+            ui->multilistview->addItem(items);
+        }
     }
 
     applyFilters();
@@ -1107,7 +1128,6 @@ bool DirDiffForm::rescan(
 // File system has notified us of a change in one of our directories
 void DirDiffForm::contentsChanged(QString dirname_)
 {
-	std::cout << "Directory changed " << qt::convert(dirname_) << std::endl;
 	const std::string dirname = cpp::filesystem::cleanpath(qt::convert(dirname_));
 
 	const int d = ui->depth->value();
@@ -1153,8 +1173,6 @@ void DirDiffForm::fileChanged(const std::string& file)
 			}
 		}
 	}
-
-	startComparison();
 }
 
 void DirDiffForm::filesChanged(const std::vector< std::string >&)
@@ -1365,19 +1383,21 @@ void DirDiffForm::items_compared(
 	bool           equal
 )
 {
+
 	const std::string first  = qt::convert(first_);
 	const std::string second = qt::convert(second_);
 
 	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
 	{
-		if ( list[i].items.left == first && list[i].items.right == second )
+        if ( ltree.name + "/" + list[i].items.left == first && rtree.name + "/" + list[i].items.right == second )
 		{
 			list[i].res = equal ? COMPARED_SAME : COMPARED_DIFFERENT;
 			applyFilters();
-
-			return;
+            break;
 		}
 	}
+
+    startComparison();
 }
 
 void DirDiffForm::clearFilter()
@@ -1512,24 +1532,17 @@ void DirDiffForm::on_actionCopy_To_Clipboard_triggered()
 
 void DirDiffForm::startComparison()
 {
-	#if 0
-	std::vector< items_t > matches;
-
-	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
-	{
-		if ( !list[i].items.left.empty() && !list[i].items.right.empty() && !list[i].compared )
-		{
-			matches.push_back(list[i].items);
-		}
-	}
-
-	if ( !matches.empty())
-	{
-		derp.stopComparison();
-		derp.startWorker(matches);
-	}
-
-	#endif
+    if (!ltree.name.empty() && !rtree.name.empty())
+    {
+        for ( std::size_t i = 0, n = list.size(); i < n; ++i )
+        {
+            if ( !list[i].items.left.empty() && !list[i].items.right.empty() && list[i].res == NOT_COMPARED )
+            {
+                emit compare_files(qt::convert(ltree.name + "/" + list[i].items.left), qt::convert(rtree.name + "/" + list[i].items.right));
+                break;
+            }
+        }
+    }
 }
 
 void DirDiffForm::on_actionSelect_Different_triggered()
@@ -1592,13 +1605,60 @@ void DirDiffForm::on_actionSelect_Right_Only_triggered()
 	ui->multilistview->setSelectedRows(indices);
 }
 
+bool DirDiffForm::compare_by_items(const DirDiffForm::comparison_t &a, const DirDiffForm::comparison_t &b)
+{
+    const std::string l = a.items.left.empty() ? a.items.right : a.items.left;
+    const std::string r = b.items.left.empty() ? b.items.right : b.items.left;
+    const std::size_t nl = l.length();
+    const std::size_t nr = r.length();
+
+    // directories before files
+    std::size_t il = 0; // start of path component
+    std::size_t ir = 0;
+
+    while (true)
+    {
+        std::size_t jl = il; // find end of path component
+        std::size_t jr = ir;
+        while (jl < nl && l[jl] != '/')
+            ++jl;
+        while (jr < nr && r[jr] != '/')
+            ++jr;
+
+        if (jl == nl && jr == nr)
+        {
+            // at last path component for both
+            return l.compare(il, jl - il, r, ir, jr - ir) == -1;
+        }
+        if (jl == nl)
+        {
+            // first points to a file and files come after directories
+            return false;
+        }
+        if (jr == nr)
+        {
+            // second points to a file and files come after directories
+            return true;
+        }
+
+        // both at directories
+        const int res = l.compare(il, jl - il, r, ir, jr - ir);
+        if (res != 0)
+            return res == -1;
+
+        // next path component
+        il = jl + 1;
+        ir = jr + 1;
+    }
+}
+
 namespace
 {
 bool is_hidden(const cpp::filesystem::path& p)
 {
-	const std::string s = p.filename().native();
+    const std::string s = p.filename().native();
 
-	return !s.empty() && s[0] == '.';
+    return !s.empty() && s[0] == '.';
 }
 
 }
@@ -1643,7 +1703,7 @@ void FileCompare::compare(
 	pbl::fs::file f(first.toStdString(), pbl::fs::file::readonly);
 	pbl::fs::file g(second.toStdString(), pbl::fs::file::readonly);
 
-	emit compared(first, second, f.compare(g));
+    emit compared(first, second, f.compare(g) == 1);
 }
 
 int FileNameMatcher::compare(
