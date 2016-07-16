@@ -222,19 +222,26 @@ private slots:
 	void on_actionSelect_Right_Only_triggered();
 private:
 	enum overwrite_t {OVERWRITE_ASK, OVERWRITE_YES, OVERWRITE_NO};
+    enum compare_result_t { NOT_COMPARED, COMPARED_SAME, COMPARED_DIFFERENT };
 
     struct dirnode
     {
         std::string name;
         std::vector< dirnode > children;
         std::vector< std::string > files;
+
+        void swap(dirnode& n)
+        {
+            name.swap(n.name);
+            children.swap(n.children);
+            files.swap(n.files);
+        }
     };
 
     struct comparison_t
     {
         items_t items;
-        bool compared;
-        bool same;
+        compare_result_t res;
         bool ignore;
 
         bool left_only() const
@@ -265,12 +272,13 @@ private:
 	QString dirName(const QDir& dir);
     std::string getDirectory(const std::string& dir);
     void change_depth(int);
+    void change_depth(int, bool, bool);
     void change_depth(dirnode&, int);
     void change_depth(dirnode&, const std::string&, int, int);
     void rematch(std::vector< comparison_t >&, const dirnode&, const dirnode&, const std::string&);
     void rematch_left(std::vector< comparison_t >&, const dirnode&, const std::string&);
     void rematch_right(std::vector< comparison_t >&, const dirnode&, const std::string&);
-    void find_subdirs(std::set< std::string >& subdirs, const dirnode& n, const std::string&);
+    void find_subdirs(std::set< std::string >& subdirs, const dirnode& n, const std::string&, int, int);
     void refresh();
 
 	/// Get a list of all items on the left
@@ -285,9 +293,10 @@ private:
 	 */
 	std::vector< items_t > match(const std::vector< std::string >& l, const std::vector< std::string >& r) const;
 
-    bool rescan(dirnode&, const std::string&);
+    bool rescan(dirnode&, const std::string&, const std::string&, int, int);
+    bool rescan(dirnode&, const std::string&, int);
 
-    void file_list_changed();
+    void file_list_changed(int depth, bool);
 
 	/** Start a worker thread for comparing matched items
 	 */
