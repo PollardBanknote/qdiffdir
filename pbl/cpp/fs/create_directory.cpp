@@ -3,7 +3,7 @@
 #include <sys/stat.h>
 
 #include "perms.h"
-#include "exists.h"
+#include "filestatus.h"
 
 namespace cpp17
 {

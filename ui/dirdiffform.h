@@ -29,6 +29,8 @@
 #ifndef DIRDIFFFORM_H
 #define DIRDIFFFORM_H
 
+#include <set>
+
 #include <QMap>
 #include <QWidget>
 #include <QDateTime>
@@ -47,6 +49,43 @@ namespace Ui
 {
 class DirDiffForm;
 }
+
+class FileSystem
+{
+public:
+    // return (files, subdirs) of path
+    std::pair< std::vector< std::string >, std::vector< std::string > > contents(const std::string&);
+private:
+};
+
+class FileCompare : public QObject
+{
+    Q_OBJECT
+public slots:
+    void compare(const QString& first, const QString& second);
+signals:
+    void compared(const QString& first, const QString& second, bool);
+};
+
+class FileNameMatcher
+{
+public:
+    int compare(
+        const std::string& a,
+        const std::string& b
+    ) const;
+
+private:
+    // ext <=> ext.gz
+    static std::string gzalt(const std::string& s);
+
+    // c <=> cpp
+    static std::string cppalt(const std::string& s);
+
+    // c <=> cpp.gz or cpp <=> c.gz
+    static std::string cgalt(const std::string& s);
+
+};
 
 /** A widget for comparing two directories, with some file operations
  *
@@ -92,7 +131,7 @@ public:
 	 */
 	void setComparison(const Compare&);
 
-	void setLeftAndRight(const std::string& leftname, const std::string& rightname, const std::vector< std::string >& leftitems, const std::vector< std::string >& rightitems);
+//	void setLeftAndRight(const std::string& leftname, const std::string& rightname, const std::vector< std::string >& leftitems, const std::vector< std::string >& rightitems);
 	void updateLeft(const std::string& added_or_changed);
 	void updateLeft(const std::vector< std::string >& added_or_changed, const std::vector< std::string >& remove = std::vector< std::string >( ));
 	void updateRight(const std::string& added_or_changed);
@@ -123,6 +162,8 @@ signals:
 	 * @param r The right item
 	 */
 	void itemDoubleClicked(QString l, QString r);
+
+    void compare_files(const QString&, const QString&);
 private slots:
 	void on_viewdiff_clicked();
 	void on_copytoright_clicked();
@@ -171,7 +212,7 @@ private slots:
 	 * @param r The identifier of the right item
 	 * @param same True iff items compared "the same"
 	 */
-	void items_compared(QString l, QString r, bool same);
+    void items_compared(const QString& l, const QString& r, bool same);
 	void on_actionSelect_Different_triggered();
 
 	void on_actionSelect_Same_triggered();
@@ -182,7 +223,38 @@ private slots:
 private:
 	enum overwrite_t {OVERWRITE_ASK, OVERWRITE_YES, OVERWRITE_NO};
 
-	void saveAs(const std::string&, const std::string& source, const std::string& destination);
+    struct dirnode
+    {
+        std::string name;
+        std::vector< dirnode > children;
+        std::vector< std::string > files;
+    };
+
+    struct comparison_t
+    {
+        items_t items;
+        bool compared;
+        bool same;
+        bool ignore;
+
+        bool left_only() const
+        {
+            return !items.left.empty() && items.right.empty();
+        }
+
+        bool right_only() const
+        {
+            return items.left.empty() && !items.right.empty();
+        }
+
+        bool unmatched() const
+        {
+            return items.left.empty() || items.right.empty();
+        }
+
+    };
+
+    void saveAs(const std::string&, const std::string& source, const std::string& destination);
 	void saveAs(const std::vector< std::string >&, const std::string&, const std::string&);
 	std::pair< bool, overwrite_t > copyTo(const std::string & file, const std::string & destdir, const std::string & newname, overwrite_t);
 	void stopDirectoryWatcher();
@@ -191,31 +263,15 @@ private:
 	void filesChanged(const std::vector< std::string >&);
 	QString renumber(const QString& s_);
 	QString dirName(const QDir& dir);
-	QString getDirectory(const QString& dir);
-
-	struct comparison_t
-	{
-		items_t items;
-		bool compared;
-		bool same;
-		bool ignore;
-
-		bool left_only() const
-		{
-			return !items.left.empty() && items.right.empty();
-		}
-
-		bool right_only() const
-		{
-			return items.left.empty() && !items.right.empty();
-		}
-
-		bool unmatched() const
-		{
-			return items.left.empty() || items.right.empty();
-		}
-
-	};
+    std::string getDirectory(const std::string& dir);
+    void change_depth(int);
+    void change_depth(dirnode&, int);
+    void change_depth(dirnode&, const std::string&, int, int);
+    void rematch(std::vector< comparison_t >&, const dirnode&, const dirnode&, const std::string&);
+    void rematch_left(std::vector< comparison_t >&, const dirnode&, const std::string&);
+    void rematch_right(std::vector< comparison_t >&, const dirnode&, const std::string&);
+    void find_subdirs(std::set< std::string >& subdirs, const dirnode& n, const std::string&);
+    void refresh();
 
 	/// Get a list of all items on the left
 	std::vector< std::string > getAllLeft() const;
@@ -228,6 +284,10 @@ private:
 	 * @param r Items on the right
 	 */
 	std::vector< items_t > match(const std::vector< std::string >& l, const std::vector< std::string >& r) const;
+
+    bool rescan(dirnode&, const std::string&);
+
+    void file_list_changed();
 
 	/** Start a worker thread for comparing matched items
 	 */
@@ -243,6 +303,10 @@ private:
 
 	/// Pointer to UI class c/o Qt Creator
 	Ui::DirDiffForm* ui;
+
+    QThread compare_thread;
+
+    FileNameMatcher matcher;
 
 	/// A filter for which items to show
 	QRegExp filter;
@@ -262,11 +326,18 @@ private:
 	QString leftname;
 	QString rightname;
 
-	std::vector< comparison_t > list;
+    FileSystem scanner;
 
-	DirectoryComparison derp;
+    dirnode ltree;
+    dirnode rtree;
+
+	std::vector< comparison_t > list;
+    /*
+    DirectoryComparison derp;
+    */
 	QDateTime           when;                  // last time directories were updated
 	QFileSystemWatcher* watcher;
+    std::set< std::string > watched_dirs;
 };
 
 #endif // DIRDIFFFORM_H

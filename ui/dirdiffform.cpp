@@ -45,6 +45,8 @@
 #include <QDesktopServices>
 #include <QUrl>
 
+#include "cpp/filesystem.h"
+
 #include "util/file.h"
 #include "util/strings.h"
 #include "util/containers.h"
@@ -60,10 +62,10 @@ namespace
 
 // Check that two files are equal. Files are relative to the directories passed
 // to the constructor
-class FileCompare : public Compare
+class FileCompare2 : public Compare
 {
 public:
-	FileCompare(
+    FileCompare2(
 		const std::string& l,
 		const std::string& r
 	)
@@ -72,9 +74,9 @@ public:
 
 	}
 
-	FileCompare* clone() const
+    FileCompare2* clone() const
 	{
-		return new FileCompare(*this);
+        return new FileCompare2(*this);
 	}
 
 	/// @todo Don't unzip a file if we don't need to
@@ -139,107 +141,6 @@ private:
 
 };
 
-class FileNameMatcher : public Matcher
-{
-public:
-	FileNameMatcher* clone() const
-	{
-		return new FileNameMatcher;
-	}
-
-	int compare(
-		const std::string& a,
-		const std::string& b
-	) const
-	{
-		if ( a == b )
-		{
-			return EXACT_MATCH;
-		}
-
-		if ( a == gzalt(b))
-		{
-			return 1;
-		}
-
-		if ( a == cppalt(b))
-		{
-			return 2;
-		}
-
-		if ( a == cgalt(b))
-		{
-			return 3;
-		}
-
-		return DO_NOT_MATCH;
-	}
-
-private:
-	// ext <=> ext.gz
-	static std::string gzalt(const std::string& s)
-	{
-		if ( !pbl::ends_with(s, ".gz"))
-		{
-			return s + ".gz";
-		}
-
-		std::string t(s, 0, s.length() - 3);
-
-		return t;
-	}
-
-	// c <=> cpp
-	static std::string cppalt(const std::string& s)
-	{
-		if ( pbl::ends_with(s, ".cpp"))
-		{
-			std::string t(s, 0, s.length() - 2);
-
-			return t;
-		}
-
-		if ( pbl::ends_with(s, ".c"))
-		{
-			return s + "pp";
-		}
-
-		return std::string();
-	}
-
-	// c <=> cpp.gz or cpp <=> c.gz
-	static std::string cgalt(const std::string& s)
-	{
-		if ( pbl::ends_with(s, ".cpp"))
-		{
-			std::string t(s, 0, s.length() - 2);
-
-			return t + ".gz";
-		}
-
-		if ( pbl::ends_with(s, ".c"))
-		{
-			return s + "pp.gz";
-		}
-
-		if ( pbl::ends_with(s, ".c.gz"))
-		{
-			std::string t(s, 0, s.length() - 3);
-
-			return t + "pp";
-		}
-
-		if ( pbl::ends_with(s, ".cpp.gz"))
-		{
-			std::string t(s, 0, s.length() - 5);
-
-			return t;
-		}
-
-		return std::string();
-	}
-
-};
 
 }
 
@@ -261,6 +162,14 @@ DirDiffForm::DirDiffForm(QWidget* parent_) :
 	watcher()
 {
 	ui->setupUi(this);
+
+    FileCompare* comparer = new FileCompare;
+    comparer->moveToThread(&compare_thread);
+    connect(&compare_thread, SIGNAL(finished()), comparer, SLOT(deleteLater()));
+    connect(this, SIGNAL(compare_files(QString,QString)), comparer, SLOT(compare(QString,QString)));
+    connect(comparer, SIGNAL(compared(QString,QString,bool)), SLOT(items_compared(QString,QString,bool)));
+    compare_thread.start();
+
 	ui->openleftdir->setIcon(get_icon("folder"));
 	ui->openrightdir->setIcon(get_icon("folder"));
 	ui->refresh->setIcon(get_icon("view-refresh"));
@@ -278,16 +187,16 @@ DirDiffForm::DirDiffForm(QWidget* parent_) :
 	ui->multilistview->addAction(ui->actionSelect_Right_Only);
 	connect(ui->multilistview, SIGNAL(itemActivated(int)), SLOT(viewfiles(int)));
 
-	connect(&derp, SIGNAL(compared(QString,QString,bool)), SLOT(items_compared(QString,QString,bool)));
+    const std::string p = cpp::filesystem::current_path().native();
 
-	derp.setMatcher(FileNameMatcher());
-	changeDirectories(derp.getLeftLocation(), derp.getRightLocation());
+    changeDirectories(p, p);
 }
 
 DirDiffForm::~DirDiffForm()
 {
-	derp.stopComparison();
-	delete ui;
+    compare_thread.quit();
+    compare_thread.wait();
+    delete ui;
 }
 
 void DirDiffForm::setFlags(
@@ -321,17 +230,21 @@ void DirDiffForm::on_viewdiff_clicked()
 
 		if ( s1.empty()) // view s2
 		{
-			QProcess::startDetached(settings.getEditor(), QStringList(qt::convert(s2)), qt::convert(derp.getRightLocation()));
+            cpp::filesystem::path p(rtree.name + "/" + s2);
+            cpp::filesystem::path q = p.parent_path();
+            QProcess::startDetached(settings.getEditor(), QStringList(qt::convert(p.filename().native())), qt::convert(q.native()));
 		}
 		else if ( s2.empty()) // view s1
 		{
-			QProcess::startDetached(settings.getEditor(), QStringList(qt::convert(s1)), qt::convert(derp.getLeftLocation()));
+            cpp::filesystem::path p(ltree.name + "/" + s1);
+            cpp::filesystem::path q = p.parent_path();
+            QProcess::startDetached(settings.getEditor(), QStringList(qt::convert(p.filename().native())), qt::convert(q.native()));
 		}
 		else
 		{
 			QStringList l;
-			l << QString::fromStdString(derp.getLeftLocation(s1))
-			  << QString::fromStdString(derp.getRightLocation(s2));
+            l << QString::fromStdString(ltree.name + "/" + s1)
+              << QString::fromStdString(rtree.name + "/" + s2);
 			QProcess::startDetached(settings.getDiffTool(), l);
 		}
 	}
@@ -409,8 +322,8 @@ void DirDiffForm::on_copytoright_clicked()
 
 		if ( !rel.empty())
 		{
-			const std::string              source_file = derp.getLeftLocation(rel);
-			const std::string              dest_file   = derp.getRightLocation() + "/" + rel;
+            const std::string              source_file = ltree.name + "/" + rel;
+            const std::string              dest_file   = rtree.name + "/" + rel;
 			const std::string              dest_dir    = cpp::filesystem::dirname(dest_file);
 			const std::string              file_name   = cpp::filesystem::basename(source_file);
 			std::pair< bool, overwrite_t > res         = copyTo(source_file, dest_dir, file_name, overwrite);
@@ -454,8 +367,8 @@ void DirDiffForm::on_copytoleft_clicked()
 
 		if ( !rel.empty())
 		{
-			std::string                    source_file = derp.getRightLocation(rel);
-			std::string                    dest_file   = derp.getLeftLocation() + "/" + rel;
+            std::string                    source_file = rtree.name + "/" + rel;
+            std::string                    dest_file   = ltree.name + "/" + rel;
 			std::string                    dest_dir    = cpp::filesystem::dirname(dest_file);
 			std::string                    file_name   = cpp::filesystem::basename(source_file);
 			std::pair< bool, overwrite_t > res         = copyTo(source_file, dest_dir, file_name, overwrite);
@@ -497,7 +410,7 @@ void DirDiffForm::on_renametoright_clicked()
 		}
 	}
 
-	saveAs(files, derp.getLeftLocation(), derp.getRightLocation());
+    saveAs(files, ltree.name, rtree.name);
 }
 
 void DirDiffForm::on_renametoleft_clicked()
@@ -514,14 +427,14 @@ void DirDiffForm::on_renametoleft_clicked()
 		}
 	}
 
-	saveAs(files, derp.getRightLocation(), derp.getLeftLocation());
+    saveAs(files, rtree.name, ltree.name);
 }
 
-QString DirDiffForm::getDirectory(const QString& dir)
+std::string DirDiffForm::getDirectory(const std::string& dir)
 {
 	#if 1
 
-	return QFileDialog::getExistingDirectory(this, "Choose a directory", dir);
+    return qt::convert(QFileDialog::getExistingDirectory(this, "Choose a directory", qt::convert(dir)));
 
 	#else
 	QFileDialog dlg(this, dir, dir);
@@ -546,21 +459,21 @@ QString DirDiffForm::getDirectory(const QString& dir)
 
 void DirDiffForm::on_openleftdir_clicked()
 {
-	const QString s = getDirectory(qt::convert(derp.getLeftLocation()));
+    const std::string s = getDirectory(ltree.name);
 
-	if ( !s.isEmpty())
+    if ( !s.empty())
 	{
-		changeDirectories(qt::convert(s), std::string());
+        changeDirectories(s, std::string());
 	}
 }
 
 void DirDiffForm::on_openrightdir_clicked()
 {
-	const QString s = getDirectory(qt::convert(derp.getRightLocation()));
+    const std::string s = getDirectory(rtree.name);
 
-	if ( !s.isEmpty())
+    if ( !s.empty())
 	{
-		changeDirectories(std::string(), qt::convert(s));
+        changeDirectories(std::string(), s);
 	}
 }
 
@@ -576,18 +489,18 @@ void DirDiffForm::viewfiles(int x_)
 		if ( s1.empty())
 		{
 			QProcess::startDetached(settings.getEditor(),
-				QStringList(qt::convert(derp.getRightLocation(s2))));
+                QStringList(qt::convert(rtree.name + "/" + s2)));
 		}
 		else if ( s2.empty())
 		{
 			QProcess::startDetached(settings.getEditor(),
-				QStringList(qt::convert(derp.getLeftLocation(s1))));
+                QStringList(qt::convert(ltree.name + "/" + s1)));
 		}
 		else
 		{
 			QStringList l;
-			l << qt::convert(derp.getLeftLocation(s1))
-			  << qt::convert(derp.getRightLocation(s2));
+            l << qt::convert(ltree.name + "/" + s1)
+              << qt::convert(rtree.name + "/" + s2);
 			QProcess::startDetached(settings.getDiffTool(), l);
 		}
 	}
@@ -616,34 +529,246 @@ QString DirDiffForm::renumber(const QString& s_)
 	return s;
 }
 
-// directories have not changed, but list has
 void DirDiffForm::on_depth_valueChanged(int d)
 {
-	std::set< std::string > reml = pbl::make_set(derp.getLeftRelativeFileNames());
-	std::set< std::string > remr = pbl::make_set(derp.getRightRelativeFileNames());
+    change_depth(d);
+}
 
-	std::pair< std::vector< std::string >, std::vector< std::string > > bothfiles = derp.setDepth(d);
-	{
+void DirDiffForm::change_depth(dirnode & n, int d)
+{
+    change_depth(n, n.name, 0, d);
+}
 
-		const std::vector< std::string > files = bothfiles.first;
+void DirDiffForm::change_depth(dirnode & n, const std::string& current_path, int current_depth, int d)
+{
+    if (current_depth < d)
+    {
+        if (n.files.empty() && n.children.empty())
+        {
+            // Need to populate this directory's contents
+            std::pair< std::vector< std::string >, std::vector< std::string > > res = scanner.contents(current_path);
+            std::sort(res.first.begin(), res.first.end());
+            std::sort(res.second.begin(), res.second.end());
+            n.files.swap(res.first);
+            n.children.resize(res.second.size());
+            for (std::size_t i = 0; i < res.second.size(); ++i)
+            {
+                n.children[i].name.swap(res.second[i]);
+            }
+        }
 
-		for ( std::size_t i = 0; i < files.size(); ++i )
-		{
-			reml.erase(files[i]);
-		}
+        // Move down a level
+        for (std::size_t i = 0; i < n.children.size(); ++i)
+        {
+            change_depth(n.children[i], current_path + "/" + n.children[i].name, current_depth + 1, d);
+        }
+    }
+    else
+    {
+        n.children.clear();
+        n.files.clear();
+    }
+}
 
-		updateLeft(files, std::vector< std::string >(reml.begin(), reml.end()));
-	}
-	{
-		const std::vector< std::string > files = bothfiles.second;
+void DirDiffForm::rematch_left(std::vector<comparison_t> & m, const dirnode & l, const std::string& prefix)
+{
+    // Recursively apply to subdirectories
+    for (std::size_t i = 0, n = l.children.size(); i < n; ++i)
+    {
+        rematch_left(m, l.children[i], prefix + l.children[i].name + "/");
+    }
 
-		for ( std::size_t i = 0; i < files.size(); ++i )
-		{
-			remr.erase(files[i]);
-		}
+    for (std::size_t i = 0, n = l.files.size(); i < n; ++i)
+    {
+        comparison_t c = { items_t(prefix + l.files[i], std::string()), false, false, false};
+        m.push_back(c);
+    }
+}
 
-		updateRight(files, std::vector< std::string >(remr.begin(), remr.end()));
-	}
+void DirDiffForm::rematch_right(std::vector<comparison_t> & m, const dirnode & r, const std::string& prefix)
+{
+    // Recursively apply to subdirectories
+    for (std::size_t i = 0, n = r.children.size(); i < n; ++i)
+    {
+        rematch_left(m, r.children[i], prefix + r.children[i].name + "/");
+    }
+
+    for (std::size_t i = 0, n = r.files.size(); i < n; ++i)
+    {
+        comparison_t c = { items_t(std::string(), prefix + r.files[i]), false, false, false};
+        m.push_back(c);
+    }
+}
+
+void DirDiffForm::rematch(std::vector<comparison_t> & m, const dirnode & l, const dirnode & r, const std::string& prefix)
+{
+    // Recursively apply to subdirectories
+    for (std::size_t il = 0, ir = 0, nl = l.children.size(), nr = r.children.size(); il < nl && ir < nr; )
+    {
+        if (l.children[il].name == r.children[ir].name)
+        {
+            rematch(m, l.children[il], r.children[ir], prefix + l.children[il].name + "/");
+            ++il;
+            ++ir;
+        }
+        else
+        {
+            if (l.children[il].name < r.children[ir].name)
+            {
+                rematch_left(m, l.children[il], prefix + l.children[il].name + "/");
+                ++il;
+            }
+            else
+            {
+                rematch_right(m, r.children[ir], prefix + r.children[ir].name + "/");
+                ++ir;
+            }
+        }
+    }
+
+    // Match files
+    const std::size_t nl = l.files.size();
+    const std::size_t nr = r.files.size();
+    std::size_t il = 0;
+    std::size_t ir = 0;
+    for (; il < nl && ir < nr;)
+    {
+        comparison_t c = { items_t(std::string(), std::string()), false, false, false};
+
+        if (l.files[il] == r.files[ir])
+        {
+            c.items.left = prefix + l.files[il];
+            c.items.right = prefix + r.files[ir];
+            ++il;
+            ++ir;
+        }
+        else
+        {
+            if (l.files[il] < r.files[ir])
+            {
+                c.items.left = prefix + l.files[il];
+                ++il;
+            }
+            else
+            {
+                c.items.right = prefix + r.files[ir];
+                ++ir;
+            }
+        }
+
+        std::cout << c.items.left << ":" << c.items.right << std::endl;
+
+        m.push_back(c);
+    }
+
+    for (; il < nl ; ++il)
+    {
+        comparison_t c = { items_t(prefix + l.files[il], std::string()), false, false, false};
+        m.push_back(c);
+    }
+
+    for (; ir < nr; ++ir)
+    {
+        comparison_t c = { items_t(std::string(), prefix + r.files[ir]), false, false, false};
+        m.push_back(c);
+    }
+}
+
+// directories have not changed, but list has
+void DirDiffForm::change_depth(int d)
+{
+    change_depth(ltree, d);
+    change_depth(rtree, d);
+    file_list_changed();
+}
+
+void DirDiffForm::find_subdirs(std::set< std::string >& subdirs, const dirnode& n, const std::string& s)
+{
+    subdirs.insert(s + n.name);
+
+    for (std::size_t i = 0; i< n.children.size(); ++i)
+    {
+        find_subdirs(subdirs, n.children[i], s + n.name + "/");
+    }
+}
+
+void DirDiffForm::file_list_changed()
+{
+    // Rematch files
+    ui->multilistview->clear();
+    std::vector< comparison_t > matched;
+
+    std::cout << __LINE__ << std::endl;
+
+    rematch(matched, ltree, rtree, "");
+    list.swap(matched);
+
+    std::cout << __LINE__ << std::endl;
+
+    // Redraw items
+    for (std::size_t i = 0; i < list.size(); ++i)
+    {
+        QStringList items;
+        items << qt::convert(list[i].items.left) << qt::convert(list[i].items.right);
+        std::cout << "++" << list[i].items.left << ":" << list[i].items.right << std::endl;
+        ui->multilistview->addItem(items);
+    }
+
+    // Update file system watcher
+    std::set< std::string > subdirs;
+    std::cout << __LINE__ << std::endl;
+    find_subdirs(subdirs, ltree, std::string());
+    std::cout << __LINE__ << std::endl;
+    find_subdirs(subdirs, rtree, std::string());
+
+    std::set< std::string >::iterator first1 = subdirs.begin(), last1 = subdirs.end(), first2 = watched_dirs.begin(), last2 = watched_dirs.end();
+
+    std::cout << __LINE__ << std::endl;
+
+    while (first1 != last1 && first2 != last2)
+    {
+        if (*first1 < *first2)
+        {
+            // Adding directory to watch
+            if (watcher)
+                watcher->addPath(qt::convert(*first1));
+            ++first1;
+        }
+        else if (*first2 < *first1)
+        {
+            // no longer watching path
+            if (watcher)
+                watcher->removePath(qt::convert(*first2));
+            ++first2;
+        }
+        else
+        {
+            ++first1;
+            ++first2;
+        }
+    }
+
+    std::cout << __LINE__ << std::endl;
+    while (first1 != last1)
+    {
+        if (watcher)
+            watcher->addPath(qt::convert(*first1));
+        ++first1;
+    }
+
+    std::cout << __LINE__ << std::endl;
+    while (first2 != last2)
+    {
+        if (watcher)
+            watcher->removePath(qt::convert(*first2));
+        ++first2;
+    }
+
+    std::cout << __LINE__ << std::endl;
+    watched_dirs.swap(subdirs);
+
+    /// @todo Save time by not redoing comparisons
+    startComparison();
 }
 
 void DirDiffForm::changeDirectories(
@@ -654,40 +779,41 @@ void DirDiffForm::changeDirectories(
 	// stop the watcher, and clear the comparisons we know
 	stopDirectoryWatcher();
 
+    bool lchanged = false;
+    bool rchanged = false;
+
 	// change to the new directories
-	if ( !left.empty())
+    const cpp::filesystem::path lpath(left);
+
+    if ( lpath.is_absolute() && cpp::filesystem::is_directory(lpath))
+    {
+        ltree.name = cpp::filesystem::cleanpath(lpath);
+        ltree.children.clear();
+        ltree.files.clear();
+        ui->openleftdir->setText(qt::convert(cpp::filesystem::basename(left)));
+        lchanged = true;
+    }
+
+    const cpp::filesystem::path rpath(right);
+
+    if ( rpath.is_absolute() && cpp::filesystem::is_directory(rpath))
 	{
-		derp.setLeftLocation(left);
-		ui->openleftdir->setText(qt::convert(derp.getLeftName()));
+        rtree.name = cpp::filesystem::cleanpath(rpath);
+        rtree.children.clear();
+        rtree.files.clear();
+        ui->openrightdir->setText(qt::convert(cpp::filesystem::basename(right)));
+        rchanged = true;
 	}
 
-	if ( !right.empty())
-	{
-		derp.setRightLocation(right);
-		ui->openrightdir->setText(qt::convert(derp.getRightName()));
-	}
+    if (lchanged || rchanged)
+    {
+        if ( ui->autoRefresh->isChecked())
+        {
+            startDirectoryWatcher();
+        }
 
-	const int                                                                 depth_     = ui->depth->value();
-	const std::pair< std::vector< std::string >, std::vector< std::string > > bothfiles  = derp.setDepth(depth_);
-	const std::vector< std::string >                                          leftfiles  = bothfiles.first;
-	const std::vector< std::string >                                          rightfiles = bothfiles.second;
-
-	{
-		/// @todo If left and right are the same, don't do both
-		/// @todo If a dir hasn't changed, don't go through it
-		// refresh the compareview
-
-		when = QDateTime::currentDateTime();
-
-		setLeftAndRight(derp.getLeftLocation(), derp.getRightLocation(), leftfiles, rightfiles);
-	}
-
-	startDirectoryWatcher();
-
-	if ( !ui->autoRefresh->isChecked())
-	{
-		stopDirectoryWatcher();
-	}
+        change_depth(ui->depth->value());
+    }
 }
 
 std::pair< bool, DirDiffForm::overwrite_t > DirDiffForm::copyTo(
@@ -751,72 +877,82 @@ void DirDiffForm::stopDirectoryWatcher()
 
 void DirDiffForm::startDirectoryWatcher()
 {
-	stopDirectoryWatcher();
+    if (!watcher)
+    {
+        // create new file system watcher
+        watcher = new QFileSystemWatcher(this);
+        connect(watcher, SIGNAL(directoryChanged(QString)), SLOT(contentsChanged(QString)));
 
-	// create new file system watcher
-	std::vector< std::string > dirlist = derp.getDirectories();
+        for (std::set<std::string>::iterator it = watched_dirs.begin(); it != watched_dirs.end(); ++it)
+        {
+            watcher->addPath(qt::convert(*it));
+        }
+    }
+}
 
-	watcher = new QFileSystemWatcher(qt::convert(dirlist), this);
-	connect(watcher, SIGNAL(directoryChanged(QString)), SLOT(contentsChanged(QString)));
+bool DirDiffForm::rescan(dirnode& n, const std::string& dirname)
+{
+    const std::size_t l = n.name.length();
+
+    if (dirname.length() > l && dirname[l] == '/' && dirname.compare(0, l, n.name) == 0)
+    {
+        const std::string t = dirname.substr(l + 1);
+
+        for (std::size_t i = 0; i < n.children.size(); ++i)
+        {
+            if (rescan(n.children[i], t))
+                return true;
+        }
+    }
+    else if (dirname.length() == l)
+    {
+        if (n.name == dirname)
+        {
+            n.children.clear();
+            n.files.clear();
+            return true;
+        }
+    }
+    return false;
 }
 
 // File system has notified us of a change in one of our directories
-/// @bug Watch any new subdirectories that popped up
-/// @todo added_or_changed should not include files that haven't changed
 void DirDiffForm::contentsChanged(QString dirname_)
 {
-	QDir              eventdir(dirname_);
-	const std::string dirname = qt::convert(dirName(eventdir)); // absolute path of dir
+    const std::string dirname = cpp::filesystem::cleanpath(qt::convert(dirname_));
 
-	// absolute path of every file below dirname
-	if ( pbl::starts_with(dirname, derp.getLeftLocation()))
-	{
-		DirectoryContents::update_t u = derp.updateLeft(dirname);
+    rescan(ltree, dirname);
+    rescan(rtree, dirname);
 
-		for ( std::size_t i = 0, n = u.changed.size(); i < n; ++i )
-		{
-			QFileInfo fi(qt::convert(derp.getLeftLocation(u.changed[i])));
-
-			if ( fi.lastModified() > when )
-			{
-				u.added.push_back(u.changed[i]);
-			}
-		}
-
-		updateLeft(u.added, u.removed);
-	}
-
-	if ( pbl::starts_with(dirname, derp.getRightLocation()))
-	{
-		DirectoryContents::update_t u = derp.updateRight(dirname);
-
-		for ( std::size_t i = 0, n = u.changed.size(); i < n; ++i )
-		{
-			QFileInfo fi(qt::convert(derp.getRightLocation(u.changed[i])));
-
-			if ( fi.lastModified() > when )
-			{
-				u.added.push_back(u.changed[i]);
-			}
-		}
-
-		updateRight(u.added, u.removed);
-	}
+    change_depth(ui->depth->value());
 }
 
 // A single file has been changed/or added. Everything else stayed the same
 // file is an absolute path
+/// @bug Not tracking file changes
 void DirDiffForm::fileChanged(const std::string& file)
 {
-	if ( pbl::starts_with(file, derp.getLeftLocation()))
+    if ( pbl::starts_with(file, ltree.name + "/"))
 	{
-		updateLeft(derp.getLeftRelativeFilePath(file));
+        for (std::size_t i = 0; i < list.size(); ++i)
+            if (file.compare(ltree.name.length() + 1, std::string::npos, list[i].items.left) == 0)
+            {
+                list[i].compared = false;
+                break;
+            }
 	}
 
-	if ( pbl::starts_with(file, derp.getRightLocation()))
+    if ( pbl::starts_with(file, rtree.name + "/"))
 	{
-		updateRight(derp.getRightRelativeFilePath(file));
-	}
+        for (std::size_t i = 0; i < list.size(); ++i)
+            if (file.compare(rtree.name.length() + 1, std::string::npos, list[i].items.right) == 0)
+            {
+                list[i].compared = false;
+                break;
+            }
+    }
+
+    startComparison();
 }
 
 void DirDiffForm::filesChanged(const std::vector< std::string >& files)
@@ -824,8 +960,8 @@ void DirDiffForm::filesChanged(const std::vector< std::string >& files)
 	std::vector< std::string > l;
 	std::vector< std::string > r;
 
-	std::string lloc = derp.getLeftLocation();
-	std::string rloc = derp.getRightLocation();
+    const std::string lloc = ltree.name + "/";
+    const std::string rloc = rtree.name + "/";
 
 	for ( std::size_t i = 0, n = files.size(); i < n; ++i )
 	{
@@ -833,12 +969,12 @@ void DirDiffForm::filesChanged(const std::vector< std::string >& files)
 
 		if ( pbl::starts_with(file, lloc))
 		{
-			l.push_back(derp.getLeftRelativeFilePath(file));
+            l.push_back(file.substr(lloc.length()));
 		}
 
 		if ( pbl::starts_with(file, rloc))
 		{
-			r.push_back(derp.getRightRelativeFilePath(file));
+            r.push_back(file.substr(rloc.length()));
 		}
 	}
 
@@ -862,23 +998,32 @@ QString DirDiffForm::dirName(const QDir& dir)
 
 void DirDiffForm::on_refresh_clicked()
 {
-	changeDirectories(derp.getLeftLocation(), derp.getRightLocation());
+    refresh();
+}
+
+void DirDiffForm::refresh()
+{
+    ltree.children.clear();
+    ltree.files.clear();
+    rtree.children.clear();
+    rtree.files.clear();
+    change_depth(ui->depth->value());
 }
 
 void DirDiffForm::on_swap_clicked()
 {
 	/// @todo does a lot of work unnecessarily
-	changeDirectories(derp.getRightLocation(), derp.getLeftLocation());
+    changeDirectories(rtree.name, ltree.name);
 }
 
 void DirDiffForm::on_openright_clicked()
 {
-	QDesktopServices::openUrl(QUrl("file://" + qt::convert(derp.getRightLocation())));
+    QDesktopServices::openUrl(QUrl(qt::convert("file://" + rtree.name)));
 }
 
 void DirDiffForm::on_openleft_clicked()
 {
-	QDesktopServices::openUrl(QUrl("file://" + qt::convert(derp.getRightLocation())));
+    QDesktopServices::openUrl(QUrl(qt::convert("file://" + ltree.name)));
 }
 
 void DirDiffForm::on_showleftonly_toggled(bool checked)
@@ -1032,8 +1177,8 @@ void DirDiffForm::applyFilters()
 }
 
 void DirDiffForm::items_compared(
-	QString first_,
-	QString second_,
+    const QString& first_,
+    const QString& second_,
 	bool    equal
 )
 {
@@ -1183,6 +1328,7 @@ void DirDiffForm::on_actionCopy_To_Clipboard_triggered()
 	clipboard->setText(temp);
 }
 
+/*
 void DirDiffForm::setLeftAndRight(
 	const std::string&                leftname_,
 	const std::string&                rightname_,
@@ -1244,14 +1390,17 @@ void DirDiffForm::setLeftAndRight(
 	}
 
 	applyFilters();
-	setComparison(FileCompare(leftname_, rightname_));
+    setComparison(FileCompare2(leftname_, rightname_));
 }
+*/
 
 std::vector< items_t > DirDiffForm::match(
 	const std::vector< std::string >& leftitems,
 	const std::vector< std::string >& rightitems
 ) const
 {
+    return 	std::vector< items_t >();
+#if 0
 	std::map< int, std::vector< items_t > > score;
 
 	for ( std::size_t il = 0, nl = leftitems.size(); il < nl; ++il )
@@ -1305,10 +1454,12 @@ std::vector< items_t > DirDiffForm::match(
 	std::sort(matching.begin(), matching.end());
 
 	return matching;
+#endif
 }
 
 void DirDiffForm::setComparison(const Compare& comp)
 {
+#if 0
 	if ( Compare* p = comp.clone())
 	{
 		derp.stopComparison();
@@ -1322,10 +1473,12 @@ void DirDiffForm::setComparison(const Compare& comp)
 		startComparison();
 
 	}
+#endif
 }
 
 void DirDiffForm::startComparison()
 {
+#if 0
 	std::vector< items_t > matches;
 
 	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
@@ -1341,6 +1494,7 @@ void DirDiffForm::startComparison()
 		derp.stopComparison();
 		derp.startWorker(matches);
 	}
+#endif
 }
 
 std::vector< std::string > DirDiffForm::getAllLeft() const
@@ -1531,6 +1685,7 @@ void DirDiffForm::updateRight(
 
 void DirDiffForm::rematch()
 {
+#if 0
 	// rematch filenames
 	std::vector< items_t > matching = match(getAllLeft(), getAllRight());
 
@@ -1571,6 +1726,7 @@ void DirDiffForm::rematch()
 
 	startComparison();
 	applyFilters();
+#endif
 
 }
 
@@ -1632,4 +1788,139 @@ void DirDiffForm::on_actionSelect_Right_Only_triggered()
 	}
 
 	ui->multilistview->setSelectedRows(indices);
+}
+
+namespace
+{
+bool is_hidden(const cpp::filesystem::path& p)
+{
+    const std::string s = p.filename().native();
+
+    return !s.empty() && s[0] == '.';
+}
+}
+
+std::pair< std::vector< std::string >, std::vector< std::string > > FileSystem::contents(const std::string& path)
+{
+    std::pair< std::vector< std::string >, std::vector< std::string > > res;
+
+    const bool hidden_dirs  = false;
+    const bool hidden_files = false;
+
+    for ( cpp::filesystem::directory_iterator it(path), last; it != last; ++it )
+    {
+        cpp::filesystem::file_status s = it->status();
+
+        if ( cpp::filesystem::is_directory(s) )
+        {
+            if ( hidden_dirs || !is_hidden(it->get_path()))
+            {
+                const cpp::filesystem::path rel = it->get_path().lexically_relative(path);
+                res.second.push_back(rel.native());
+            }
+        }
+        else if(cpp::filesystem::is_regular_file(s) || cpp::filesystem::is_symlink(s))
+        {
+            if ( hidden_files || !is_hidden(it->get_path()))
+            {
+                const cpp::filesystem::path rel = it->get_path().lexically_relative(path);
+                res.first.push_back(rel.native());
+            }
+        }
+    }
+
+    return res;
+}
+
+void FileCompare::compare(const QString &first, const QString &second)
+{
+    pbl::fs::file f(first.toStdString(), pbl::fs::file::readonly);
+    pbl::fs::file g(second.toStdString(), pbl::fs::file::readonly);
+
+    emit compared(first, second, f.compare(g));
+}
+
+int FileNameMatcher::compare(const std::string &a, const std::string &b) const
+{
+    if ( a == b )
+    {
+        return Matcher::EXACT_MATCH;
+    }
+
+    if ( a == gzalt(b))
+    {
+        return 1;
+    }
+
+    if ( a == cppalt(b))
+    {
+        return 2;
+    }
+
+    if ( a == cgalt(b))
+    {
+        return 3;
+    }
+
+    return Matcher::DO_NOT_MATCH;
+}
+
+std::string FileNameMatcher::gzalt(const std::string &s)
+{
+    if ( !pbl::ends_with(s, ".gz"))
+    {
+        return s + ".gz";
+    }
+
+    std::string t(s, 0, s.length() - 3);
+
+    return t;
+}
+
+std::string FileNameMatcher::cppalt(const std::string &s)
+{
+    if ( pbl::ends_with(s, ".cpp"))
+    {
+        std::string t(s, 0, s.length() - 2);
+
+        return t;
+    }
+
+    if ( pbl::ends_with(s, ".c"))
+    {
+        return s + "pp";
+    }
+
+    return std::string();
+}
+
+std::string FileNameMatcher::cgalt(const std::string &s)
+{
+    if ( pbl::ends_with(s, ".cpp"))
+    {
+        std::string t(s, 0, s.length() - 2);
+
+        return t + ".gz";
+    }
+
+    if ( pbl::ends_with(s, ".c"))
+    {
+        return s + "pp.gz";
+    }
+
+    if ( pbl::ends_with(s, ".c.gz"))
+    {
+        std::string t(s, 0, s.length() - 3);
+
+        return t + "pp";
+    }
+
+    if ( pbl::ends_with(s, ".cpp.gz"))
+    {
+        std::string t(s, 0, s.length() - 5);
+
+        return t;
+    }
+
+    return std::string();
 }

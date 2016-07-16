@@ -66,6 +66,8 @@ bool status_known(file_status);
 
 bool exists(file_status);
 bool exists(const path&);
+bool is_regular_file(file_status);
+bool is_regular_file(const path&);
 bool is_symlink(file_status);
 bool is_symlink(const path&);
 bool is_directory(file_status);

@@ -23,7 +23,11 @@ SOURCES += \
     cpp/fs/filetype.cpp \
     util/file.cpp \
     util/strings.cpp \
-    cpp/fs/absolute.cpp
+    cpp/fs/absolute.cpp \
+    cpp/fs/create_directory.cpp \
+    cpp/fs/remove.cpp \
+    cpp/fs/tempdir.cpp \
+    cpp/fs/current_path.cpp
 
 HEADERS += \
     cpp/fs/diriter.h \
@@ -42,7 +46,11 @@ HEADERS += \
     util/strings.h \
     util/containers.h \
     cpp/fs/absolute.h \
-    cpp/os.h
+    cpp/os.h \
+    cpp/fs/create_directory.h \
+    cpp/fs/remove.h \
+    cpp/fs/tempdir.h \
+    cpp/fs/current_path.h
 
 unix {
     target.path = /usr/lib
