@@ -57,101 +57,9 @@
 #include "qutilities/icons.h"
 #include "qutilities/convert.h"
 
-namespace
-{
-
-// Check that two files are equal. Files are relative to the directories passed
-// to the constructor
-class FileCompare2 : public Compare
-{
-public:
-	FileCompare2(
-		const std::string& l,
-		const std::string& r
-	)
-		: left(l), right(r)
-	{
-
-	}
-
-	FileCompare2* clone() const
-	{
-		return new FileCompare2(*this);
-	}
-
-	/// @todo Don't unzip a file if we don't need to
-	/// @todo Don't read entire files into memory when doing the file compare
-	bool equal(
-		const std::string& lfile,
-		const std::string& rfile
-	)
-	{
-		const std::string first  = left + "/" + lfile;
-		const std::string second = right + "/" + rfile;
-
-		if ( pbl::ends_with(first, ".gz") || pbl::ends_with(second, ".gz"))
-		{
-			const QByteArray data1 = gunzip(first);
-			const QByteArray data2 = gunzip(second);
-
-			return data1 == data2;
-		}
-		else
-		{
-			pbl::fs::file f(first, pbl::fs::file::readonly);
-			pbl::fs::file g(second, pbl::fs::file::readonly);
-
-			return f.compare(g);
-		}
-	}
-
-private:
-	static QByteArray gunzip(const std::string& filename)
-	{
-		if ( pbl::ends_with(filename, ".gz"))
-		{
-			QStringList l;
-			l << "-c" << qt::convert(filename);
-
-			QProcess gz;
-			gz.start("gunzip", l);
-
-			if ( !gz.waitForFinished())
-			{
-				return QByteArray();
-			}
-
-			return gz.readAllStandardOutput();
-		}
-		else
-		{
-			QFile file(qt::convert(filename));
-
-			if ( !file.open(QIODevice::ReadOnly))
-			{
-				return QByteArray();
-			}
-
-			return file.readAll();
-		}
-	}
-
-	std::string left;
-	std::string right;
-
-};
-
-
-}
-
 QString lastPathComponent(const QString& s)
 {
 	return qt::convert(cpp::filesystem::basename(qt::convert(s)));
-}
-
-QString directoryComponent(const QString& s)
-{
-	return qt::convert(cpp::filesystem::dirname(qt::convert(s)));
 }
 
 DirDiffForm::DirDiffForm(QWidget* parent_) :
@@ -676,7 +584,6 @@ void DirDiffForm::rematch_right(
 	}
 }
 
-/// @bug Not using name matcher
 void DirDiffForm::rematch(
 	std::vector< comparison_t >& m,
 	const dirnode&               l,
@@ -725,6 +632,8 @@ void DirDiffForm::rematch(
     }
 
 	// Match files
+    std::vector< comparison_t > matched_files;
+
 	const std::size_t nl = l.files.size();
 	const std::size_t nr = r.files.size();
 	std::size_t       il = 0;
@@ -755,20 +664,58 @@ void DirDiffForm::rematch(
 			}
 		}
 
-		m.push_back(c);
+        matched_files.push_back(c);
 	}
 
 	for (; il < nl; ++il )
 	{
 		comparison_t c = { items_t(prefix + l.files[il], std::string()), NOT_COMPARED, false };
-		m.push_back(c);
+        matched_files.push_back(c);
 	}
 
 	for (; ir < nr; ++ir )
 	{
 		comparison_t c = { items_t(std::string(), prefix + r.files[ir]), NOT_COMPARED, false };
-		m.push_back(c);
+        matched_files.push_back(c);
 	}
+
+    // Second pass to match non-exact names
+    for (std::size_t i = 0, n = matched_files.size(); i < n; ++i)
+    {
+        // Unmatched left item
+        if (matched_files[i].items.right.empty())
+        {
+            // Find the best match
+            std::size_t ibest = 0;
+            int xbest = -1;
+
+            for (std::size_t j = 0; j < n; ++j)
+                if (matched_files[j].items.left.empty())
+                {
+                    const int x = matcher.compare(matched_files[i].items.left, matched_files[j].items.right);
+                    if (x >= 0)
+                    {
+                        if (xbest == -1 || x < xbest)
+                        {
+                            ibest = j;
+                            xbest = x;
+                        }
+                    }
+                }
+
+            // If there is one, delete it and fixup i, n
+            if (xbest != -1)
+            {
+                matched_files[i].items.right = matched_files[ibest].items.right;
+                matched_files.erase(matched_files.begin() + ibest);
+                --n;
+                if (ibest < i)
+                    --i;
+            }
+        }
+    }
+
+    m.insert(m.end(), matched_files.begin(), matched_files.end());
 }
 
 void DirDiffForm::find_subdirs(
@@ -1162,7 +1109,7 @@ void DirDiffForm::contentsChanged(QString dirname_)
 
 // A single file has been changed/or added. Everything else stayed the same
 // file is an absolute path
-/// @bug Not tracking file changes
+/// @bug Not tracking file changes, but it seems to work anyway
 void DirDiffForm::fileChanged(const std::string& file)
 {
 	if ( !ltree.name.empty() && pbl::starts_with(file, ltree.name + "/"))
@@ -1721,11 +1668,58 @@ void FileCompare::compare(
 	const QString& second
 )
 {
-	pbl::fs::file f(first.toStdString(), pbl::fs::file::readonly);
-	pbl::fs::file g(second.toStdString(), pbl::fs::file::readonly);
+    bool res;
 
-    emit compared(first, second, f.compare(g) == 1);
+    if ( first.endsWith(".gz") || second.endsWith(".gz"))
+    {
+        /// @todo gunzip to a temporary and run the file comparison
+        const QByteArray data1 = gunzip(first.toStdString());
+        const QByteArray data2 = gunzip(second.toStdString());
+
+        res = (data1 == data2);
+    }
+    else
+    {
+        pbl::fs::file f(first.toStdString(), pbl::fs::file::readonly);
+        pbl::fs::file g(second.toStdString(), pbl::fs::file::readonly);
+
+        res = (f.compare(g) == 1);
+    }
+
+    emit compared(first, second, res);
 }
+
+QByteArray FileCompare::gunzip(const std::string& filename)
+{
+    if ( pbl::ends_with(filename, ".gz"))
+    {
+        QStringList l;
+        l << "-c" << qt::convert(filename);
+
+        QProcess gz;
+        gz.start("gunzip", l);
+
+        if ( !gz.waitForFinished())
+        {
+            return QByteArray();
+        }
+
+        return gz.readAllStandardOutput();
+    }
+    else
+    {
+        QFile file(qt::convert(filename));
+
+        if ( !file.open(QIODevice::ReadOnly))
+        {
+            return QByteArray();
+        }
+
+        return file.readAll();
+    }
+}
+
+
 
 int FileNameMatcher::compare(
 	const std::string& a,
@@ -1734,7 +1728,7 @@ int FileNameMatcher::compare(
 {
 	if ( a == b )
 	{
-		return Matcher::EXACT_MATCH;
+        return 0;
 	}
 
 	if ( a == gzalt(b))
@@ -1752,7 +1746,7 @@ int FileNameMatcher::compare(
 		return 3;
 	}
 
-	return Matcher::DO_NOT_MATCH;
+    return -1;
 }
 
 std::string FileNameMatcher::gzalt(const std::string& s)
@@ -1813,4 +1807,18 @@ std::string FileNameMatcher::cgalt(const std::string& s)
 	}
 
 	return std::string();
+}
+
+void DirDiffForm::on_depthlimit_toggled(bool checked)
+{
+    ui->depth->setEnabled(checked);
+
+    if (checked)
+    {
+        change_depth(ui->depth->value());
+    }
+    else
+    {
+        change_depth(INT_MAX);
+    }
 }

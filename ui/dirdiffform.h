@@ -65,6 +65,8 @@ public slots:
 	void compare(const QString& first, const QString& second);
 signals:
 	void compared(const QString& first, const QString& second, bool);
+private:
+    static QByteArray gunzip(const std::string& filename);
 };
 
 class FileNameMatcher
@@ -203,6 +205,8 @@ private slots:
 	void on_actionSelect_Left_Only_triggered();
 
 	void on_actionSelect_Right_Only_triggered();
+    void on_depthlimit_toggled(bool checked);
+
 private:
 	enum overwrite_t {OVERWRITE_ASK, OVERWRITE_YES, OVERWRITE_NO};
 	enum compare_result_t {NOT_COMPARED, COMPARED_SAME, COMPARED_DIFFERENT};
