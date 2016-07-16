@@ -252,7 +252,7 @@ private:
 	void stopDirectoryWatcher();
 	void startDirectoryWatcher();
 	void fileChanged(const std::string&);
-	void filesChanged(const std::vector< std::string >&);
+    void filesChanged(const std::set<std::__cxx11::string> &);
 	QString renumber(const QString& s_);
 	std::string getDirectory(const std::string& dir);
 	void change_depth(int);

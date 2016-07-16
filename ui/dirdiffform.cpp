@@ -317,7 +317,7 @@ void DirDiffForm::on_copytoright_clicked()
 
 	overwrite_t overwrite = OVERWRITE_ASK;
 
-	std::vector< std::string > changed;
+    std::set< std::string > changed;
 
 	for ( int i = 0, n = indices.count(); i < n; ++i )
 	{
@@ -333,7 +333,7 @@ void DirDiffForm::on_copytoright_clicked()
 
 			if ( res.first )
 			{
-				changed.push_back(dest_file);
+                changed.insert(dest_file);
 			}
 
 			overwrite = res.second;
@@ -367,7 +367,7 @@ void DirDiffForm::on_copytoleft_clicked()
 
 	overwrite_t overwrite = OVERWRITE_ASK;
 
-	std::vector< std::string > changed;
+    std::set< std::string > changed;
 
 	for ( int i = 0, n = indices.count(); i < n; ++i )
 	{
@@ -383,7 +383,7 @@ void DirDiffForm::on_copytoleft_clicked()
 
 			if ( res.first )
 			{
-				changed.push_back(dest_file);
+                changed.insert(dest_file);
 			}
 
 			overwrite = res.second;
@@ -685,28 +685,44 @@ void DirDiffForm::rematch(
 )
 {
 	// Recursively apply to subdirectories
-	for ( std::size_t il = 0, ir = 0, nl = l.children.size(), nr = r.children.size(); il < nl && ir < nr;)
-	{
-		if ( l.children[il].name == r.children[ir].name )
-		{
-			rematch(m, l.children[il], r.children[ir], prefix + l.children[il].name + "/");
-			++il;
-			++ir;
-		}
-		else
-		{
-			if ( l.children[il].name < r.children[ir].name )
-			{
-				rematch_left(m, l.children[il], prefix + l.children[il].name + "/");
-				++il;
-			}
-			else
-			{
-				rematch_right(m, r.children[ir], prefix + r.children[ir].name + "/");
-				++ir;
-			}
-		}
-	}
+    {
+        std::size_t il = 0, ir = 0;
+        const std::size_t nl = l.children.size();
+        const std::size_t nr = r.children.size();
+
+        for (; il < nl && ir < nr;)
+        {
+            if ( l.children[il].name == r.children[ir].name )
+            {
+                rematch(m, l.children[il], r.children[ir], prefix + l.children[il].name + "/");
+                ++il;
+                ++ir;
+            }
+            else
+            {
+                if ( l.children[il].name < r.children[ir].name )
+                {
+                    rematch_left(m, l.children[il], prefix + l.children[il].name + "/");
+                    ++il;
+                }
+                else
+                {
+                    rematch_right(m, r.children[ir], prefix + r.children[ir].name + "/");
+                    ++ir;
+                }
+            }
+        }
+
+        for (; il < nl; ++il)
+        {
+            rematch_left(m, l.children[il], prefix + l.children[il].name + "/");
+        }
+
+        for (; ir < nr; ++ir)
+        {
+            rematch_right(m, r.children[ir], prefix + r.children[ir].name + "/");
+        }
+    }
 
 	// Match files
 	const std::size_t nl = l.files.size();
@@ -795,14 +811,13 @@ void DirDiffForm::file_list_changed(
 	}
 	else if ( !ltree.name.empty())
 	{
-		rematch_left(matched, ltree, "");
+        rematch_left(matched, ltree, "");
 	}
     else if ( !rtree.name.empty())
 	{
-		rematch_right(matched, rtree, "");
+        rematch_right(matched, rtree, "");
 	}
 
-    /// @todo Save list widget items
     if (!rootchanged)
     {
         // Reuse the previous information
@@ -1175,10 +1190,16 @@ void DirDiffForm::fileChanged(const std::string& file)
 	}
 }
 
-void DirDiffForm::filesChanged(const std::vector< std::string >&)
+void DirDiffForm::filesChanged(const std::set< std::string >& files)
 {
-    /// @todo Too much work
-    refresh();
+    for (std::size_t i = 0; i < list.size(); ++i)
+    {
+        if ((!ltree.name.empty() && !list[i].items.left.empty() && files.count(ltree.name + "/" + list[i].items.left) != 0)
+                || (!rtree.name.empty() && !list[i].items.right.empty() && files.count(rtree.name + "/" + list[i].items.right) != 0))
+            list[i].res = NOT_COMPARED;
+    }
+
+    startComparison();
 }
 
 void DirDiffForm::on_refresh_clicked()
