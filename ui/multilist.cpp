@@ -70,23 +70,20 @@ MultiList::MultiList(QWidget* parent) :
 
 	setLayout(layout);
 
-	for ( int i = 0; i < 2; ++i )
+    verticalScrollBar = new QScrollBar(Qt::Vertical, this);
+    connect(verticalScrollBar, SIGNAL(valueChanged(int)), SLOT(sync_scroll(int)));
+
+    for ( int i = 0; i < 2; ++i )
 	{
 		if ( QListWidget* dir = new QListWidget(this))
 		{
 			dirs.push_back(dir);
 			dir->setContextMenuPolicy(Qt::NoContextMenu);
-			dir->setSelectionMode(QAbstractItemView::ExtendedSelection);
+            dir->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+            dir->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-			// Sync scrollbar
-            if (i == 0)
-            {
-                connect(dir->verticalScrollBar(), SIGNAL(valueChanged(int)), SLOT(sync_scroll(int)));
-            }
-            else
-            {
-                dir->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-            }
+            // Sync scrollbar
+            connect(dir->verticalScrollBar(), SIGNAL(valueChanged(int)), verticalScrollBar, SLOT(setValue(int)));
 
 			// Keep selections in sync
 			connect(dir, SIGNAL(itemSelectionChanged()), SLOT(update_selection()));
@@ -97,7 +94,10 @@ MultiList::MultiList(QWidget* parent) :
 		}
 	}
 
-	update_scroll_range();
+    verticalScrollBar->setRange(0, 0);
+    connect(dirs[0]->verticalScrollBar(), SIGNAL(rangeChanged(int,int)), SLOT(update_scroll_range(int,int)));
+
+    layout->insertWidget(1, verticalScrollBar);
 }
 
 MultiList::~MultiList()
@@ -106,12 +106,15 @@ MultiList::~MultiList()
 
 void MultiList::sync_scroll(int val)
 {
-    for ( std::size_t i = 1; i < dirs.size(); ++i )
+    for ( std::size_t i = 0; i < dirs.size(); ++i )
 	{
 		if ( QListWidget* dir = dirs[i] )
 		{
-            dir->verticalScrollBar()->setValue(val);
-		}
+            if ( dir->verticalScrollBar()->value() != val )
+            {
+                dir->verticalScrollBar()->setValue(val);
+            }
+        }
 	}
 }
 
@@ -166,7 +169,6 @@ void MultiList::clear()
 	{
 		dirs[i]->clear();
 	}
-    update_scroll_range();
 }
 
 void MultiList::addItem(const QStringList& items)
@@ -184,22 +186,11 @@ void MultiList::addItem(const QStringList& items)
 			new QListWidgetItem(dirs[i]);
 		}
 	}
-
-	update_scroll_range();
 }
 
-void MultiList::update_scroll_range()
+void MultiList::update_scroll_range(int min, int max)
 {
-    /*
-	if ( !dirs.empty())
-	{
-		if ( QScrollBar* sb = dirs[0]->verticalScrollBar())
-		{
-            std::cout << sb->minimum() << " : " << sb->maximum() << std::endl;
-			verticalScrollBar->setRange(sb->minimum(), sb->maximum());
-		}
-	}
-    */
+    verticalScrollBar->setRange(min, max);
 }
 
 void MultiList::clearText(
@@ -225,8 +216,6 @@ void MultiList::removeItem(int r)
 			delete item;
 		}
 	}
-
-	update_scroll_range();
 }
 
 void MultiList::insertItem(
@@ -238,8 +227,6 @@ void MultiList::insertItem(
 	{
 		dirs[i]->insertItem(j, new QListWidgetItem(l.at(i)));
 	}
-
-	update_scroll_range();
 }
 
 void MultiList::style(
@@ -271,8 +258,6 @@ void MultiList::setRowHidden(
 			item->setHidden(hidden);
 		}
 	}
-
-	update_scroll_range();
 }
 
 void MultiList::styleitem(
