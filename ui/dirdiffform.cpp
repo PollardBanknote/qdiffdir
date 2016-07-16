@@ -64,7 +64,7 @@ QString lastPathComponent(const QString& s)
 
 DirDiffForm::DirDiffForm(QWidget* parent_) :
 	QWidget(parent_),
-	ui(new Ui::DirDiffForm), filter(),
+    ui(new Ui::DirDiffForm),
 	hide_left_only(false),
 	hide_right_only(false), hide_identical_items(false), hide_ignored(false),
 	watcher()
@@ -1230,9 +1230,15 @@ void DirDiffForm::on_filter_activated(int index)
 
 void DirDiffForm::on_filter_editTextChanged(const QString& arg1)
 {
-	QRegExp rx(arg1);
+    QStringList l = arg1.split(';');
 
-	setFilter(rx);
+    QVector< QRegExp > f;
+
+    for (int i = 0; i < l.count(); ++i)
+    {
+        f.push_back(QRegExp(l.at(i).trimmed(), Qt::CaseSensitive, QRegExp::Wildcard));
+    }
+    setFilter(f);
 }
 
 void DirDiffForm::on_autoRefresh_stateChanged(int state)
@@ -1278,10 +1284,19 @@ bool DirDiffForm::hidden(std::size_t i) const
 	}
 
 	// Hide items that don't match the current filter
-	if ( !filter.isEmpty() && !filter.exactMatch(qt::convert(list[i].items.left)) && !filter.exactMatch(qt::convert(list[i].items.right)))
-	{
-		hideitem = true;
-	}
+    if (!filters.isEmpty())
+    {
+        hideitem = true;
+        for (int j = 0; j < filters.count(); ++j)
+        {
+            if (filters.at(j).exactMatch(qt::convert(list[i].items.left))
+                    || filters.at(j).exactMatch(qt::convert(list[i].items.right)))
+            {
+                hideitem = false;
+                break;
+            }
+        }
+    }
 
 	return hideitem;
 }
@@ -1370,13 +1385,21 @@ void DirDiffForm::items_compared(
 
 void DirDiffForm::clearFilter()
 {
-	setFilter(QRegExp());
+    filters.clear();
+    applyFilters();
 }
 
 void DirDiffForm::setFilter(const QRegExp& r)
 {
-	filter = r;
+    filters.clear();
+    filters.push_back(r);
 	applyFilters();
+}
+
+void DirDiffForm::setFilter(const QVector< QRegExp >& r)
+{
+    filters = r;
+    applyFilters();
 }
 
 void DirDiffForm::showOnlyLeft(bool checked)

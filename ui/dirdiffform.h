@@ -140,6 +140,8 @@ public slots:
 
 	void setFilter(const QRegExp&);
 
+    void setFilter(const QVector< QRegExp >&);
+
 	void clearFilter();
 signals:
 	/** Notify connected objects that the user double clicked an item
@@ -290,7 +292,7 @@ private:
 	FileNameMatcher matcher;
 
 	/// A filter for which items to show
-	QRegExp filter;
+    QVector< QRegExp > filters;
 
 	/// Whether or not to show left only items
 	bool hide_left_only;
