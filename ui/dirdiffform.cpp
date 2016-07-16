@@ -666,7 +666,7 @@ void DirDiffForm::rematch_right(
 	// Recursively apply to subdirectories
 	for ( std::size_t i = 0, n = r.children.size(); i < n; ++i )
 	{
-		rematch_left(m, r.children[i], prefix + r.children[i].name + "/");
+        rematch_right(m, r.children[i], prefix + r.children[i].name + "/");
 	}
 
 	for ( std::size_t i = 0, n = r.files.size(); i < n; ++i )
@@ -790,7 +790,11 @@ void DirDiffForm::file_list_changed(
 	ui->multilistview->clear();
 	std::vector< comparison_t > matched;
 
-	rematch(matched, ltree, rtree, "");
+    if (!ltree.name.empty() && !rtree.name.empty())
+        rematch(matched, ltree, rtree, "");
+    else if(!ltree.name.empty())
+        rematch_left(matched, ltree, "");
+    else rematch_right(matched, rtree, "");
 
 	if ( rootchanged )
 	{
@@ -1002,6 +1006,7 @@ void DirDiffForm::startDirectoryWatcher()
 	}
 }
 
+// dirname begins with current_path + "/"
 bool DirDiffForm::rescan(
 	dirnode&           n,
 	const std::string& current_path,
@@ -1010,29 +1015,34 @@ bool DirDiffForm::rescan(
 	int                maxdepth
 )
 {
-	if ( current_path == dirname )
-	{
-		// Found the dir, rescan it
-		n.children.clear();
-		n.files.clear();
-		change_depth(n, current_path, depth, maxdepth);
+    /// @todo binary search because children is sorted
+    for ( std::size_t i = 0; i < n.children.size(); ++i )
+    {
+        const std::string s = current_path + "/" + n.children[i].name;
 
-		return true;
-	}
-
-	// else, if we are going in the right direction, keep going
-	if ( pbl::starts_with(dirname, current_path + "/"))
-	{
-		for ( std::size_t i = 0; i < n.children.size(); ++i )
-		{
-			if ( rescan(n.children[i], current_path + "/" + n.children[i].name, dirname, depth + 1, maxdepth))
-			{
-				return true;
-			}
-		}
-	}
-
-	return false;
+        if (dirname == s)
+        {
+            // Found the dir
+            if (cpp::filesystem::is_directory(s))
+            {
+                n.children[i].children.clear();
+                n.children[i].files.clear();
+                change_depth(n.children[i], s, depth + 1, maxdepth);
+            }
+            else
+            {
+                // no longer exists on disk
+                n.children.erase(n.children.begin() + i);
+            }
+            return true;
+        }
+        else if (pbl::starts_with(dirname, s + "/"))
+        {
+            // Descend
+            return rescan(n.children[i], s, dirname, depth + 1, maxdepth);
+        }
+    }
+    return false;
 }
 
 bool DirDiffForm::rescan(
@@ -1054,7 +1064,7 @@ bool DirDiffForm::rescan(
 
 		if ( cpp::filesystem::is_directory(dirname))
 		{
-			change_depth(n, current_path, 0, maxdepth);
+            change_depth(n, maxdepth);
 
 			return true;
 		}
@@ -1068,7 +1078,8 @@ bool DirDiffForm::rescan(
 	}
 	else
 	{
-		rescan(n, n.name, dirname, 0, maxdepth);
+        if (pbl::starts_with(dirname, n.name + "/"))
+            rescan(n, n.name, dirname, 0, maxdepth);
 
 		return true;
 	}
@@ -1077,7 +1088,6 @@ bool DirDiffForm::rescan(
 // File system has notified us of a change in one of our directories
 void DirDiffForm::contentsChanged(QString dirname_)
 {
-	/// @bug dirname_ might have been removed
 	std::cout << "Directory changed " << qt::convert(dirname_) << std::endl;
 	const std::string dirname = cpp::filesystem::cleanpath(qt::convert(dirname_));
 
