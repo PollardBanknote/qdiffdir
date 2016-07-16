@@ -192,7 +192,7 @@ bool path::next_path_component(std::pair< std::size_t, std::size_t >& r) const
 {
 	const std::size_t n = s.length();
 
-    std::size_t i = r.second;
+	std::size_t i = r.second;
 
 	while ( i < n && s[i] == preferred_separator )
 	{
@@ -243,6 +243,7 @@ path path::lexically_relative(const path& base) const
 
 		if ( !ok1 && !ok2 )
 		{
+
 			// paths are identical
 			return path(".");
 		}
@@ -260,15 +261,16 @@ path path::lexically_relative(const path& base) const
 		while ( base.next_path_component(r2));
 	}
 
-    if (ok1)
-    {
-        do
-        {
-            res /= s.substr(r1.first, r1.second - r1.first);
-        } while ( next_path_component(r1));
-    }
+	if ( ok1 )
+	{
+		do
+		{
+			res /= s.substr(r1.first, r1.second - r1.first);
+		}
+		while ( next_path_component(r1));
+	}
 
-    return res;
+	return res;
 }
 
 bool path::is_absolute() const

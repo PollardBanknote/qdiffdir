@@ -183,12 +183,12 @@ bool exists(const path& p)
 
 bool is_regular_file(file_status s)
 {
-    return s.type() == file_type::regular;
+	return s.type() == file_type::regular;
 }
 
-bool is_regular_file(const path & p)
+bool is_regular_file(const path& p)
 {
-    return is_regular_file(status(p));
+	return is_regular_file(status(p));
 }
 
 bool is_symlink(file_status s)

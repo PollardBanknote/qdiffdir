@@ -8,40 +8,44 @@ namespace filesystem
 {
 path current_path()
 {
-    char buf[4096];
+	char buf[4096];
 
-    if (::getcwd(buf, sizeof(buf)))
-        return buf;
+	if ( ::getcwd(buf, sizeof( buf )))
+	{
+		return buf;
+	}
 
-    // Dynamically allocate larger buffers until cwd fits
-    std::size_t size = 2 * sizeof(buf);
+	// Dynamically allocate larger buffers until cwd fits
+	std::size_t size = 2 * sizeof( buf );
 
-    while (true)
-    {
-        char* q = new char[size];
+	while ( true )
+	{
+		char* q = new char[size];
 
-        if (::getcwd(q, size))
-        {
-            path p = q;
-            delete[] q;
-            return p;
-        }
-        else
-        {
-            if (errno == ERANGE)
-            {
-                delete[] q;
-                size *= 2;
-            }
-            else
-            {
-                delete[] q;
-                break;
-            }
-        }
-    }
+		if ( ::getcwd(q, size))
+		{
+			path p = q;
+			delete[] q;
 
-    return path();
+			return p;
+		}
+		else
+		{
+			if ( errno == ERANGE )
+			{
+				delete[] q;
+				size *= 2;
+			}
+			else
+			{
+				delete[] q;
+				break;
+			}
+		}
+	}
+
+	return path();
 }
+
 }
 }

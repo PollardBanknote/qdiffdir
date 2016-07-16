@@ -117,11 +117,11 @@ int main(
 	}
 
 	// Detach from the terminal and start up the GUI
-#if 1
-#warning Detach is disabled
-#else
-    pbl::process::detach();
-#endif
+	#if 1
+	#warning Detach is disabled
+	#else
+	pbl::process::detach();
+	#endif
 
 	QApplication a(argc, argv);
 
