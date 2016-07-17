@@ -33,6 +33,7 @@
 
 const char difftool_key[] = "difftool";
 const char editor_key[]   = "editor";
+const char filters_key[] = "filters";
 
 MySettings& MySettings::instance()
 {
@@ -82,7 +83,26 @@ QString MySettings::getDiffToolSetting() const
 
 void MySettings::setDiffTool(const QString& s)
 {
-	setValue(difftool_key, s);
+    setValue(difftool_key, s);
+}
+
+QMap<QString, QString> MySettings::getFilters() const
+{
+    const QMap< QString, QVariant > v = store->value(filters_key).toMap();
+    QMap< QString, QString > m;
+    for (QMap< QString, QVariant>::const_iterator it = v.constBegin(); it != v.constEnd(); ++it)
+    {
+        m.insert(it.key(), it.value().toString());
+    }
+    return m;
+}
+
+void MySettings::setFilters(const QMap<QString, QString> & m)
+{
+    QMap< QString, QVariant > v;
+    for (QMap< QString, QString >::const_iterator it = m.constBegin(); it != m.constEnd(); ++it)
+        v.insert(it.key(), it.value());
+    store->setValue(filters_key, v);
 }
 
 MySettings::MySettings()

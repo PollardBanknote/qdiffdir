@@ -124,6 +124,8 @@ public:
 	 */
 	void setFlags(bool show_left_only, bool show_right_only, bool show_identical);
 
+public slots:
+    void settingsChanged();
 signals:
 	void compare_files(const QString&, const QString&);
 private slots:
@@ -152,8 +154,6 @@ private slots:
 	void on_showsame_toggled(bool checked);
 
 	void on_filter_activated(int index);
-
-	void on_filter_editTextChanged(const QString& arg1);
 
 	void on_autoRefresh_stateChanged(int state);
 
@@ -223,6 +223,8 @@ private:
 		}
 	};
 
+    void populate_filters();
+
     void applyFilters();
 
     /** The "show left only" checkbox was toggled
@@ -243,9 +245,7 @@ private:
 
     void setFilter(const QRegExp&);
 
-    void setFilter(const QVector< QRegExp >&);
-
-    void clearFilter();
+    void setFilters(const QString&);
 
     static bool compare_by_items(const comparison_t& a, const comparison_t& b);
 

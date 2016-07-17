@@ -128,16 +128,6 @@
        <property name="editable">
         <bool>true</bool>
        </property>
-       <item>
-        <property name="text">
-         <string>All Items</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Source Files (*.cpp, *.h)</string>
-        </property>
-       </item>
       </widget>
      </item>
     </layout>

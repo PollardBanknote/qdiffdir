@@ -48,6 +48,12 @@ private slots:
 	void on_cancel_clicked();
 
 	void accept();
+    void on_add_filter_clicked();
+
+    void on_remove_filter_clicked();
+
+    void on_edit_filter_clicked();
+
 private:
 	Ui::SettingsDialog* ui;
 };

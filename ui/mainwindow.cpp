@@ -60,5 +60,6 @@ void MainWindow::on_actionSettings_triggered()
 {
 	SettingsDialog dlg(this);
 
-	dlg.exec();
+    if (dlg.exec() == QDialog::Accepted)
+        ui->widget->settingsChanged();
 }

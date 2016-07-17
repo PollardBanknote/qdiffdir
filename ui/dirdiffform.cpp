@@ -70,6 +70,7 @@ DirDiffForm::DirDiffForm(QWidget* parent_) :
 	watcher()
 {
 	ui->setupUi(this);
+    populate_filters();
 
 	FileCompare* comparer = new FileCompare;
 	comparer->moveToThread(&compare_thread);
@@ -113,7 +114,12 @@ void DirDiffForm::setFlags(
 {
 	ui->showleftonly->setChecked(show_left_only);
 	ui->showrightonly->setChecked(show_right_only);
-	ui->showsame->setChecked(show_identical);
+    ui->showsame->setChecked(show_identical);
+}
+
+void DirDiffForm::settingsChanged()
+{
+    populate_filters();
 }
 
 void DirDiffForm::on_viewdiff_clicked()
@@ -1251,28 +1257,25 @@ void DirDiffForm::on_showsame_toggled(bool checked)
 
 void DirDiffForm::on_filter_activated(int index)
 {
-	switch ( index )
-	{
-	case 0:
-		clearFilter();
-		break;
-	case 1:
-		setFilter(QRegExp(".*(cpp|h)"));
-		break;
-	}
-}
-
-void DirDiffForm::on_filter_editTextChanged(const QString& arg1)
-{
-    QStringList l = arg1.split(';');
-
-    QVector< QRegExp > f;
-
-    for (int i = 0; i < l.count(); ++i)
+    const QVariant& v = ui->filter->itemData(index);
+    if (v.type() == QVariant::RegExp)
     {
-        f.push_back(QRegExp(l.at(i).trimmed(), Qt::CaseSensitive, QRegExp::Wildcard));
+        // A reg ex is stored
+        setFilter(v.toRegExp());
     }
-    setFilter(f);
+    else
+    {
+        QString s;
+
+        if (v.type() == QVariant::String)
+        {
+            s = v.toString();
+        }
+        else
+            s = ui->filter->itemText(index);
+
+        setFilters(s);
+    }
 }
 
 void DirDiffForm::on_autoRefresh_stateChanged(int state)
@@ -1417,12 +1420,6 @@ void DirDiffForm::items_compared(
     startComparison();
 }
 
-void DirDiffForm::clearFilter()
-{
-    filters.clear();
-    applyFilters();
-}
-
 void DirDiffForm::setFilter(const QRegExp& r)
 {
     filters.clear();
@@ -1430,9 +1427,18 @@ void DirDiffForm::setFilter(const QRegExp& r)
 	applyFilters();
 }
 
-void DirDiffForm::setFilter(const QVector< QRegExp >& r)
+void DirDiffForm::setFilters(const QString& s)
 {
-    filters = r;
+    QStringList l = s.split(';');
+
+    QVector< QRegExp > f;
+
+    for (int i = 0; i < l.count(); ++i)
+    {
+        f.push_back(QRegExp(l.at(i).trimmed(), Qt::CaseSensitive, QRegExp::Wildcard));
+    }
+
+    filters = f;
     applyFilters();
 }
 
@@ -1881,4 +1887,19 @@ void DirDiffForm::on_depthlimit_toggled(bool checked)
 {
     ui->depth->setEnabled(checked);
     change_depth(get_depth());
+}
+
+void DirDiffForm::populate_filters()
+{
+    ui->filter->clear();
+    ui->filter->addItem("All Files", QRegExp(".*"));
+
+    MySettings& settings = MySettings::instance();
+
+    const QMap< QString, QString > f = settings.getFilters();
+
+    for (QMap< QString, QString >::const_iterator it = f.constBegin(); it != f.constEnd(); ++it)
+    {
+        ui->filter->addItem(it.key() + " (" + it.value() + ")", it.value());
+    }
 }
