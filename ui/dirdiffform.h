@@ -269,8 +269,8 @@ private:
 	void rematch(std::vector< comparison_t >&, const dirnode&, const dirnode&, const std::string&);
 	void rematch_left(std::vector< comparison_t >&, const dirnode&, const std::string&);
 	void rematch_right(std::vector< comparison_t >&, const dirnode&, const std::string&);
-    void find_subdirs(QStringList& subdirs, const dirnode& n, const std::string&, int, int);
-    QStringList find_subdirs(const dirnode&, int);
+	void find_subdirs(QStringList& subdirs, const dirnode& n, const std::string&, int, int);
+	QStringList find_subdirs(const dirnode&, int);
 	void refresh();
 	int get_depth();
 
