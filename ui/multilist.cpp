@@ -70,35 +70,35 @@ MultiList::MultiList(QWidget* parent) :
 
 	setLayout(layout);
 
-    verticalScrollBar = new QScrollBar(Qt::Vertical, this);
+	verticalScrollBar = new QScrollBar(Qt::Vertical, this);
 
-    for ( int i = 0; i < 2; ++i )
+	for ( int i = 0; i < 2; ++i )
 	{
 		if ( QListWidget* dir = new QListWidget(this))
 		{
 			dirs.push_back(dir);
 			dir->setContextMenuPolicy(Qt::NoContextMenu);
-            dir->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-            dir->setSelectionMode(QAbstractItemView::ExtendedSelection);
+			dir->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+			dir->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-            // Sync scrollbar
-            connect(dir->verticalScrollBar(), &QScrollBar::valueChanged, this, &MultiList::sync_scroll);
+			// Sync scrollbar
+			connect(dir->verticalScrollBar(), &QScrollBar::valueChanged, this, &MultiList::sync_scroll);
 
 			// Keep selections in sync
-            connect(dir, &QListWidget::itemSelectionChanged, this, &MultiList::update_selection);
-            connect(dir, &QListWidget::currentRowChanged, this, &MultiList::current_row_changed);
-            connect(dir, &QListWidget::itemDoubleClicked, this, &MultiList::handle_item_double_clicked);
+			connect(dir, &QListWidget::itemSelectionChanged, this, &MultiList::update_selection);
+			connect(dir, &QListWidget::currentRowChanged, this, &MultiList::current_row_changed);
+			connect(dir, &QListWidget::itemDoubleClicked, this, &MultiList::handle_item_double_clicked);
 
 			this->layout()->addWidget(dir);
 		}
 	}
 
-    connect(dirs[0]->verticalScrollBar(), &QScrollBar::rangeChanged, this, &MultiList::update_scroll_range);
+	connect(dirs[0]->verticalScrollBar(), &QScrollBar::rangeChanged, this, &MultiList::update_scroll_range);
 
-    verticalScrollBar->setRange(0, 0);
-    connect(verticalScrollBar, &QScrollBar::valueChanged, this, &MultiList::sync_scroll);
+	verticalScrollBar->setRange(0, 0);
+	connect(verticalScrollBar, &QScrollBar::valueChanged, this, &MultiList::sync_scroll);
 
-    layout->insertWidget(1, verticalScrollBar);
+	layout->insertWidget(1, verticalScrollBar);
 }
 
 MultiList::~MultiList()
@@ -108,19 +108,21 @@ MultiList::~MultiList()
 // One of the scroll bars has changed.. ensure they are all the same
 void MultiList::sync_scroll(int val)
 {
-    for ( std::size_t i = 0; i < dirs.size(); ++i )
+	for ( std::size_t i = 0; i < dirs.size(); ++i )
 	{
 		if ( QListWidget* dir = dirs[i] )
 		{
-            if ( dir->verticalScrollBar()->value() != val )
-            {
-                dir->verticalScrollBar()->setValue(val);
-            }
-        }
+			if ( dir->verticalScrollBar()->value() != val )
+			{
+				dir->verticalScrollBar()->setValue(val);
+			}
+		}
 	}
 
-    if (verticalScrollBar->value() != val)
-        verticalScrollBar->setValue(val);
+	if ( verticalScrollBar->value() != val )
+	{
+		verticalScrollBar->setValue(val);
+	}
 }
 
 void MultiList::update_selection()
@@ -131,9 +133,9 @@ void MultiList::update_selection()
 		{
 			if ( dirs[i] != from )
 			{
-                disconnect(dirs[i], &QListWidget::itemSelectionChanged, this, &MultiList::update_selection);
+				disconnect(dirs[i], &QListWidget::itemSelectionChanged, this, &MultiList::update_selection);
 				copy_selection(from, dirs[i]);
-                connect(dirs[i], &QListWidget::itemSelectionChanged, this, &MultiList::update_selection);
+				connect(dirs[i], &QListWidget::itemSelectionChanged, this, &MultiList::update_selection);
 			}
 		}
 	}
@@ -193,9 +195,12 @@ void MultiList::addItem(const QStringList& items)
 	}
 }
 
-void MultiList::update_scroll_range(int min, int max)
+void MultiList::update_scroll_range(
+	int min,
+	int max
+)
 {
-    verticalScrollBar->setRange(min, max);
+	verticalScrollBar->setRange(min, max);
 }
 
 void MultiList::clearText(
@@ -350,7 +355,7 @@ void MultiList::setSelectedRows(const QList< int >& l)
 		// temporarily disonnect signals that edit selection
 		for ( std::size_t r = 0; r < dirs.size(); ++r )
 		{
-            disconnect(dirs[r], &QListWidget::itemSelectionChanged, this, &MultiList::update_selection);
+			disconnect(dirs[r], &QListWidget::itemSelectionChanged, this, &MultiList::update_selection);
 		}
 
 		for ( std::size_t r = 0; r < dirs.size(); ++r )
@@ -371,7 +376,7 @@ void MultiList::setSelectedRows(const QList< int >& l)
 		// Reconnect slots
 		for ( std::size_t r = 0; r < dirs.size(); ++r )
 		{
-            connect(dirs[r], &QListWidget::itemSelectionChanged, this, &MultiList::update_selection);
+			connect(dirs[r], &QListWidget::itemSelectionChanged, this, &MultiList::update_selection);
 		}
 	}
 }

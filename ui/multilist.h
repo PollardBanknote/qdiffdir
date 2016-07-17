@@ -80,13 +80,13 @@ private slots:
 
 	void update_selection();
 	void current_row_changed(int);
-    void update_scroll_range(int, int);
+	void update_scroll_range(int, int);
 private:
 	void styleitem(QListWidgetItem*, bool, bool, bool, bool);
 
 
 	std::vector< QListWidget* > dirs;
-    QScrollBar*                 verticalScrollBar;
+	QScrollBar*                 verticalScrollBar;
 };
 
 #endif // MULTILIST_H

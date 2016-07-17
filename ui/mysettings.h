@@ -46,9 +46,8 @@ public:
 	QString getDiffTool() const;
 	QString getDiffToolSetting() const;
 	void setDiffTool(const QString&);
-    QMap< QString, QString > getFilters() const;
-    void setFilters(const QMap< QString, QString >&);
-
+	QMap< QString, QString > getFilters() const;
+	void setFilters(const QMap< QString, QString >&);
 private:
 	MySettings();
 	MySettings(const MySettings&);

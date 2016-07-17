@@ -43,7 +43,7 @@ MainWindow::MainWindow(
 
 	if ( dirnames.size() == 1 )
 	{
-        ui->widget->changeDirectories(dirnames[0], std::string());
+		ui->widget->changeDirectories(dirnames[0], std::string());
 	}
 	else if ( dirnames.size() > 1 )
 	{
@@ -60,6 +60,8 @@ void MainWindow::on_actionSettings_triggered()
 {
 	SettingsDialog dlg(this);
 
-    if (dlg.exec() == QDialog::Accepted)
-        ui->widget->settingsChanged();
+	if ( dlg.exec() == QDialog::Accepted )
+	{
+		ui->widget->settingsChanged();
+	}
 }

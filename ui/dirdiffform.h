@@ -51,13 +51,14 @@ class DirDiffForm;
 
 struct items_t
 {
-    std::string left;
-    std::string right;
+	std::string left;
+	std::string right;
 
-    bool operator==(const items_t& o) const
-    {
-        return left == o.left && right == o.right;
-    }
+	bool operator==(const items_t& o) const
+	{
+		return left == o.left && right == o.right;
+	}
+
 };
 
 
@@ -77,7 +78,7 @@ public slots:
 signals:
 	void compared(const QString& first, const QString& second, bool);
 private:
-    static QByteArray gunzip(const std::string& filename);
+	static QByteArray gunzip(const std::string& filename);
 };
 
 class FileNameMatcher
@@ -123,9 +124,8 @@ public:
 	 * @param show_identical Show files that are equivalent on the left and right
 	 */
 	void setFlags(bool show_left_only, bool show_right_only, bool show_identical);
-
 public slots:
-    void settingsChanged();
+	void settingsChanged();
 signals:
 	void compare_files(const QString&, const QString&);
 private slots:
@@ -180,8 +180,7 @@ private slots:
 	void on_actionSelect_Left_Only_triggered();
 
 	void on_actionSelect_Right_Only_triggered();
-    void on_depthlimit_toggled(bool checked);
-
+	void on_depthlimit_toggled(bool checked);
 private:
 	enum overwrite_t {OVERWRITE_ASK, OVERWRITE_YES, OVERWRITE_NO};
 	enum compare_result_t {NOT_COMPARED, COMPARED_SAME, COMPARED_DIFFERENT};
@@ -221,33 +220,39 @@ private:
 		{
 			return items.left.empty() || items.right.empty();
 		}
+
 	};
 
-    void populate_filters();
+    std::vector< std::string > get_left_files();
+    std::vector< std::string > get_right_files();
 
-    void applyFilters();
+    void copyfiles(const std::string&, const std::string&, const std::vector< std::string >&);
 
-    /** The "show left only" checkbox was toggled
-     */
-    void showOnlyLeft(bool checked);
+	void populate_filters();
 
-    /** The "show ignored" checkbox was toggled
-     */
-    void showIgnored(bool checked);
+	void applyFilters();
 
-    /** The "show identical items" checkbox was toggled
-     */
-    void showSame(bool checked);
+	/** The "show left only" checkbox was toggled
+	 */
+	void showOnlyLeft(bool checked);
 
-    /** The "show right only" checkbox was toggled
-     */
-    void showOnlyRight(bool checked);
+	/** The "show ignored" checkbox was toggled
+	 */
+	void showIgnored(bool checked);
 
-    void setFilter(const QRegExp&);
+	/** The "show identical items" checkbox was toggled
+	 */
+	void showSame(bool checked);
 
-    void setFilters(const QString&);
+	/** The "show right only" checkbox was toggled
+	 */
+	void showOnlyRight(bool checked);
 
-    static bool compare_by_items(const comparison_t& a, const comparison_t& b);
+	void setFilter(const QRegExp&);
+
+	void setFilters(const QString&);
+
+	static bool compare_by_items(const comparison_t& a, const comparison_t& b);
 
 	void saveAs(const std::string&, const std::string& source, const std::string& destination);
 	void saveAs(const std::vector< std::string >&, const std::string&, const std::string&);
@@ -255,11 +260,11 @@ private:
 	void stopDirectoryWatcher();
 	void startDirectoryWatcher();
 	void fileChanged(const std::string&);
-    void filesChanged(const std::set<std::__cxx11::string> &);
+	void filesChanged(const std::set< std::__cxx11::string >&);
 	QString renumber(const QString& s_);
 	std::string getDirectory(const std::string& dir);
 	void change_depth(int);
-    void change_dir(const std::string&, const std::string&);
+	void change_dir(const std::string&, const std::string&);
 	void change_depth(dirnode&, int);
 	void change_depth(dirnode&, const std::string&, int, int);
 	void rematch(std::vector< comparison_t >&, const dirnode&, const dirnode&, const std::string&);
@@ -267,10 +272,10 @@ private:
 	void rematch_right(std::vector< comparison_t >&, const dirnode&, const std::string&);
 	void find_subdirs(std::set< std::string >& subdirs, const dirnode& n, const std::string&, int, int);
 	void refresh();
-    int get_depth();
+	int get_depth();
 
 	bool rescan(dirnode&, const std::string&, const std::string&, int, int);
-    void rescan(dirnode&, const std::string&, int);
+	void rescan(dirnode&, const std::string&, int);
 
 	void file_list_changed(int depth, bool);
 
@@ -290,7 +295,7 @@ private:
 	FileNameMatcher matcher;
 
 	/// A filter for which items to show
-    QVector< QRegExp > filters;
+	QVector< QRegExp > filters;
 
 	/// Whether or not to show left only items
 	bool hide_left_only;
