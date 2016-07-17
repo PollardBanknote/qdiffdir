@@ -14,7 +14,6 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    directorycomparison.cpp \
     dirdiffform.cpp \
     mysettings.cpp \
     settingsdialog.cpp \
@@ -29,7 +28,6 @@ HEADERS  += mainwindow.h \
     mysettings.h \
     settingsdialog.h \
     multilist.h \
-    directorycomparison.h \
     compare.h \
     items.h \
     workerthread.h \

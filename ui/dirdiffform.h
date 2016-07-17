@@ -43,12 +43,23 @@ class QString;
 class QFileSystemWatcher;
 
 #include "trees/directorycontents.h"
-#include "directorycomparison.h"
 
 namespace Ui
 {
 class DirDiffForm;
 }
+
+struct items_t
+{
+    std::string left;
+    std::string right;
+
+    bool operator==(const items_t& o) const
+    {
+        return left == o.left && right == o.right;
+    }
+};
+
 
 class FileSystem
 {
@@ -112,14 +123,6 @@ public:
 	 * @param show_identical Show files that are equivalent on the left and right
 	 */
 	void setFlags(bool show_left_only, bool show_right_only, bool show_identical);
-
-	/** Set the object used to match items between lists
-	 *
-	 * By default, items are matched if they have the exact same name. A
-	 * matcher can override or extend that behavior. See the documentation for
-	 * that class.
-	 */
-	void setMatcher(const Matcher&);
 
 public slots:
 	/** The "show left only" checkbox was toggled
@@ -262,7 +265,7 @@ private:
 	QString renumber(const QString& s_);
 	std::string getDirectory(const std::string& dir);
 	void change_depth(int);
-	void change_depth(int, bool, bool);
+    void change_dir(bool, bool);
 	void change_depth(dirnode&, int);
 	void change_depth(dirnode&, const std::string&, int, int);
 	void rematch(std::vector< comparison_t >&, const dirnode&, const dirnode&, const std::string&);
@@ -270,6 +273,7 @@ private:
 	void rematch_right(std::vector< comparison_t >&, const dirnode&, const std::string&);
 	void find_subdirs(std::set< std::string >& subdirs, const dirnode& n, const std::string&, int, int);
 	void refresh();
+    int get_depth();
 
 	bool rescan(dirnode&, const std::string&, const std::string&, int, int);
 	bool rescan(dirnode&, const std::string&, int);

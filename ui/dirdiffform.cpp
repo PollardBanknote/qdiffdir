@@ -472,12 +472,13 @@ void DirDiffForm::change_depth(int d)
 }
 
 // depth has not changed, but one or both directories have changed
-void DirDiffForm::change_depth(
-	int  d,
+void DirDiffForm::change_dir(
 	bool l,
 	bool r
 )
 {
+    const int d = get_depth();
+
 	if ( l )
 	{
 		change_depth(ltree, d);
@@ -560,7 +561,7 @@ void DirDiffForm::rematch_left(
 
 	for ( std::size_t i = 0, n = l.files.size(); i < n; ++i )
 	{
-		comparison_t c = { items_t(prefix + l.files[i], std::string()), NOT_COMPARED, false };
+        comparison_t c = { { prefix + l.files[i], std::string()}, NOT_COMPARED, false };
 		m.push_back(c);
 	}
 }
@@ -579,7 +580,7 @@ void DirDiffForm::rematch_right(
 
 	for ( std::size_t i = 0, n = r.files.size(); i < n; ++i )
 	{
-		comparison_t c = { items_t(std::string(), prefix + r.files[i]), NOT_COMPARED, false };
+        comparison_t c = { { std::string(), prefix + r.files[i]}, NOT_COMPARED, false };
 		m.push_back(c);
 	}
 }
@@ -641,7 +642,7 @@ void DirDiffForm::rematch(
 
 	for (; il < nl && ir < nr;)
 	{
-		comparison_t c = { items_t(std::string(), std::string()), NOT_COMPARED, false };
+        comparison_t c = { { std::string(), std::string()}, NOT_COMPARED, false };
 
 		if ( l.files[il] == r.files[ir] )
 		{
@@ -669,13 +670,13 @@ void DirDiffForm::rematch(
 
 	for (; il < nl; ++il )
 	{
-		comparison_t c = { items_t(prefix + l.files[il], std::string()), NOT_COMPARED, false };
+        comparison_t c = { { prefix + l.files[il], std::string()}, NOT_COMPARED, false };
         matched_files.push_back(c);
 	}
 
 	for (; ir < nr; ++ir )
 	{
-		comparison_t c = { items_t(std::string(), prefix + r.files[ir]), NOT_COMPARED, false };
+        comparison_t c = { { std::string(), prefix + r.files[ir]}, NOT_COMPARED, false };
         matched_files.push_back(c);
 	}
 
@@ -925,7 +926,7 @@ void DirDiffForm::changeDirectories(
 
 	if ( lchanged || rchanged )
 	{
-		change_depth(ui->depth->value(), lchanged, rchanged);
+        change_dir(lchanged, rchanged);
 	}
 }
 
@@ -1088,11 +1089,12 @@ bool DirDiffForm::rescan(
 }
 
 // File system has notified us of a change in one of our directories
+/// @todo If we get a lot of these, performance is terrible
 void DirDiffForm::contentsChanged(QString dirname_)
 {
 	const std::string dirname = cpp::filesystem::cleanpath(qt::convert(dirname_));
 
-	const int d = ui->depth->value();
+    const int d = get_depth();
 
 	if ( !rescan(ltree, dirname, d))
 	{
@@ -1160,7 +1162,14 @@ void DirDiffForm::refresh()
 	ltree.files.clear();
 	rtree.children.clear();
 	rtree.files.clear();
-	change_depth(ui->depth->value());
+    change_depth(get_depth());
+}
+
+int DirDiffForm::get_depth()
+{
+    if (ui->depthlimit->isChecked())
+        return ui->depth->value();
+    return INT_MAX;
 }
 
 void DirDiffForm::on_swap_clicked()
@@ -1172,7 +1181,7 @@ void DirDiffForm::on_swap_clicked()
 		std::swap(list[i].items.left, list[i].items.right);
 	}
 
-	file_list_changed(ui->depth->value(), true);
+    file_list_changed(get_depth(), true);
 
 	QString s = ui->openleftdir->text();
 	ui->openleftdir->setText(ui->openrightdir->text());
@@ -1846,13 +1855,5 @@ std::string FileNameMatcher::cgalt(const std::string& s)
 void DirDiffForm::on_depthlimit_toggled(bool checked)
 {
     ui->depth->setEnabled(checked);
-
-    if (checked)
-    {
-        change_depth(ui->depth->value());
-    }
-    else
-    {
-        change_depth(INT_MAX);
-    }
+    change_depth(get_depth());
 }
