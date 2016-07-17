@@ -322,7 +322,7 @@ private:
 	 */
 	QDateTime               when;              // last time directories were updated
 	QFileSystemWatcher*     watcher;
-	std::set< std::string > watched_dirs;
+    QStringList watched_dirs;
 };
 
 #endif // DIRDIFFFORM_H

@@ -97,8 +97,6 @@ DirDiffForm::DirDiffForm(QWidget* parent_) :
 	ui->multilistview->addAction(ui->actionSelect_Left_Only);
 	ui->multilistview->addAction(ui->actionSelect_Right_Only);
 	connect(ui->multilistview, &MultiList::itemActivated, this, &DirDiffForm::viewfiles);
-
-	startDirectoryWatcher();
 }
 
 DirDiffForm::~DirDiffForm()
@@ -734,6 +732,8 @@ void DirDiffForm::file_list_changed(
 	bool rootchanged
 )
 {
+    stopDirectoryWatcher();
+
 	// Update the text of the open directory buttons
 	if ( ltree.name.empty())
 	{
@@ -855,63 +855,17 @@ void DirDiffForm::file_list_changed(
 
 	applyFilters();
 
-	// Update file system watcher
+    // Update file system watcher
 	std::set< std::string > subdirs;
 	find_subdirs(subdirs, ltree, std::string(), 0, depth);
 	find_subdirs(subdirs, rtree, std::string(), 0, depth);
 
-	std::set< std::string >::iterator first1 = subdirs.begin(), last1 = subdirs.end(), first2 = watched_dirs.begin(), last2 = watched_dirs.end();
+    watched_dirs.clear();
+    for (std::set< std::string >::iterator it = subdirs.begin(); it != subdirs.end(); ++it)
+        watched_dirs << qt::convert(*it);
 
-	while ( first1 != last1 && first2 != last2 )
-	{
-		if ( *first1 < *first2 )
-		{
-			// Adding directory to watch
-			if ( watcher )
-			{
-				watcher->addPath(qt::convert(*first1));
-			}
-
-			++first1;
-		}
-		else if ( *first2 < *first1 )
-		{
-			// no longer watching path
-			if ( watcher )
-			{
-				watcher->removePath(qt::convert(*first2));
-			}
-
-			++first2;
-		}
-		else
-		{
-			++first1;
-			++first2;
-		}
-	}
-
-	while ( first1 != last1 )
-	{
-		if ( watcher )
-		{
-			watcher->addPath(qt::convert(*first1));
-		}
-
-		++first1;
-	}
-
-	while ( first2 != last2 )
-	{
-		if ( watcher )
-		{
-			watcher->removePath(qt::convert(*first2));
-		}
-
-		++first2;
-	}
-
-	watched_dirs.swap(subdirs);
+    if (ui->autoRefresh->isChecked())
+        startDirectoryWatcher();
 
 	startComparison();
 }
@@ -988,13 +942,8 @@ void DirDiffForm::startDirectoryWatcher()
 	if ( !watcher )
 	{
 		// create new file system watcher
-		watcher = new QFileSystemWatcher(this);
+        watcher = new QFileSystemWatcher(watched_dirs, this);
 		connect(watcher, &QFileSystemWatcher::directoryChanged, this, &DirDiffForm::contentsChanged);
-
-		for ( std::set< std::string >::iterator it = watched_dirs.begin(); it != watched_dirs.end(); ++it )
-		{
-			watcher->addPath(qt::convert(*it));
-		}
 	}
 }
 
