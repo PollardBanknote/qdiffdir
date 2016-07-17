@@ -422,61 +422,36 @@ void DirDiffForm::change_depth(int d)
 	file_list_changed(d, false);
 }
 
+bool DirDiffForm::change_root(dirnode & n, const std::string & dir)
+{
+    if (!dir.empty())
+    {
+        const cpp::filesystem::path path(dir);
+
+        n.name = ( path.is_absolute() && cpp::filesystem::is_directory(path))
+                ? cpp::filesystem::cleanpath(dir)
+                : std::string();
+        n.children.clear();
+        n.files.clear();
+
+        change_depth(n, get_depth());
+        return true;
+    }
+    return false;
+}
+
 // depth has not changed, but one or both directories have changed
 void DirDiffForm::change_dir(
 	const std::string& left,
 	const std::string& right
 )
 {
-	const bool lchanged = !left.empty();
-	const bool rchanged = !right.empty();
-	const int  d        = get_depth();
+    const bool lchanged = change_root(ltree, left);
+    const bool rchanged = change_root(rtree, right);
 
-	if ( lchanged )
+    if ( lchanged || rchanged )
 	{
-		// change to the new directories
-		const cpp::filesystem::path lpath(left);
-
-		if ( lpath.is_absolute() && cpp::filesystem::is_directory(lpath))
-		{
-			ltree.name = cpp::filesystem::cleanpath(lpath);
-			ltree.children.clear();
-			ltree.files.clear();
-		}
-		else
-		{
-			// Error
-			ltree.name.clear();
-			ltree.children.clear();
-			ltree.files.clear();
-		}
-
-		change_depth(ltree, d);
-	}
-
-	if ( rchanged )
-	{
-		const cpp::filesystem::path rpath(right);
-
-		if ( rpath.is_absolute() && cpp::filesystem::is_directory(rpath))
-		{
-			rtree.name = cpp::filesystem::cleanpath(rpath);
-			rtree.children.clear();
-			rtree.files.clear();
-		}
-		else
-		{
-			rtree.name.clear();
-			rtree.children.clear();
-			rtree.files.clear();
-		}
-
-		change_depth(rtree, d);
-	}
-
-	if ( lchanged || rchanged )
-	{
-		file_list_changed(d, true);
+        file_list_changed(get_depth(), true);
 	}
 }
 

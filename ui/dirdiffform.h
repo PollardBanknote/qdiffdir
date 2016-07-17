@@ -262,6 +262,7 @@ private:
 	QString renumber(const QString& s_);
 	std::string getDirectory(const std::string& dir);
 	void change_depth(int);
+    bool change_root(dirnode&, const std::string&);
 	void change_dir(const std::string&, const std::string&);
 	void change_depth(dirnode&, int);
 	void change_depth(dirnode&, const std::string&, int, int);
