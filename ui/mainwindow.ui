@@ -50,8 +50,11 @@
    <addaction name="menuFile"/>
   </widget>
   <action name="actionSettings">
+   <property name="icon">
+    <iconset theme="preferences-system"/>
+   </property>
    <property name="text">
-    <string>Settings</string>
+    <string>&amp;Settings</string>
    </property>
   </action>
  </widget>

@@ -79,7 +79,9 @@ DirDiffForm::DirDiffForm(QWidget* parent_) :
     connect(comparer, &FileCompare::compared, this, &DirDiffForm::items_compared);
 	compare_thread.start();
 
-	ui->openleftdir->setIcon(get_icon("folder"));
+    ui->copytoleft->setIcon(get_icon("edit-copy"));
+    ui->copytoright->setIcon(get_icon("edit-copy"));
+    ui->openleftdir->setIcon(get_icon("folder"));
 	ui->openrightdir->setIcon(get_icon("folder"));
 	ui->refresh->setIcon(get_icon("view-refresh"));
 	ui->openleft->setIcon(get_icon("folder-open"));
