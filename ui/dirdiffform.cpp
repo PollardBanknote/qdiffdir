@@ -706,7 +706,7 @@ void DirDiffForm::rematch(
 }
 
 void DirDiffForm::find_subdirs(
-	std::set< std::string >& subdirs,
+    QStringList& subdirs,
 	const dirnode&           n,
 	const std::string&       s,
 	int                      depth,
@@ -718,7 +718,7 @@ void DirDiffForm::find_subdirs(
 		if ( depth < maxdepth )
 		{
 			// don't need to watch dirs at max depth
-			subdirs.insert(s + n.name);
+            subdirs << qt::convert(s + n.name);
 
 			if ( depth + 1 < maxdepth )
 			{
@@ -729,6 +729,13 @@ void DirDiffForm::find_subdirs(
 			}
 		}
 	}
+}
+
+QStringList DirDiffForm::find_subdirs(const dirnode & n, int maxdepth)
+{
+    QStringList r;
+    find_subdirs(r, n, std::string(), 0, maxdepth);
+    return r;
 }
 
 void replace_intermediate_paths(std::string& s)
@@ -875,16 +882,10 @@ void DirDiffForm::file_list_changed(
 	applyFilters();
 
 	// Update file system watcher
-	std::set< std::string > subdirs;
-	find_subdirs(subdirs, ltree, std::string(), 0, depth);
-	find_subdirs(subdirs, rtree, std::string(), 0, depth);
-
-	watched_dirs.clear();
-
-	for ( std::set< std::string >::iterator it = subdirs.begin(); it != subdirs.end(); ++it )
-	{
-		watched_dirs << qt::convert(*it);
-	}
+    watched_dirs.clear();
+    watched_dirs << find_subdirs(ltree, depth)
+                 << find_subdirs(rtree, depth);
+    watched_dirs.removeDuplicates();
 
 	if ( ui->autoRefresh->isChecked())
 	{
