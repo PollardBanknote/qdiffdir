@@ -223,10 +223,10 @@ private:
 
 	};
 
-    std::vector< std::string > get_left_files();
-    std::vector< std::string > get_right_files();
+	std::vector< std::string > get_left_files();
+	std::vector< std::string > get_right_files();
 
-    void copyfiles(const std::string&, const std::string&, const std::vector< std::string >&);
+	void copyfiles(const std::string&, const std::string&, const std::vector< std::string >&);
 
 	void populate_filters();
 
@@ -262,7 +262,7 @@ private:
 	QString renumber(const QString& s_);
 	std::string getDirectory(const std::string& dir);
 	void change_depth(int);
-    bool change_root(dirnode&, const std::string&);
+	bool change_root(dirnode&, const std::string&);
 	void change_dir(const std::string&, const std::string&);
 	void change_depth(dirnode&, int);
 	void change_depth(dirnode&, const std::string&, int, int);
@@ -320,9 +320,9 @@ private:
 	/*
 	   DirectoryComparison derp;
 	 */
-	QDateTime               when;              // last time directories were updated
-	QFileSystemWatcher*     watcher;
-    QStringList watched_dirs;
+	QDateTime           when;                  // last time directories were updated
+	QFileSystemWatcher* watcher;
+	QStringList         watched_dirs;
 };
 
 #endif // DIRDIFFFORM_H

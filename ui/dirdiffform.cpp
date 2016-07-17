@@ -165,144 +165,158 @@ void DirDiffForm::on_viewdiff_clicked()
 void DirDiffForm::saveAs(
 	const std::vector< std::string >& filenames,
 	const std::string&                source,
-    const std::string&                destination
+	const std::string&                destination
 )
 {
-    if (!source.empty() && !destination.empty())
-    {
-        std::set< std::string > changed;
+	if ( !source.empty() && !destination.empty())
+	{
+		std::set< std::string > changed;
 
-        for ( std::size_t i = 0; i < filenames.size(); ++i )
-        {
-            const std::string& original_filename = filenames[i];
+		for ( std::size_t i = 0; i < filenames.size(); ++i )
+		{
+			const std::string& original_filename = filenames[i];
 
-            QStringList suggested_relative_path = qt::convert(original_filename).split(QDir::separator(), QString::SkipEmptyParts);
-            suggested_relative_path.pop_back(); // remove the filename
+			QStringList suggested_relative_path = qt::convert(original_filename).split(QDir::separator(), QString::SkipEmptyParts);
+			suggested_relative_path.pop_back(); // remove the filename
 
-            QDir suggested_save_directory(qt::convert(destination));
+			QDir suggested_save_directory(qt::convert(destination));
 
-            bool valid_dir = true;
+			bool valid_dir = true;
 
-            for ( int i = 0; valid_dir == true && i < suggested_relative_path.size(); ++i )
-            {
-                valid_dir = suggested_save_directory.cd(suggested_relative_path[i]);
-            }
+			for ( int i = 0; valid_dir == true && i < suggested_relative_path.size(); ++i )
+			{
+				valid_dir = suggested_save_directory.cd(suggested_relative_path[i]);
+			}
 
-            if ( !valid_dir )
-            {
-                suggested_save_directory.cd(qt::convert(destination));
-            }
+			if ( !valid_dir )
+			{
+				suggested_save_directory.cd(qt::convert(destination));
+			}
 
-            QString suggested_filename = suggested_save_directory.absolutePath() + QDir::separator() + qt::convert(cpp::filesystem::basename(original_filename));
-            QString save_file_name     = QFileDialog::getSaveFileName(this, "Save as", suggested_filename);
+			QString suggested_filename = suggested_save_directory.absolutePath() + QDir::separator() + qt::convert(cpp::filesystem::basename(original_filename));
+			QString save_file_name     = QFileDialog::getSaveFileName(this, "Save as", suggested_filename);
 
-            if ( !save_file_name.isEmpty())
-            {
-                QString s = lastPathComponent(save_file_name);
-                QString t = save_file_name;
-                t.chop(s.length());
-                QDir                           src(qt::convert(source));
-                std::pair< bool, overwrite_t > res = copyTo(qt::convert(src.absoluteFilePath(qt::convert(original_filename))), qt::convert(t), qt::convert(s), OVERWRITE_ASK);
+			if ( !save_file_name.isEmpty())
+			{
+				QString s = lastPathComponent(save_file_name);
+				QString t = save_file_name;
+				t.chop(s.length());
+				QDir                           src(qt::convert(source));
+				std::pair< bool, overwrite_t > res = copyTo(qt::convert(src.absoluteFilePath(qt::convert(original_filename))), qt::convert(t), qt::convert(s), OVERWRITE_ASK);
 
-                if ( res.first )
-                {
-                    changed.insert(qt::convert(save_file_name));
-                }
-            }
-        }
+				if ( res.first )
+				{
+					changed.insert(qt::convert(save_file_name));
+				}
+			}
+		}
 
-        if ( !changed.empty())
-        {
-            filesChanged(changed);
-        }
-    }
+		if ( !changed.empty())
+		{
+			filesChanged(changed);
+		}
+	}
 }
 
-void DirDiffForm::copyfiles(const std::string& from, const std::string& to, const std::vector< std::string >& rels)
+void DirDiffForm::copyfiles(
+	const std::string&                from,
+	const std::string&                to,
+	const std::vector< std::string >& rels
+)
 {
-    if ( from.empty() || to.empty())
-    {
-        return;
-    }
+	if ( from.empty() || to.empty())
+	{
+		return;
+	}
 
-    if (!rels.empty())
-    {
-        overwrite_t overwrite = OVERWRITE_ASK;
+	if ( !rels.empty())
+	{
+		overwrite_t overwrite = OVERWRITE_ASK;
 
-        std::set< std::string > changed;
+		std::set< std::string > changed;
 
-        for ( std::size_t i = 0; i < rels.size(); ++i )
-        {
-            const std::string rel = rels[i];
+		for ( std::size_t i = 0; i < rels.size(); ++i )
+		{
+			const std::string rel = rels[i];
 
-            const std::string              source_file = from + "/" + rel;
-            const std::string              dest_file   = to + "/" + rel;
-            const std::string              dest_dir    = cpp::filesystem::dirname(dest_file);
-            const std::string              file_name   = cpp::filesystem::basename(source_file);
-            std::pair< bool, overwrite_t > res         = copyTo(source_file, dest_dir, file_name, overwrite);
+			const std::string              source_file = from + "/" + rel;
+			const std::string              dest_file   = to + "/" + rel;
+			const std::string              dest_dir    = cpp::filesystem::dirname(dest_file);
+			const std::string              file_name   = cpp::filesystem::basename(source_file);
+			std::pair< bool, overwrite_t > res         = copyTo(source_file, dest_dir, file_name, overwrite);
 
-            if ( res.first )
-            {
-                changed.insert(dest_file);
-            }
+			if ( res.first )
+			{
+				changed.insert(dest_file);
+			}
 
-            overwrite = res.second;
-        }
+			overwrite = res.second;
+		}
 
-        if ( !changed.empty())
-        {
-            filesChanged(changed);
-        }
-    }
-    else
-    {
-        QMessageBox::warning(this, "No file selected", "Cannot complete action");
+		if ( !changed.empty())
+		{
+			filesChanged(changed);
+		}
+	}
+	else
+	{
+		QMessageBox::warning(this, "No file selected", "Cannot complete action");
 
-    }
+	}
 }
 
 std::vector< std::string > DirDiffForm::get_left_files()
 {
-    const QList< int > indices = ui->multilistview->selectedRows();
-    std::vector< std::string > rels;
-    for ( int i = 0, n = indices.count(); i < n; ++i )
-    {
-        if (!list[indices[i]].items.left.empty())
-            rels.push_back(list[indices[i]].items.left);
-    }
-    return rels;
+	const QList< int > indices = ui->multilistview->selectedRows();
+
+	std::vector< std::string > rels;
+
+	for ( int i = 0, n = indices.count(); i < n; ++i )
+	{
+		if ( !list[indices[i]].items.left.empty())
+		{
+			rels.push_back(list[indices[i]].items.left);
+		}
+	}
+
+	return rels;
 }
 
 std::vector< std::string > DirDiffForm::get_right_files()
 {
-    const QList< int > indices = ui->multilistview->selectedRows();
-    std::vector< std::string > rels;
-    for ( int i = 0, n = indices.count(); i < n; ++i )
-    {
-        if (!list[indices[i]].items.right.empty())
-            rels.push_back(list[indices[i]].items.right);
-    }
-    return rels;
+	const QList< int > indices = ui->multilistview->selectedRows();
+
+	std::vector< std::string > rels;
+
+	for ( int i = 0, n = indices.count(); i < n; ++i )
+	{
+		if ( !list[indices[i]].items.right.empty())
+		{
+			rels.push_back(list[indices[i]].items.right);
+		}
+	}
+
+	return rels;
 }
 
 void DirDiffForm::on_copytoright_clicked()
 {
-    copyfiles(ltree.name, rtree.name, get_left_files());
+	copyfiles(ltree.name, rtree.name, get_left_files());
 }
 
 void DirDiffForm::on_copytoleft_clicked()
 {
-    copyfiles(rtree.name, ltree.name, get_right_files());
+	copyfiles(rtree.name, ltree.name, get_right_files());
 }
 
 void DirDiffForm::on_renametoright_clicked()
 {
-    saveAs(get_left_files(), ltree.name, rtree.name);
+	saveAs(get_left_files(), ltree.name, rtree.name);
 }
 
 void DirDiffForm::on_renametoleft_clicked()
 {
-    saveAs(get_right_files(), rtree.name, ltree.name);
+	saveAs(get_right_files(), rtree.name, ltree.name);
 }
 
 std::string DirDiffForm::getDirectory(const std::string& dir)
@@ -420,22 +434,27 @@ void DirDiffForm::change_depth(int d)
 	file_list_changed(d, false);
 }
 
-bool DirDiffForm::change_root(dirnode & n, const std::string & dir)
+bool DirDiffForm::change_root(
+	dirnode&           n,
+	const std::string& dir
+)
 {
-    if (!dir.empty())
-    {
-        const cpp::filesystem::path path(dir);
+	if ( !dir.empty())
+	{
+		const cpp::filesystem::path path(dir);
 
-        n.name = ( path.is_absolute() && cpp::filesystem::is_directory(path))
-                ? cpp::filesystem::cleanpath(dir)
-                : std::string();
-        n.children.clear();
-        n.files.clear();
+		n.name = ( path.is_absolute() && cpp::filesystem::is_directory(path))
+		         ? cpp::filesystem::cleanpath(dir)
+				 : std::string();
+		n.children.clear();
+		n.files.clear();
 
-        change_depth(n, get_depth());
-        return true;
-    }
-    return false;
+		change_depth(n, get_depth());
+
+		return true;
+	}
+
+	return false;
 }
 
 // depth has not changed, but one or both directories have changed
@@ -444,12 +463,12 @@ void DirDiffForm::change_dir(
 	const std::string& right
 )
 {
-    const bool lchanged = change_root(ltree, left);
-    const bool rchanged = change_root(rtree, right);
+	const bool lchanged = change_root(ltree, left);
+	const bool rchanged = change_root(rtree, right);
 
-    if ( lchanged || rchanged )
+	if ( lchanged || rchanged )
 	{
-        file_list_changed(get_depth(), true);
+		file_list_changed(get_depth(), true);
 	}
 }
 
@@ -732,7 +751,7 @@ void DirDiffForm::file_list_changed(
 	bool rootchanged
 )
 {
-    stopDirectoryWatcher();
+	stopDirectoryWatcher();
 
 	// Update the text of the open directory buttons
 	if ( ltree.name.empty())
@@ -855,17 +874,22 @@ void DirDiffForm::file_list_changed(
 
 	applyFilters();
 
-    // Update file system watcher
+	// Update file system watcher
 	std::set< std::string > subdirs;
 	find_subdirs(subdirs, ltree, std::string(), 0, depth);
 	find_subdirs(subdirs, rtree, std::string(), 0, depth);
 
-    watched_dirs.clear();
-    for (std::set< std::string >::iterator it = subdirs.begin(); it != subdirs.end(); ++it)
-        watched_dirs << qt::convert(*it);
+	watched_dirs.clear();
 
-    if (ui->autoRefresh->isChecked())
-        startDirectoryWatcher();
+	for ( std::set< std::string >::iterator it = subdirs.begin(); it != subdirs.end(); ++it )
+	{
+		watched_dirs << qt::convert(*it);
+	}
+
+	if ( ui->autoRefresh->isChecked())
+	{
+		startDirectoryWatcher();
+	}
 
 	startComparison();
 }
@@ -942,7 +966,7 @@ void DirDiffForm::startDirectoryWatcher()
 	if ( !watcher )
 	{
 		// create new file system watcher
-        watcher = new QFileSystemWatcher(watched_dirs, this);
+		watcher = new QFileSystemWatcher(watched_dirs, this);
 		connect(watcher, &QFileSystemWatcher::directoryChanged, this, &DirDiffForm::contentsChanged);
 	}
 }
@@ -1636,10 +1660,10 @@ void FileCompare::compare(
 {
 	bool res;
 
-    /// @todo Support different archive types (ex., bz2)
+	/// @todo Support different archive types (ex., bz2)
 	if ( first.endsWith(".gz") || second.endsWith(".gz"))
 	{
-        /// @todo use popen and compare streams
+		/// @todo use popen and compare streams
 		const QByteArray data1 = gunzip(first.toStdString());
 		const QByteArray data2 = gunzip(second.toStdString());
 
