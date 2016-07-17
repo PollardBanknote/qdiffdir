@@ -1579,7 +1579,7 @@ bool DirDiffForm::compare_by_items(
 		{
 
 			// at last path component for both
-			return l.compare(il, jl - il, r, ir, jr - ir) == -1;
+			return l.compare(il, jl - il, r, ir, jr - ir) < 0;
 		}
 
 		if ( jl == nl )
@@ -1601,7 +1601,7 @@ bool DirDiffForm::compare_by_items(
 
 		if ( res != 0 )
 		{
-			return res == -1;
+			return res < 0;
 		}
 
 		// next path component
