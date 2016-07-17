@@ -73,9 +73,9 @@ DirDiffForm::DirDiffForm(QWidget* parent_) :
 
 	FileCompare* comparer = new FileCompare;
 	comparer->moveToThread(&compare_thread);
-	connect(&compare_thread, SIGNAL(finished()), comparer, SLOT(deleteLater()));
-	connect(this, SIGNAL(compare_files(QString,QString)), comparer, SLOT(compare(QString,QString)));
-	connect(comparer, SIGNAL(compared(QString,QString,bool)), SLOT(items_compared(QString,QString,bool)));
+    connect(&compare_thread, &QThread::finished, comparer, &QObject::deleteLater);
+    connect(this, &DirDiffForm::compare_files, comparer, &FileCompare::compare);
+    connect(comparer, &FileCompare::compared, this, &DirDiffForm::items_compared);
 	compare_thread.start();
 
 	ui->openleftdir->setIcon(get_icon("folder"));
@@ -93,7 +93,7 @@ DirDiffForm::DirDiffForm(QWidget* parent_) :
 	ui->multilistview->addAction(ui->actionSelect_Same);
 	ui->multilistview->addAction(ui->actionSelect_Left_Only);
 	ui->multilistview->addAction(ui->actionSelect_Right_Only);
-	connect(ui->multilistview, SIGNAL(itemActivated(int)), SLOT(viewfiles(int)));
+    connect(ui->multilistview, &MultiList::itemActivated, this, &DirDiffForm::viewfiles);
 
 	startDirectoryWatcher();
 }
@@ -473,23 +473,58 @@ void DirDiffForm::change_depth(int d)
 
 // depth has not changed, but one or both directories have changed
 void DirDiffForm::change_dir(
-	bool l,
-	bool r
+    const std::string& left,
+    const std::string& right
 )
 {
+    const bool lchanged = !left.empty();
+    const bool rchanged = !right.empty();
     const int d = get_depth();
 
-	if ( l )
-	{
-		change_depth(ltree, d);
-	}
+    if ( lchanged)
+    {
+        // change to the new directories
+        const cpp::filesystem::path lpath(left);
 
-	if ( r )
-	{
-		change_depth(rtree, d);
-	}
+        if ( lpath.is_absolute() && cpp::filesystem::is_directory(lpath))
+        {
+            ltree.name = cpp::filesystem::cleanpath(lpath);
+            ltree.children.clear();
+            ltree.files.clear();
+        }
+        else
+        {
+            // Error
+            ltree.name.clear();
+            ltree.children.clear();
+            ltree.files.clear();
+        }
+        change_depth(ltree, d);
+    }
 
-	file_list_changed(d, l || r);
+    if ( rchanged)
+    {
+        const cpp::filesystem::path rpath(right);
+
+        if ( rpath.is_absolute() && cpp::filesystem::is_directory(rpath))
+        {
+            rtree.name = cpp::filesystem::cleanpath(rpath);
+            rtree.children.clear();
+            rtree.files.clear();
+        }
+        else
+        {
+            rtree.name.clear();
+            rtree.children.clear();
+            rtree.files.clear();
+        }
+        change_depth(rtree, d);
+    }
+
+    if ( lchanged || rchanged )
+    {
+        file_list_changed(d, true);
+    }
 }
 
 void DirDiffForm::change_depth(
@@ -745,11 +780,68 @@ void DirDiffForm::find_subdirs(
 	}
 }
 
+void replace_intermediate_paths(std::string& s)
+{
+    const std::size_t i = s.find_first_of('/');
+    if (i != std::string::npos)
+    {
+        const std::size_t j = s.find_last_of('/');
+        if (j > i)
+            s.replace(i + 1, j - i - 1, "..");
+    }
+}
+
 void DirDiffForm::file_list_changed(
 	int  depth,
 	bool rootchanged
 )
 {
+    // Update the text of the open directory buttons
+    if (ltree.name.empty())
+    {
+        ui->openleftdir->setText("Open Left Dir");
+        if (rtree.name.empty())
+            ui->openrightdir->setText("Open Right Dir");
+        else
+            ui->openrightdir->setText(qt::convert(cpp::filesystem::basename(rtree.name)));
+    }
+    else if (rtree.name.empty())
+    {
+        ui->openleftdir->setText(qt::convert(cpp::filesystem::basename(ltree.name)));
+        ui->openrightdir->setText("Open Right Dir");
+    }
+    else
+    {
+        // Prefer to use just the directory name
+        std::string l = cpp::filesystem::basename(ltree.name);
+        std::string r = cpp::filesystem::basename(rtree.name);
+
+        if (l == r)
+        {
+            l = ltree.name;
+            r = rtree.name;
+
+            // Find common ancestor
+            std::size_t i = 0;
+            const std::size_t n = std::min(l.length(), r.length());
+            while (i < n && l[i] == r[i])
+                ++i;
+            while (i > 0 && l[i - 1] != '/')
+                --i;
+
+            // Erase common ancestor
+            l.erase(0, i);
+            r.erase(0, i);
+
+            // Remove intermediate directories
+            replace_intermediate_paths(l);
+            replace_intermediate_paths(r);
+        }
+
+        ui->openleftdir->setText(qt::convert(l));
+        ui->openrightdir->setText(qt::convert(r));
+    }
+
 	// Rematch files
 	std::vector< comparison_t > matched;
 
@@ -879,55 +971,7 @@ void DirDiffForm::changeDirectories(
 	const std::string& right
 )
 {
-	const bool lchanged = !left.empty();
-	const bool rchanged = !right.empty();
-
-	if ( !left.empty())
-	{
-		// change to the new directories
-		const cpp::filesystem::path lpath(left);
-
-		if ( lpath.is_absolute() && cpp::filesystem::is_directory(lpath))
-		{
-			ltree.name = cpp::filesystem::cleanpath(lpath);
-			ltree.children.clear();
-			ltree.files.clear();
-			ui->openleftdir->setText(qt::convert(cpp::filesystem::basename(left)));
-		}
-		else
-		{
-			// Error
-			ltree.name.clear();
-			ltree.children.clear();
-			ltree.files.clear();
-			ui->openleftdir->setText("Open Left Dir");
-		}
-	}
-
-	if ( !right.empty())
-	{
-		const cpp::filesystem::path rpath(right);
-
-		if ( rpath.is_absolute() && cpp::filesystem::is_directory(rpath))
-		{
-			rtree.name = cpp::filesystem::cleanpath(rpath);
-			rtree.children.clear();
-			rtree.files.clear();
-			ui->openrightdir->setText(qt::convert(cpp::filesystem::basename(right)));
-		}
-		else
-		{
-			rtree.name.clear();
-			rtree.children.clear();
-			rtree.files.clear();
-			ui->openrightdir->setText("Open Right Dir");
-		}
-	}
-
-	if ( lchanged || rchanged )
-	{
-        change_dir(lchanged, rchanged);
-	}
+    change_dir(left, right);
 }
 
 std::pair< bool, DirDiffForm::overwrite_t > DirDiffForm::copyTo(
@@ -995,7 +1039,7 @@ void DirDiffForm::startDirectoryWatcher()
 	{
 		// create new file system watcher
 		watcher = new QFileSystemWatcher(this);
-		connect(watcher, SIGNAL(directoryChanged(QString)), SLOT(contentsChanged(QString)));
+        connect(watcher, &QFileSystemWatcher::directoryChanged, this, &DirDiffForm::contentsChanged);
 
 		for ( std::set< std::string >::iterator it = watched_dirs.begin(); it != watched_dirs.end(); ++it )
 		{
@@ -1046,46 +1090,38 @@ bool DirDiffForm::rescan(
 	return false;
 }
 
-bool DirDiffForm::rescan(
+void DirDiffForm::rescan(
 	dirnode&           n,
 	const std::string& dirname,
 	int                maxdepth
 )
 {
-	if ( n.name.empty())
+    if ( !n.name.empty())
 	{
-		return false;
-	}
+        if ( n.name == dirname )
+        {
+            // root has changed
+            n.children.clear();
+            n.files.clear();
 
-	if ( n.name == dirname )
-	{
-		// root has changed
-		n.children.clear();
-		n.files.clear();
-
-		if ( cpp::filesystem::is_directory(dirname))
-		{
-			change_depth(n, maxdepth);
-
-			return true;
-		}
-		else
-		{
-			// directory doesn't exist anymore
-			n.name.clear();
-
-			return false;
-		}
-	}
-	else
-	{
-		if ( pbl::starts_with(dirname, n.name + "/"))
-		{
-			rescan(n, n.name, dirname, 0, maxdepth);
-		}
-
-		return true;
-	}
+            if ( cpp::filesystem::is_directory(dirname))
+            {
+                change_depth(n, maxdepth);
+            }
+            else
+            {
+                // directory doesn't exist anymore
+                n.name.clear();
+            }
+        }
+        else
+        {
+            if ( pbl::starts_with(dirname, n.name + "/"))
+            {
+                rescan(n, n.name, dirname, 0, maxdepth);
+            }
+        }
+    }
 }
 
 // File system has notified us of a change in one of our directories
@@ -1096,15 +1132,8 @@ void DirDiffForm::contentsChanged(QString dirname_)
 
     const int d = get_depth();
 
-	if ( !rescan(ltree, dirname, d))
-	{
-		ui->openleftdir->setText("Open Left Dir");
-	}
-
-	if ( !rescan(rtree, dirname, d))
-	{
-		ui->openrightdir->setText("Open Right Dir");
-	}
+    rescan(ltree, dirname, d);
+    rescan(rtree, dirname, d);
 
 	file_list_changed(d, false);
 }
@@ -1182,10 +1211,6 @@ void DirDiffForm::on_swap_clicked()
 	}
 
     file_list_changed(get_depth(), true);
-
-	QString s = ui->openleftdir->text();
-	ui->openleftdir->setText(ui->openrightdir->text());
-	ui->openrightdir->setText(s);
 }
 
 void DirDiffForm::on_openright_clicked()

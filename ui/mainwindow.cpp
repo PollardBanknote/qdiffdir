@@ -43,7 +43,7 @@ MainWindow::MainWindow(
 
 	if ( dirnames.size() == 1 )
 	{
-		ui->widget->changeDirectories(std::string(), dirnames[0]);
+        ui->widget->changeDirectories(dirnames[0], std::string());
 	}
 	else if ( dirnames.size() > 1 )
 	{

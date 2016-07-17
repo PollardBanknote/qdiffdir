@@ -124,35 +124,7 @@ public:
 	 */
 	void setFlags(bool show_left_only, bool show_right_only, bool show_identical);
 
-public slots:
-	/** The "show left only" checkbox was toggled
-	 */
-	void showOnlyLeft(bool checked);
-
-	/** The "show ignored" checkbox was toggled
-	 */
-	void showIgnored(bool checked);
-
-	/** The "show identical items" checkbox was toggled
-	 */
-	void showSame(bool checked);
-
-	/** The "show right only" checkbox was toggled
-	 */
-	void showOnlyRight(bool checked);
-
-	void setFilter(const QRegExp&);
-
-    void setFilter(const QVector< QRegExp >&);
-
-	void clearFilter();
 signals:
-	/** Notify connected objects that the user double clicked an item
-	 * @param l The left item
-	 * @param r The right item
-	 */
-	void itemDoubleClicked(QString l, QString r);
-
 	void compare_files(const QString&, const QString&);
 private slots:
 	void on_viewdiff_clicked();
@@ -184,8 +156,6 @@ private slots:
 	void on_filter_editTextChanged(const QString& arg1);
 
 	void on_autoRefresh_stateChanged(int state);
-
-	void applyFilters();
 
 	/** Mark an item as ignored
 	 */
@@ -253,6 +223,30 @@ private:
 		}
 	};
 
+    void applyFilters();
+
+    /** The "show left only" checkbox was toggled
+     */
+    void showOnlyLeft(bool checked);
+
+    /** The "show ignored" checkbox was toggled
+     */
+    void showIgnored(bool checked);
+
+    /** The "show identical items" checkbox was toggled
+     */
+    void showSame(bool checked);
+
+    /** The "show right only" checkbox was toggled
+     */
+    void showOnlyRight(bool checked);
+
+    void setFilter(const QRegExp&);
+
+    void setFilter(const QVector< QRegExp >&);
+
+    void clearFilter();
+
     static bool compare_by_items(const comparison_t& a, const comparison_t& b);
 
 	void saveAs(const std::string&, const std::string& source, const std::string& destination);
@@ -265,7 +259,7 @@ private:
 	QString renumber(const QString& s_);
 	std::string getDirectory(const std::string& dir);
 	void change_depth(int);
-    void change_dir(bool, bool);
+    void change_dir(const std::string&, const std::string&);
 	void change_depth(dirnode&, int);
 	void change_depth(dirnode&, const std::string&, int, int);
 	void rematch(std::vector< comparison_t >&, const dirnode&, const dirnode&, const std::string&);
@@ -276,7 +270,7 @@ private:
     int get_depth();
 
 	bool rescan(dirnode&, const std::string&, const std::string&, int, int);
-	bool rescan(dirnode&, const std::string&, int);
+    void rescan(dirnode&, const std::string&, int);
 
 	void file_list_changed(int depth, bool);
 
