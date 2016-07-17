@@ -254,12 +254,10 @@ private:
 
 	static bool compare_by_items(const comparison_t& a, const comparison_t& b);
 
-	void saveAs(const std::string&, const std::string& source, const std::string& destination);
 	void saveAs(const std::vector< std::string >&, const std::string&, const std::string&);
 	std::pair< bool, overwrite_t > copyTo(const std::string & file, const std::string & destdir, const std::string & newname, overwrite_t);
 	void stopDirectoryWatcher();
 	void startDirectoryWatcher();
-	void fileChanged(const std::string&);
 	void filesChanged(const std::set< std::__cxx11::string >&);
 	QString renumber(const QString& s_);
 	std::string getDirectory(const std::string& dir);

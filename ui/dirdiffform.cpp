@@ -167,57 +167,57 @@ void DirDiffForm::on_viewdiff_clicked()
 void DirDiffForm::saveAs(
 	const std::vector< std::string >& filenames,
 	const std::string&                source,
-	const std::string&                dest
+    const std::string&                destination
 )
 {
-    for ( std::size_t i = 0; i < filenames.size(); ++i )
+    if (!source.empty() && !destination.empty())
     {
-        saveAs(filenames[i], source, dest);
+        std::set< std::string > changed;
+
+        for ( std::size_t i = 0; i < filenames.size(); ++i )
+        {
+            const std::string& original_filename = filenames[i];
+
+            QStringList suggested_relative_path = qt::convert(original_filename).split(QDir::separator(), QString::SkipEmptyParts);
+            suggested_relative_path.pop_back(); // remove the filename
+
+            QDir suggested_save_directory(qt::convert(destination));
+
+            bool valid_dir = true;
+
+            for ( int i = 0; valid_dir == true && i < suggested_relative_path.size(); ++i )
+            {
+                valid_dir = suggested_save_directory.cd(suggested_relative_path[i]);
+            }
+
+            if ( !valid_dir )
+            {
+                suggested_save_directory.cd(qt::convert(destination));
+            }
+
+            QString suggested_filename = suggested_save_directory.absolutePath() + QDir::separator() + qt::convert(cpp::filesystem::basename(original_filename));
+            QString save_file_name     = QFileDialog::getSaveFileName(this, "Save as", suggested_filename);
+
+            if ( !save_file_name.isEmpty())
+            {
+                QString s = lastPathComponent(save_file_name);
+                QString t = save_file_name;
+                t.chop(s.length());
+                QDir                           src(qt::convert(source));
+                std::pair< bool, overwrite_t > res = copyTo(qt::convert(src.absoluteFilePath(qt::convert(original_filename))), qt::convert(t), qt::convert(s), OVERWRITE_ASK);
+
+                if ( res.first )
+                {
+                    changed.insert(qt::convert(save_file_name));
+                }
+            }
+        }
+
+        if ( !changed.empty())
+        {
+            filesChanged(changed);
+        }
     }
-}
-
-void DirDiffForm::saveAs(
-	const std::string& original_filename, // a filename relative to source
-	const std::string& source,
-	const std::string& destination
-)
-{
-    if ( !original_filename.empty() && !source.empty() && !destination.empty())
-	{
-		QStringList suggested_relative_path = qt::convert(original_filename).split(QDir::separator(), QString::SkipEmptyParts);
-		suggested_relative_path.pop_back(); // remove the filename
-
-		QDir suggested_save_directory(qt::convert(destination));
-
-		bool valid_dir = true;
-
-		for ( int i = 0; valid_dir == true && i < suggested_relative_path.size(); ++i )
-		{
-			valid_dir = suggested_save_directory.cd(suggested_relative_path[i]);
-		}
-
-		if ( !valid_dir )
-		{
-			suggested_save_directory.cd(qt::convert(destination));
-		}
-
-		QString suggested_filename = suggested_save_directory.absolutePath() + QDir::separator() + qt::convert(cpp::filesystem::basename(original_filename));
-		QString save_file_name     = QFileDialog::getSaveFileName(this, "Save as", suggested_filename);
-
-		if ( !save_file_name.isEmpty())
-		{
-			QString s = lastPathComponent(save_file_name);
-			QString t = save_file_name;
-			t.chop(s.length());
-			QDir                           src(qt::convert(source));
-			std::pair< bool, overwrite_t > res = copyTo(qt::convert(src.absoluteFilePath(qt::convert(original_filename))), qt::convert(t), qt::convert(s), OVERWRITE_ASK);
-
-			if ( res.first )
-			{
-				fileChanged(qt::convert(save_file_name));
-			}
-		}
-	}
 }
 
 void DirDiffForm::copyfiles(const std::string& from, const std::string& to, const std::vector< std::string >& rels)
@@ -1111,36 +1111,6 @@ void DirDiffForm::contentsChanged(QString dirname_)
 	rescan(rtree, dirname, d);
 
 	file_list_changed(d, false);
-}
-
-// A single file has been changed/or added. Everything else stayed the same
-// file is an absolute path
-/// @bug Not tracking file changes, but it seems to work anyway
-void DirDiffForm::fileChanged(const std::string& file)
-{
-	if ( !ltree.name.empty() && pbl::starts_with(file, ltree.name + "/"))
-	{
-		for ( std::size_t i = 0; i < list.size(); ++i )
-		{
-			if ( file.compare(ltree.name.length() + 1, std::string::npos, list[i].items.left) == 0 )
-			{
-				list[i].res = NOT_COMPARED;
-				break;
-			}
-		}
-	}
-
-	if ( !rtree.name.empty() && pbl::starts_with(file, rtree.name + "/"))
-	{
-		for ( std::size_t i = 0; i < list.size(); ++i )
-		{
-			if ( file.compare(rtree.name.length() + 1, std::string::npos, list[i].items.right) == 0 )
-			{
-				list[i].res = NOT_COMPARED;
-				break;
-			}
-		}
-	}
 }
 
 void DirDiffForm::filesChanged(const std::set< std::string >& files)
