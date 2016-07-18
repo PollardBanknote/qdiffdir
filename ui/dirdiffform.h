@@ -166,13 +166,13 @@ private:
 
 	struct dirnode
 	{
-        std::string name;
+		std::string name;
 		std::vector< dirnode > children;
 		std::vector< std::string > files;
 
 		void swap(dirnode& n)
 		{
-            name.swap(n.name);
+			name.swap(n.name);
 			children.swap(n.children);
 			files.swap(n.files);
 		}
@@ -181,25 +181,26 @@ private:
 
 	struct comparison_t
 	{
-        std::string left;
-        std::string right;
+		std::string left;
+		std::string right;
 		compare_result_t res;
 		bool ignore;
 
-        bool left_only() const
+		bool left_only() const
 		{
-            return !left.empty() && right.empty();
+			return !left.empty() && right.empty();
 		}
 
 		bool right_only() const
 		{
-            return left.empty() && !right.empty();
+			return left.empty() && !right.empty();
 		}
 
 		bool unmatched() const
 		{
-            return left.empty() || right.empty();
+			return left.empty() || right.empty();
 		}
+
 	};
 
 	std::vector< std::string > get_left_files();
@@ -234,7 +235,7 @@ private:
 	static bool compare_by_items(const comparison_t& a, const comparison_t& b);
 
 	void saveAs(const std::vector< std::string >&, const std::string&, const std::string&);
-    std::pair< bool, overwrite_t > copyTo(const std::string & file, const std::string &, overwrite_t);
+	std::pair< bool, overwrite_t > copyTo(const std::string & file, const std::string&, overwrite_t);
 	void stopDirectoryWatcher();
 	void startDirectoryWatcher();
 	void filesChanged(const std::set< std::__cxx11::string >&);
