@@ -10,6 +10,15 @@ TARGET = pbl
 TEMPLATE = lib
 CONFIG += staticlib
 
+QMAKE_CXXFLAGS = -pipe
+QMAKE_CXXFLAGS_DEBUG = -Og -ggdb3
+QMAKE_CXXFLAGS_RELEASE = -O2
+QMAKE_CXXFLAGS_WARN_OFF = warnoff
+QMAKE_CXXFLAGS_WARN_ON = -Wall -Wsign-compare -Wconversion -Wpointer-arith -Winit-self \
+    -Wcast-qual -Wredundant-decls -Wcast-align -Wwrite-strings  -Wno-long-long \
+    -Woverloaded-virtual -Wformat -Wno-unknown-pragmas -Wnon-virtual-dtor \
+    -Wno-c++0x-compat
+
 SOURCES += \
     process/detach.cpp \
     cpp/fs/basename.cpp \

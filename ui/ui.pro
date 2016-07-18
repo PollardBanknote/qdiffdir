@@ -11,6 +11,14 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = ui
 TEMPLATE = app
 
+QMAKE_CXXFLAGS = -pipe
+QMAKE_CXXFLAGS_DEBUG = -Og -ggdb3
+QMAKE_CXXFLAGS_RELEASE = -O2
+QMAKE_CXXFLAGS_WARN_OFF = warnoff
+QMAKE_CXXFLAGS_WARN_ON = -Wall -Wsign-compare -Wconversion -Wpointer-arith -Winit-self \
+    -Wcast-qual -Wredundant-decls -Wcast-align -Wwrite-strings  -Wno-long-long \
+    -Woverloaded-virtual -Wformat -Wno-unknown-pragmas -Wnon-virtual-dtor \
+    -Wno-c++0x-compat
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -18,7 +26,6 @@ SOURCES += main.cpp\
     mysettings.cpp \
     settingsdialog.cpp \
     multilist.cpp \
-    workerthread.cpp \
     qutilities/icons.cpp \
     qutilities/convert.cpp \
     trees/directorycontents.cpp
@@ -30,7 +37,6 @@ HEADERS  += mainwindow.h \
     multilist.h \
     compare.h \
     items.h \
-    workerthread.h \
     matcher.h \
     qutilities/icons.h \
     qutilities/convert.h \
