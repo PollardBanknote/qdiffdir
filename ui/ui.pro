@@ -28,7 +28,7 @@ SOURCES += main.cpp\
     multilist.cpp \
     qutilities/icons.cpp \
     qutilities/convert.cpp \
-    trees/directorycontents.cpp
+    modules/filesystem.cpp
 
 HEADERS  += mainwindow.h \
     dirdiffform.h \
@@ -36,11 +36,10 @@ HEADERS  += mainwindow.h \
     settingsdialog.h \
     multilist.h \
     compare.h \
-    items.h \
     matcher.h \
     qutilities/icons.h \
     qutilities/convert.h \
-    trees/directorycontents.h
+    modules/filesystem.h
 
 FORMS    += mainwindow.ui \
     dirdiffform.ui \

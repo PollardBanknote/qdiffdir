@@ -42,33 +42,12 @@ class QListWidgetItem;
 class QString;
 class QFileSystemWatcher;
 
-#include "trees/directorycontents.h"
+#include "modules/filesystem.h"
 
 namespace Ui
 {
 class DirDiffForm;
 }
-
-struct items_t
-{
-	std::string left;
-	std::string right;
-
-	bool operator==(const items_t& o) const
-	{
-		return left == o.left && right == o.right;
-	}
-
-};
-
-
-class FileSystem
-{
-public:
-	// return (files, subdirs) of path
-	std::pair< std::vector< std::string >, std::vector< std::string > > contents(const std::string&);
-private:
-};
 
 class FileCompare : public QObject
 {
@@ -187,13 +166,13 @@ private:
 
 	struct dirnode
 	{
-		std::string name;
+        std::string name;
 		std::vector< dirnode > children;
 		std::vector< std::string > files;
 
 		void swap(dirnode& n)
 		{
-			name.swap(n.name);
+            name.swap(n.name);
 			children.swap(n.children);
 			files.swap(n.files);
 		}
@@ -202,25 +181,25 @@ private:
 
 	struct comparison_t
 	{
-		items_t items;
+        std::string left;
+        std::string right;
 		compare_result_t res;
 		bool ignore;
 
-		bool left_only() const
+        bool left_only() const
 		{
-			return !items.left.empty() && items.right.empty();
+            return !left.empty() && right.empty();
 		}
 
 		bool right_only() const
 		{
-			return items.left.empty() && !items.right.empty();
+            return left.empty() && !right.empty();
 		}
 
 		bool unmatched() const
 		{
-			return items.left.empty() || items.right.empty();
+            return left.empty() || right.empty();
 		}
-
 	};
 
 	std::vector< std::string > get_left_files();
@@ -255,7 +234,7 @@ private:
 	static bool compare_by_items(const comparison_t& a, const comparison_t& b);
 
 	void saveAs(const std::vector< std::string >&, const std::string&, const std::string&);
-	std::pair< bool, overwrite_t > copyTo(const std::string & file, const std::string & destdir, const std::string & newname, overwrite_t);
+    std::pair< bool, overwrite_t > copyTo(const std::string & file, const std::string &, overwrite_t);
 	void stopDirectoryWatcher();
 	void startDirectoryWatcher();
 	void filesChanged(const std::set< std::__cxx11::string >&);
