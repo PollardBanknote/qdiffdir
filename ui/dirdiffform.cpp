@@ -1,4 +1,4 @@
-/* Copyright (c) 2014, Pollard Banknote Limited
+/* Copyright (c) 2016, Pollard Banknote Limited
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without modification,
