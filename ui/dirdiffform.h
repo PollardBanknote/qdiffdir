@@ -238,7 +238,7 @@ private:
 	std::pair< bool, overwrite_t > copyTo(const std::string & file, const std::string&, overwrite_t);
 	void stopDirectoryWatcher();
 	void startDirectoryWatcher();
-	void filesChanged(const std::set< std::__cxx11::string >&);
+	void filesChanged(const std::set< std::string >&);
 	QString renumber(const QString& s_);
 	std::string getDirectory(const std::string& dir);
 	void change_depth(int);
