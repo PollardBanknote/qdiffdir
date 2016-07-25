@@ -33,6 +33,25 @@
 
 #include "mainwindow.h"
 #include "process/detach.h"
+#include "cpp/filesystem.h"
+
+std::string make_absolute(
+	const std::string& s,
+	const std::string& cwd
+)
+{
+	if ( !s.empty())
+	{
+		if ( s[0] != '/' )
+		{
+			return cwd + "/" + s;
+		}
+
+		return s;
+	}
+
+	return std::string();
+}
 
 /** @brief Start the application based on command line arguments
  */
@@ -41,6 +60,8 @@ int main(
 	char* argv[]
 )
 {
+	const std::string cwd = cpp::filesystem::current_path().native();
+
 	// options for the application
 	std::vector< std::string > filenames;
 
@@ -56,7 +77,7 @@ int main(
 	{
 		if ( no_more_switches )
 		{
-			filenames.push_back(argv[i]);
+			filenames.push_back(make_absolute(argv[i], cwd));
 		}
 		else
 		{
@@ -96,7 +117,7 @@ int main(
 			}
 			else if ( !( s.find("--") == 0 ))
 			{
-				filenames.push_back(s);
+				filenames.push_back(make_absolute(s, cwd));
 			}
 		}
 	}
@@ -117,7 +138,7 @@ int main(
 	}
 
 	// Detach from the terminal and start up the GUI
-	#if 1
+	#if 0
 	#warning Detach is disabled
 	#else
 	pbl::process::detach();
