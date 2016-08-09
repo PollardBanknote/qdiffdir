@@ -122,6 +122,11 @@ int main(
 		}
 	}
 
+	if ( filenames.size() == 1 )
+	{
+		filenames.insert(filenames.begin(), cwd);
+	}
+
 	if ( help )
 	{
 		std::cout << "\nUsage: qdiffdir [options] [[leftdir] rightdir]\n\n";
