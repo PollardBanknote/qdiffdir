@@ -1196,7 +1196,7 @@ bool DirDiffForm::hidden(std::size_t i) const
 	}
 
 	// Hide items that don't match the current filter
-	if ( !filters.isEmpty())
+	if ( !hideitem && !filters.isEmpty())
 	{
 		hideitem = true;
 
