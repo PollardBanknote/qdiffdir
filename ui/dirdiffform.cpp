@@ -59,8 +59,8 @@
 DirDiffForm::DirDiffForm(QWidget* parent_) :
 	QWidget(parent_),
 	ui(new Ui::DirDiffForm),
-	hide_left_only(false),
-	hide_right_only(false), hide_identical_items(false), hide_ignored(false),
+    hide_section_only(),
+    hide_identical_items(false), hide_ignored(false),
 	watcher()
 {
 	ui->setupUi(this);
@@ -140,15 +140,15 @@ void DirDiffForm::on_viewdiff_clicked()
 		if ( !s1.empty() && !s2.empty())
 		{
 			QStringList l;
-			l << QString::fromStdString(ltree.name + "/" + s1)
-			  << QString::fromStdString(rtree.name + "/" + s2);
+			l << QString::fromStdString(section_tree[0].name + "/" + s1)
+			  << QString::fromStdString(section_tree[1].name + "/" + s2);
 			QProcess::startDetached(settings.getDiffTool(), l);
 		}
 		else
 		{
 			const std::string s = ( s1.empty() ? s2 : s1 );
 
-			cpp::filesystem::path p(rtree.name + "/" + s);
+			cpp::filesystem::path p(section_tree[1].name + "/" + s);
 			cpp::filesystem::path q = p.parent_path();
 			QProcess::startDetached(settings.getEditor(), QStringList(qt::convert(p.filename().native())), qt::convert(q.native()));
 		}
@@ -253,7 +253,7 @@ void DirDiffForm::copyfiles(
 	}
 }
 
-std::vector< std::string > DirDiffForm::get_left_files()
+std::vector< std::string > DirDiffForm::get_section_files(std::size_t j)
 {
 	const QList< int > indices = ui->multilistview->selectedRows();
 
@@ -261,26 +261,9 @@ std::vector< std::string > DirDiffForm::get_left_files()
 
 	for ( int i = 0, n = indices.count(); i < n; ++i )
 	{
-		if ( !list[indices[i]].items[0].empty())
+		if ( !list[indices[i]].items[j].empty())
 		{
-			rels.push_back(list[indices[i]].items[0]);
-		}
-	}
-
-	return rels;
-}
-
-std::vector< std::string > DirDiffForm::get_right_files()
-{
-	const QList< int > indices = ui->multilistview->selectedRows();
-
-	std::vector< std::string > rels;
-
-	for ( int i = 0, n = indices.count(); i < n; ++i )
-	{
-		if ( !list[indices[i]].items[1].empty())
-		{
-			rels.push_back(list[indices[i]].items[1]);
+			rels.push_back(list[indices[i]].items[j]);
 		}
 	}
 
@@ -289,22 +272,22 @@ std::vector< std::string > DirDiffForm::get_right_files()
 
 void DirDiffForm::on_copytoright_clicked()
 {
-	copyfiles(ltree.name, rtree.name, get_left_files());
+	copyfiles(section_tree[0].name, section_tree[1].name, get_section_files(0));
 }
 
 void DirDiffForm::on_copytoleft_clicked()
 {
-	copyfiles(rtree.name, ltree.name, get_right_files());
+	copyfiles(section_tree[1].name, section_tree[0].name, get_section_files(1));
 }
 
 void DirDiffForm::on_renametoright_clicked()
 {
-	saveAs(get_left_files(), ltree.name, rtree.name);
+	saveAs(get_section_files(0), section_tree[0].name, section_tree[1].name);
 }
 
 void DirDiffForm::on_renametoleft_clicked()
 {
-	saveAs(get_right_files(), rtree.name, ltree.name);
+	saveAs(get_section_files(1), section_tree[1].name, section_tree[0].name);
 }
 
 std::string DirDiffForm::getDirectory(const std::string& dir)
@@ -336,7 +319,7 @@ std::string DirDiffForm::getDirectory(const std::string& dir)
 
 void DirDiffForm::on_openleftdir_clicked()
 {
-	const std::string s = getDirectory(ltree.name);
+	const std::string s = getDirectory(section_tree[0].name);
 
 	if ( !s.empty())
 	{
@@ -346,7 +329,7 @@ void DirDiffForm::on_openleftdir_clicked()
 
 void DirDiffForm::on_openrightdir_clicked()
 {
-	const std::string s = getDirectory(rtree.name);
+	const std::string s = getDirectory(section_tree[1].name);
 
 	if ( !s.empty())
 	{
@@ -368,19 +351,19 @@ void DirDiffForm::viewfiles(int x_)
 			if ( !s2.empty())
 			{
 				QProcess::startDetached(settings.getEditor(),
-					QStringList(qt::convert(rtree.name + "/" + s2)));
+				    QStringList(qt::convert(section_tree[1].name + "/" + s2)));
 			}
 		}
 		else if ( s2.empty())
 		{
 			QProcess::startDetached(settings.getEditor(),
-				QStringList(qt::convert(ltree.name + "/" + s1)));
+			    QStringList(qt::convert(section_tree[0].name + "/" + s1)));
 		}
 		else
 		{
 			QStringList l;
-			l << qt::convert(ltree.name + "/" + s1)
-			  << qt::convert(rtree.name + "/" + s2);
+			l << qt::convert(section_tree[0].name + "/" + s1)
+			  << qt::convert(section_tree[1].name + "/" + s2);
 			QProcess::startDetached(settings.getDiffTool(), l);
 		}
 	}
@@ -417,8 +400,8 @@ void DirDiffForm::on_depth_valueChanged(int d)
 // depth has changed, but dirs are the same
 void DirDiffForm::change_depth(int d)
 {
-	change_depth(ltree, d);
-	change_depth(rtree, d);
+	change_depth(section_tree[0], d);
+	change_depth(section_tree[1], d);
 	file_list_changed(d, false);
 }
 
@@ -449,8 +432,8 @@ void DirDiffForm::change_dir(
 	const std::string& right
 )
 {
-	const bool lchanged = change_root(ltree, left);
-	const bool rchanged = change_root(rtree, right);
+	const bool lchanged = change_root(section_tree[0], left);
+	const bool rchanged = change_root(section_tree[1], right);
 
 	if ( lchanged || rchanged )
 	{
@@ -513,40 +496,23 @@ void DirDiffForm::change_depth(
 	}
 }
 
-void DirDiffForm::rematch_left(
+void DirDiffForm::rematch_section(
+    std::size_t                  j,
 	std::vector< comparison_t >& m,
-	const dirnode&               l,
-	const std::string&           prefix
-)
-{
-	// Recursively apply to subdirectories
-	for ( std::size_t i = 0, n = l.children.size(); i < n; ++i )
-	{
-		rematch_left(m, l.children[i], prefix + l.children[i].name + "/");
-	}
-
-	for ( std::size_t i = 0, n = l.files.size(); i < n; ++i )
-	{
-		comparison_t c = { prefix + l.files[i], std::string(), NOT_COMPARED, false };
-		m.push_back(c);
-	}
-}
-
-void DirDiffForm::rematch_right(
-	std::vector< comparison_t >& m,
-	const dirnode&               r,
+    const dirnode&               r,
 	const std::string&           prefix
 )
 {
 	// Recursively apply to subdirectories
 	for ( std::size_t i = 0, n = r.children.size(); i < n; ++i )
 	{
-		rematch_right(m, r.children[i], prefix + r.children[i].name + "/");
+		rematch_section(j, m, r.children[i], prefix + r.children[i].name + "/");
 	}
 
 	for ( std::size_t i = 0, n = r.files.size(); i < n; ++i )
 	{
-		comparison_t c = { std::string(), prefix + r.files[i], NOT_COMPARED, false };
+		comparison_t c = { { std::string(), std::string() }, NOT_COMPARED, false };
+		c.items[j] = prefix + r.files[i];
 		m.push_back(c);
 	}
 }
@@ -576,12 +542,12 @@ void DirDiffForm::rematch(
 			{
 				if ( l.children[il].name < r.children[ir].name )
 				{
-					rematch_left(m, l.children[il], prefix + l.children[il].name + "/");
+					rematch_section(0, m, l.children[il], prefix + l.children[il].name + "/");
 					++il;
 				}
 				else
 				{
-					rematch_right(m, r.children[ir], prefix + r.children[ir].name + "/");
+					rematch_section(1, m, r.children[ir], prefix + r.children[ir].name + "/");
 					++ir;
 				}
 			}
@@ -589,12 +555,12 @@ void DirDiffForm::rematch(
 
 		for (; il < nl; ++il )
 		{
-			rematch_left(m, l.children[il], prefix + l.children[il].name + "/");
+			rematch_section(0, m, l.children[il], prefix + l.children[il].name + "/");
 		}
 
 		for (; ir < nr; ++ir )
 		{
-			rematch_right(m, r.children[ir], prefix + r.children[ir].name + "/");
+			rematch_section(1, m, r.children[ir], prefix + r.children[ir].name + "/");
 		}
 	}
 
@@ -752,34 +718,34 @@ void DirDiffForm::file_list_changed(
 	stopDirectoryWatcher();
 
 	// Update the text of the open directory buttons
-	if ( ltree.name.empty())
+	if ( section_tree[0].name.empty())
 	{
 		ui->openleftdir->setText("Open Left Dir");
 
-		if ( rtree.name.empty())
+		if ( section_tree[1].name.empty())
 		{
 			ui->openrightdir->setText("Open Right Dir");
 		}
 		else
 		{
-			ui->openrightdir->setText(qt::convert(cpp::filesystem::basename(rtree.name)));
+			ui->openrightdir->setText(qt::convert(cpp::filesystem::basename(section_tree[1].name)));
 		}
 	}
-	else if ( rtree.name.empty())
+	else if ( section_tree[1].name.empty())
 	{
-		ui->openleftdir->setText(qt::convert(cpp::filesystem::basename(ltree.name)));
+		ui->openleftdir->setText(qt::convert(cpp::filesystem::basename(section_tree[0].name)));
 		ui->openrightdir->setText("Open Right Dir");
 	}
 	else
 	{
 		// Prefer to use just the directory name
-		std::string l = cpp::filesystem::basename(ltree.name);
-		std::string r = cpp::filesystem::basename(rtree.name);
+		std::string l = cpp::filesystem::basename(section_tree[0].name);
+		std::string r = cpp::filesystem::basename(section_tree[1].name);
 
 		if ( l == r )
 		{
-			l = ltree.name;
-			r = rtree.name;
+			l = section_tree[0].name;
+			r = section_tree[1].name;
 
 			// Find common ancestor
 			std::size_t       i = 0;
@@ -811,17 +777,17 @@ void DirDiffForm::file_list_changed(
 	// Rematch files
 	std::vector< comparison_t > matched;
 
-	if ( !ltree.name.empty() && !rtree.name.empty())
+	if ( !section_tree[0].name.empty() && !section_tree[1].name.empty())
 	{
-		rematch(matched, ltree, rtree, "");
+		rematch(matched, section_tree[0], section_tree[1], "");
 	}
-	else if ( !ltree.name.empty())
+	else if ( !section_tree[0].name.empty())
 	{
-		rematch_left(matched, ltree, "");
+		rematch_section(0, matched, section_tree[0], "");
 	}
-	else if ( !rtree.name.empty())
+	else if ( !section_tree[1].name.empty())
 	{
-		rematch_right(matched, rtree, "");
+		rematch_section(1, matched, section_tree[1], "");
 	}
 
 	if ( !rootchanged )
@@ -874,8 +840,8 @@ void DirDiffForm::file_list_changed(
 
 	// Update file system watcher
 	watched_dirs.clear();
-	watched_dirs << find_subdirs(ltree, depth)
-	             << find_subdirs(rtree, depth);
+	watched_dirs << find_subdirs(section_tree[0], depth)
+	             << find_subdirs(section_tree[1], depth);
 	watched_dirs.removeDuplicates();
 
 	if ( ui->autoRefresh->isChecked())
@@ -1028,8 +994,8 @@ void DirDiffForm::contentsChanged(QString dirname_)
 
 	const int d = get_depth();
 
-	rescan(ltree, dirname, d);
-	rescan(rtree, dirname, d);
+	rescan(section_tree[0], dirname, d);
+	rescan(section_tree[1], dirname, d);
 
 	file_list_changed(d, false);
 }
@@ -1038,8 +1004,8 @@ void DirDiffForm::filesChanged(const std::set< std::string >& files)
 {
 	for ( std::size_t i = 0; i < list.size(); ++i )
 	{
-		if (( !ltree.name.empty() && !list[i].items[0].empty() && files.count(ltree.name + "/" + list[i].items[0]) != 0 )
-		    || ( !rtree.name.empty() && !list[i].items[1].empty() && files.count(rtree.name + "/" + list[i].items[1]) != 0 ))
+		if (( !section_tree[0].name.empty() && !list[i].items[0].empty() && files.count(section_tree[0].name + "/" + list[i].items[0]) != 0 )
+		    || ( !section_tree[1].name.empty() && !list[i].items[1].empty() && files.count(section_tree[1].name + "/" + list[i].items[1]) != 0 ))
 		{
 			list[i].res = NOT_COMPARED;
 		}
@@ -1055,10 +1021,10 @@ void DirDiffForm::on_refresh_clicked()
 
 void DirDiffForm::refresh()
 {
-	ltree.children.clear();
-	ltree.files.clear();
-	rtree.children.clear();
-	rtree.files.clear();
+	section_tree[0].children.clear();
+	section_tree[0].files.clear();
+	section_tree[1].children.clear();
+	section_tree[1].files.clear();
 	change_depth(get_depth());
 }
 
@@ -1074,7 +1040,7 @@ int DirDiffForm::get_depth()
 
 void DirDiffForm::on_swap_clicked()
 {
-	ltree.swap(rtree);
+	section_tree[0].swap(section_tree[1]);
 
 	for ( std::size_t i = 0; i < list.size(); ++i )
 	{
@@ -1086,17 +1052,17 @@ void DirDiffForm::on_swap_clicked()
 
 void DirDiffForm::on_openright_clicked()
 {
-	if ( !rtree.name.empty())
+	if ( !section_tree[1].name.empty())
 	{
-		QDesktopServices::openUrl(QUrl(qt::convert("file://" + rtree.name)));
+		QDesktopServices::openUrl(QUrl(qt::convert("file://" + section_tree[1].name)));
 	}
 }
 
 void DirDiffForm::on_openleft_clicked()
 {
-	if ( !ltree.name.empty())
+	if ( !section_tree[0].name.empty())
 	{
-		QDesktopServices::openUrl(QUrl(qt::convert("file://" + ltree.name)));
+		QDesktopServices::openUrl(QUrl(qt::convert("file://" + section_tree[0].name)));
 	}
 }
 
@@ -1165,13 +1131,13 @@ bool DirDiffForm::hidden(std::size_t i) const
 	bool hideitem = false;
 
 	// Hide items in the left list that do not have a match in the right
-	if ( hide_left_only && list[i].left_only())
+	if ( hide_section_only[0] && list[i].left_only())
 	{
 		hideitem = true;
 	}
 
 	// Hide items in the right list that do not have a match in the right
-	if ( hide_right_only && list[i].right_only())
+	if ( hide_section_only[1] && list[i].right_only())
 	{
 		hideitem = true;
 	}
@@ -1278,7 +1244,7 @@ void DirDiffForm::items_compared(
 
 	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
 	{
-		if ( ltree.name + "/" + list[i].items[0] == first && rtree.name + "/" + list[i].items[1] == second )
+		if ( section_tree[0].name + "/" + list[i].items[0] == first && section_tree[1].name + "/" + list[i].items[1] == second )
 		{
 			list[i].res = equal ? COMPARED_SAME : COMPARED_DIFFERENT;
 			applyFilters();
@@ -1313,7 +1279,7 @@ void DirDiffForm::setFilters(const QString& s)
 
 void DirDiffForm::showOnlyLeft(bool checked)
 {
-	hide_left_only = !checked;
+	hide_section_only[0] = !checked;
 	applyFilters();
 }
 
@@ -1331,7 +1297,7 @@ void DirDiffForm::showSame(bool checked)
 
 void DirDiffForm::showOnlyRight(bool checked)
 {
-	hide_right_only = !checked;
+	hide_section_only[1] = !checked;
 	applyFilters();
 }
 
@@ -1382,7 +1348,7 @@ void DirDiffForm::on_actionCopy_To_Clipboard_triggered()
 	QString     temp;
 	QTextStream ts(&temp);
 
-	ts << leftname << "\t" << rightname << endl;
+	ts << section_name[0] << "\t" << section_name[1] << endl;
 
 	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
 	{
@@ -1432,7 +1398,7 @@ void DirDiffForm::on_actionCopy_To_Clipboard_triggered()
 
 void DirDiffForm::startComparison()
 {
-	if ( !ltree.name.empty() && !rtree.name.empty())
+	if ( !section_tree[0].name.empty() && !section_tree[1].name.empty())
 	{
 		const std::size_t n = list.size();
 		std::size_t       j = n;
@@ -1443,7 +1409,7 @@ void DirDiffForm::startComparison()
 			{
 				if ( !hidden(i))
 				{
-					emit compare_files(qt::convert(ltree.name + "/" + list[i].items[0]), qt::convert(rtree.name + "/" + list[i].items[1]));
+					emit compare_files(qt::convert(section_tree[0].name + "/" + list[i].items[0]), qt::convert(section_tree[1].name + "/" + list[i].items[1]));
 
 					return;
 				}
@@ -1454,7 +1420,7 @@ void DirDiffForm::startComparison()
 
 		if ( j < n )
 		{
-			emit compare_files(qt::convert(ltree.name + "/" + list[j].items[0]), qt::convert(rtree.name + "/" + list[j].items[1]));
+			emit compare_files(qt::convert(section_tree[0].name + "/" + list[j].items[0]), qt::convert(section_tree[1].name + "/" + list[j].items[1]));
 		}
 	}
 }

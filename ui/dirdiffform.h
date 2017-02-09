@@ -202,8 +202,7 @@ private:
 
 	};
 
-	std::vector< std::string > get_left_files();
-	std::vector< std::string > get_right_files();
+	std::vector< std::string > get_section_files(std::size_t);
 
 	void copyfiles(const std::string&, const std::string&, const std::vector< std::string >&);
 
@@ -246,8 +245,7 @@ private:
 	void change_depth(dirnode&, int);
 	void change_depth(dirnode&, const std::string&, int, int);
 	void rematch(std::vector< comparison_t >&, const dirnode&, const dirnode&, const std::string&);
-	void rematch_left(std::vector< comparison_t >&, const dirnode&, const std::string&);
-	void rematch_right(std::vector< comparison_t >&, const dirnode&, const std::string&);
+	void rematch_section(std::size_t, std::vector< comparison_t >&, const dirnode&, const std::string&);
 	void find_subdirs(QStringList& subdirs, const dirnode& n, const std::string&, int, int);
 	QStringList find_subdirs(const dirnode&, int);
 	void refresh();
@@ -277,10 +275,7 @@ private:
 	QVector< QRegExp > filters;
 
 	/// Whether or not to show left only items
-	bool hide_left_only;
-
-	/// Whether or not to show right only items
-	bool hide_right_only;
+	bool hide_section_only[2];
 
 	/// Whether or not to show identical items
 	bool hide_identical_items;
@@ -288,13 +283,11 @@ private:
 	/// Whether or not to show items marked as ignored
 	bool hide_ignored;
 
-	QString leftname;
-	QString rightname;
+	QString section_name[2];
 
 	FileSystem scanner;
 
-	dirnode ltree;
-	dirnode rtree;
+	dirnode section_tree[2];
 
 	std::vector< comparison_t > list;
 	/*
