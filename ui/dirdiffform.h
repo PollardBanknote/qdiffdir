@@ -44,37 +44,13 @@ class QFileSystemWatcher;
 
 #include "modules/filesystem.h"
 
+#include "filenamematcher.h"
+#include "filecompare.h"
+
 namespace Ui
 {
 class DirDiffForm;
 }
-
-class FileCompare : public QObject
-{
-	Q_OBJECT
-public slots:
-	void compare(const QString& first, const QString& second);
-signals:
-	void compared(const QString& first, const QString& second, bool);
-private:
-	static QByteArray gunzip(const std::string& filename);
-};
-
-class FileNameMatcher
-{
-public:
-	int compare(const std::string& a, const std::string& b) const;
-private:
-	// ext <=> ext.gz
-	static std::string gzalt(const std::string& s);
-
-	// c <=> cpp
-	static std::string cppalt(const std::string& s);
-
-	// c <=> cpp.gz or cpp <=> c.gz
-	static std::string cgalt(const std::string& s);
-
-};
 
 /** A widget for comparing two directories, with some file operations
  *
