@@ -159,11 +159,14 @@ void DirDiffForm::viewfiles(int r)
 }
 
 void DirDiffForm::saveAs(
-	const std::vector< std::string >& filenames,
-	const std::string&                source,
-	const std::string&                destination
+        std::size_t ifrom,
+        std::size_t ito
 )
 {
+	const std::vector< std::string >& filenames = get_section_files(ifrom);
+	const std::string&                source = section_tree[ifrom].name;
+	const std::string&                destination = section_tree[ito].name;
+
 	if ( !source.empty() && !destination.empty())
 	{
 		std::set< std::string > changed;
@@ -212,11 +215,14 @@ void DirDiffForm::saveAs(
 }
 
 void DirDiffForm::copyfiles(
-    const std::vector< std::string >& rels,
-    const std::string&                from,
-    const std::string&                to
+        std::size_t ifrom,
+        std::size_t ito
 )
 {
+	const std::vector< std::string >& rels = get_section_files(ifrom);
+	const std::string&                from = section_tree[ifrom].name;
+	const std::string&                to = section_tree[ito].name;
+
 	if ( from.empty() || to.empty())
 	{
 		return;
@@ -275,22 +281,22 @@ std::vector< std::string > DirDiffForm::get_section_files(std::size_t j)
 
 void DirDiffForm::on_copytoright_clicked()
 {
-	copyfiles(get_section_files(0), section_tree[0].name, section_tree[1].name);
+	copyfiles(0, 1);
 }
 
 void DirDiffForm::on_copytoleft_clicked()
 {
-	copyfiles(get_section_files(1), section_tree[1].name, section_tree[0].name);
+	copyfiles(1, 0);
 }
 
 void DirDiffForm::on_renametoright_clicked()
 {
-	saveAs(get_section_files(0), section_tree[0].name, section_tree[1].name);
+	saveAs(0, 1);
 }
 
 void DirDiffForm::on_renametoleft_clicked()
 {
-	saveAs(get_section_files(1), section_tree[1].name, section_tree[0].name);
+	saveAs(1, 0);
 }
 
 std::string DirDiffForm::getDirectory(const std::string& dir)

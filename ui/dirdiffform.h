@@ -204,7 +204,7 @@ private:
 
 	std::vector< std::string > get_section_files(std::size_t);
 
-	void copyfiles(const std::vector< std::string >&, const std::string&, const std::string&);
+	void copyfiles(std::size_t, std::size_t);
 
 	void populate_filters();
 
@@ -232,7 +232,7 @@ private:
 
 	static bool compare_by_items(const comparison_t& a, const comparison_t& b);
 
-	void saveAs(const std::vector< std::string >&, const std::string&, const std::string&);
+	void saveAs(std::size_t, std::size_t);
 	std::pair< bool, overwrite_t > copyTo(const std::string & file, const std::string&, overwrite_t);
 	void stopDirectoryWatcher();
 	void startDirectoryWatcher();
