@@ -328,45 +328,12 @@ std::string DirDiffForm::getDirectory(const std::string& dir)
 
 void DirDiffForm::on_openleftdir_clicked()
 {
-	const std::string s = getDirectory(section_tree[0].name);
-
-	if ( !s.empty())
-	{
-		changeDirectories(s, std::string());
-	}
+	open_section(0);
 }
 
 void DirDiffForm::on_openrightdir_clicked()
 {
-	const std::string s = getDirectory(section_tree[1].name);
-
-	if ( !s.empty())
-	{
-		changeDirectories(std::string(), s);
-	}
-}
-
-QString DirDiffForm::renumber(const QString& s_)
-{
-	QString s = s_;
-	QRegExp r(".*([0-9]+).*");
-
-	if ( r.exactMatch(s))
-	{
-		QString t  = r.cap(1);
-		bool    ok = false;
-		int     x_ = t.toInt();
-		int     n  = QInputDialog::getInt(this, "Renumber", "Please enter the new file number", x_, 1, INT_MAX, 1, &ok);
-
-		if ( !ok )
-		{
-			return QString();
-		}
-
-		s.replace(t, QString::number(n));
-	}
-
-	return s;
+	open_section(1);
 }
 
 void DirDiffForm::on_depth_valueChanged(int d)
@@ -401,6 +368,17 @@ bool DirDiffForm::change_root(
 	}
 
 	return false;
+}
+
+void DirDiffForm::open_section(std::size_t i)
+{
+	std::string t[2];
+	t[i] = getDirectory(section_tree[i].name);
+
+	if ( !t[i].empty())
+	{
+		change_dir(t[0], t[1]);
+	}
 }
 
 // depth has not changed, but one or both directories have changed
@@ -1027,30 +1005,32 @@ void DirDiffForm::on_swap_clicked()
 	file_list_changed(get_depth(), true);
 }
 
+void DirDiffForm::explore_section(std::size_t i)
+{
+	if ( !section_tree[i].name.empty())
+	{
+		QDesktopServices::openUrl(QUrl(qt::convert("file://" + section_tree[i].name)));
+	}
+}
+
 void DirDiffForm::on_openright_clicked()
 {
-	if ( !section_tree[1].name.empty())
-	{
-		QDesktopServices::openUrl(QUrl(qt::convert("file://" + section_tree[1].name)));
-	}
+	explore_section(1);
 }
 
 void DirDiffForm::on_openleft_clicked()
 {
-	if ( !section_tree[0].name.empty())
-	{
-		QDesktopServices::openUrl(QUrl(qt::convert("file://" + section_tree[0].name)));
-	}
+	explore_section(0);
 }
 
 void DirDiffForm::on_showleftonly_toggled(bool checked)
 {
-	showOnlyLeft(checked);
+	show_only_section(0, checked);
 }
 
 void DirDiffForm::on_showrightonly_toggled(bool checked)
 {
-	showOnlyRight(checked);
+	show_only_section(1, checked);
 }
 
 void DirDiffForm::on_showignored_toggled(bool checked)
@@ -1108,13 +1088,13 @@ bool DirDiffForm::hidden(std::size_t i) const
 	bool hideitem = false;
 
 	// Hide items in the left list that do not have a match in the right
-	if ( hide_section_only[0] && list[i].left_only())
+	if ( hide_section_only[0] && list[i].has_only(0))
 	{
 		hideitem = true;
 	}
 
 	// Hide items in the right list that do not have a match in the right
-	if ( hide_section_only[1] && list[i].right_only())
+	if ( hide_section_only[1] && list[i].has_only(1))
 	{
 		hideitem = true;
 	}
@@ -1254,12 +1234,6 @@ void DirDiffForm::setFilters(const QString& s)
 	applyFilters();
 }
 
-void DirDiffForm::showOnlyLeft(bool checked)
-{
-	hide_section_only[0] = !checked;
-	applyFilters();
-}
-
 void DirDiffForm::showIgnored(bool checked)
 {
 	hide_ignored = !checked;
@@ -1272,9 +1246,9 @@ void DirDiffForm::showSame(bool checked)
 	applyFilters();
 }
 
-void DirDiffForm::showOnlyRight(bool checked)
+void DirDiffForm::show_only_section(std::size_t i, bool checked)
 {
-	hide_section_only[1] = !checked;
+	hide_section_only[i] = !checked;
 	applyFilters();
 }
 
@@ -1335,11 +1309,11 @@ void DirDiffForm::on_actionCopy_To_Clipboard_triggered()
 			ts << qt::convert(list[i].items[0]) << '\t' << qt::convert(list[i].items[1]) << '\t';
 
 			// result of comparison
-			if ( list[i].left_only())
+			if ( list[i].has_only(0))
 			{
 				ts << "Left Only";
 			}
-			else if ( list[i].right_only())
+			else if ( list[i].has_only(1))
 			{
 				ts << "Right Only";
 			}

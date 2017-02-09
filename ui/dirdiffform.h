@@ -185,14 +185,18 @@ private:
 		compare_result_t res;
 		bool ignore;
 
-		bool left_only() const
+		bool has_only(std::size_t i) const
 		{
-			return !items[0].empty() && items[1].empty();
-		}
-
-		bool right_only() const
-		{
-			return items[0].empty() && !items[1].empty();
+			if (!items[i].empty())
+			{
+				for (std::size_t j = 0; j < 2; ++j)
+				{
+					if (j != i && !items[j].empty())
+						return false;
+				}
+				return true;
+			}
+			return false;
 		}
 
 		bool unmatched() const
@@ -210,9 +214,7 @@ private:
 
 	void applyFilters();
 
-	/** The "show left only" checkbox was toggled
-	 */
-	void showOnlyLeft(bool checked);
+	void show_only_section(std::size_t, bool checked);
 
 	/** The "show ignored" checkbox was toggled
 	 */
@@ -221,10 +223,6 @@ private:
 	/** The "show identical items" checkbox was toggled
 	 */
 	void showSame(bool checked);
-
-	/** The "show right only" checkbox was toggled
-	 */
-	void showOnlyRight(bool checked);
 
 	void setFilter(const QRegExp&);
 
@@ -237,10 +235,10 @@ private:
 	void stopDirectoryWatcher();
 	void startDirectoryWatcher();
 	void filesChanged(const std::set< std::string >&);
-	QString renumber(const QString& s_);
 	std::string getDirectory(const std::string& dir);
 	void change_depth(int);
 	bool change_root(dirnode&, const std::string&);
+	void open_section(std::size_t);
 	void change_dir(const std::string&, const std::string&);
 	void change_depth(dirnode&, int);
 	void change_depth(dirnode&, const std::string&, int, int);
@@ -250,6 +248,7 @@ private:
 	QStringList find_subdirs(const dirnode&, int);
 	void refresh();
 	int get_depth();
+	void explore_section(std::size_t);
 
 	bool rescan(dirnode&, const std::string&, const std::string&, int, int);
 	void rescan(dirnode&, const std::string&, int);
