@@ -92,6 +92,9 @@ DirDiffForm::DirDiffForm(QWidget* parent_) :
 	ui->multilistview->addAction(ui->actionSelect_Left_Only);
 	ui->multilistview->addAction(ui->actionSelect_Right_Only);
 	connect(ui->multilistview, &MultiList::itemActivated, this, &DirDiffForm::viewfiles);
+
+    watcher = new QFileSystemWatcher(this);
+    connect(watcher, &QFileSystemWatcher::directoryChanged, this, &DirDiffForm::contentsChanged);
 }
 
 DirDiffForm::~DirDiffForm()
@@ -934,21 +937,12 @@ std::pair< bool, DirDiffForm::overwrite_t > DirDiffForm::copyTo(
 
 void DirDiffForm::stopDirectoryWatcher()
 {
-	if ( watcher != NULL )
-	{
-		delete watcher;
-		watcher = NULL;
-	}
+    watcher->removePaths(watched_dirs);
 }
 
 void DirDiffForm::startDirectoryWatcher()
 {
-	if ( !watcher )
-	{
-		// create new file system watcher
-		watcher = new QFileSystemWatcher(watched_dirs, this);
-		connect(watcher, &QFileSystemWatcher::directoryChanged, this, &DirDiffForm::contentsChanged);
-	}
+    watcher->addPaths(watched_dirs);
 }
 
 // dirname begins with current_path + "/"
