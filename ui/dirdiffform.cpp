@@ -1406,13 +1406,13 @@ void DirDiffForm::on_actionSelect_Same_triggered()
 	ui->multilistview->setSelectedRows(indices);
 }
 
-void DirDiffForm::on_actionSelect_Left_Only_triggered()
+void DirDiffForm::select_section_only(std::size_t j)
 {
 	QList< int > indices;
 
 	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
 	{
-		if ( !list[i].items[0].empty() && list[i].items[1].empty())
+		if ( list[i].has_only(j))
 		{
 			indices << i;
 		}
@@ -1421,19 +1421,14 @@ void DirDiffForm::on_actionSelect_Left_Only_triggered()
 	ui->multilistview->setSelectedRows(indices);
 }
 
+void DirDiffForm::on_actionSelect_Left_Only_triggered()
+{
+	select_section_only(0);
+}
+
 void DirDiffForm::on_actionSelect_Right_Only_triggered()
 {
-	QList< int > indices;
-
-	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
-	{
-		if ( list[i].items[0].empty() && !list[i].items[1].empty())
-		{
-			indices << i;
-		}
-	}
-
-	ui->multilistview->setSelectedRows(indices);
+	select_section_only(1);
 }
 
 bool DirDiffForm::compare_by_items(

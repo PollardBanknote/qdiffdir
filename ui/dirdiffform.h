@@ -249,6 +249,7 @@ private:
 	void refresh();
 	int get_depth();
 	void explore_section(std::size_t);
+	void select_section_only(std::size_t);
 
 	bool rescan(dirnode&, const std::string&, const std::string&, int, int);
 	void rescan(dirnode&, const std::string&, int);
