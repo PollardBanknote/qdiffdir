@@ -1602,10 +1602,7 @@ void FileCompare::compare(
 	}
 	else
 	{
-		pbl::fs::file f(first.toStdString(), pbl::fs::file::readonly);
-		pbl::fs::file g(second.toStdString(), pbl::fs::file::readonly);
-
-		res = ( f.compare(g) == 1 );
+		res = ( pbl::fs::compare(first.toStdString(), second.toStdString()) == 1 );
 	}
 
 	emit compared(first, second, res);

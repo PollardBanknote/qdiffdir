@@ -28,368 +28,37 @@
  */
 #include "file.h"
 
-#include <cerrno>
-#include <cstdlib>
-#include <cstdio>
 #include <cstring>
+
+#if !defined( _WIN32 ) && ( defined( __unix__ ) || defined( __unix ) || ( defined( __APPLE__ ) && defined( __MACH__ )))
 #include <unistd.h>
-#include <sys/stat.h>
+#if defined( _POSIX_VERSION )
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <fcntl.h>
+#endif
+#endif
 
-namespace pbl
+
+namespace
 {
-namespace fs
+int compare_inner(int fd1, int fd2)
 {
-file::file()
-	: fd(-1), is_temp(false), filestat(0)
-{
+	struct stat s1;
+	struct stat s2;
 
-}
-
-file::file(
-	const std::string& name,
-	int                flags
-) : is_temp(false), filestat(0)
-{
-	fd = ::open(name.c_str(), flags);
-
-	if ( fd != -1 )
-	{
-		filename = name;
-	}
-}
-
-file::file(
-	const std::string&       name,
-	int                      flags,
-	::cpp::filesystem::perms m
-) : filename(), is_temp(false), filestat(0)
-{
-	fd = ::open(name.c_str(), flags, m);
-
-	if ( fd != -1 )
-	{
-		filename = name;
-	}
-}
-
-file::~file()
-{
-	delete filestat;
-
-	if ( fd != -1 )
-	{
-		if ( is_temp )
-		{
-			remove();
-		}
-
-		::close(fd);
-	}
-}
-
-bool file::is_open() const
-{
-	return fd != -1;
-}
-
-bool file::get_stat() const
-{
-	if ( filestat == 0 )
-	{
-		if ( fd != -1 )
-		{
-			struct stat* p = new struct stat;
-
-			::fstat(fd, p);
-			filestat = p;
-
-			return true;
-		}
-		else
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
-bool file::is_file() const
-{
-	if ( fd != -1 )
-	{
-		if ( get_stat())
-		{
-			return S_ISREG(filestat->st_mode) || S_ISLNK(filestat->st_mode);
-		}
-	}
-
-	return false;
-}
-
-file::size_type file::read(
-	char*       buffer,
-	std::size_t n
-)
-{
-	if ( fd == -1 )
-	{
+	if (::fstat(fd1, &s1) == -1 || ::fstat(fd2, &s2) == -1)
 		return -1;
-	}
-
-	return ::read(fd, buffer, n);
-}
-
-file::size_type file::write(
-	const char* buffer,
-	std::size_t n
-)
-{
-	if ( fd == -1 )
-	{
-		return -1;
-	}
-
-	for ( std::size_t x = 0; x < n;)
-	{
-		const size_type m = ::write(fd, buffer + x, n - x);
-
-		if ( m == -1 )
-		{
-
-			// error
-			return -1;
-		}
-
-		x += m;
-	}
-
-	return n;
-}
-
-void file::flush()
-{
-	if ( fd != -1 )
-	{
-		::fsync(fd);
-	}
-}
-
-::cpp::filesystem::perms file::permissions() const
-{
-	if ( get_stat())
-	{
-		return static_cast< ::cpp::filesystem::perms >( filestat->st_mode & ( S_IRWXU | S_IRWXG | S_IRWXO ));
-	}
-
-	return perms::none;
-}
-
-void file::chmod(::cpp::filesystem::perms m)
-{
-	if ( fd != -1 )
-	{
-		::fchmod(fd, m);
-	}
-}
-
-void file::chmod(const file& other)
-{
-	if ( fd != -1 && other.fd != -1 )
-	{
-		::fchmod(fd, other.permissions());
-	}
-}
-
-void file::remove()
-{
-	if ( fd != -1 )
-	{
-		::unlink(filename.c_str());
-	}
-}
-
-/**
- * @todo Linux 3.11 supports O_TMPFILE - an anonymous file that can be "made
- * real". See man open.
- */
-bool file::mkstemp(const std::string& name)
-{
-	if ( fd == -1 )
-	{
-		// file already exists, so copy to a temp first then overwrite atomically
-		std::string       temp_file_name = name + "cpyXXXXXX";
-		const std::size_t n              = temp_file_name.length();
-		char*             s              = new char[n + 1];
-		temp_file_name.copy(s, n, 0);
-		s[n]           = '\0';
-		fd             = ::mkstemp(s);
-		temp_file_name = s;
-		delete[] s;
-
-		if ( fd != -1 )
-		{
-			is_temp  = true;
-			filename = temp_file_name;
-			::fchmod(fd, S_IWUSR | S_IRUSR);
-
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool file::rename(const std::string& dest)
-{
-	if ( fd != -1 )
-	{
-		const int res = std::rename(filename.c_str(), dest.c_str());
-
-		if ( res == 0 )
-		{
-			filename = dest;
-
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool file::realize(const std::string& dest)
-{
-	if ( fd != -1 && is_temp )
-	{
-		if ( rename(dest))
-		{
-			is_temp = false;
-
-			return true;
-		}
-	}
-
-	return false;
-}
-
-/// @bug Should probably lseek to beginning and ftruncate
-/// @todo Use sendfile(2) for efficiency
-bool file::copy(file& in)
-{
-	if ( fd != -1 && in.fd != -1 )
-	{
-		// Copy the contents of the file
-		char buffer[4096];
-
-		while ( true )
-		{
-			const size_type n = in.read(buffer, sizeof( buffer ));
-
-			if ( n < 0 )
-			{
-
-				// error
-				return false;
-			}
-
-			// eof
-			if ( n == 0 )
-			{
-				break;
-			}
-
-			if ( write(buffer, n) == -1 )
-			{
-				return false;
-			}
-		}
-
-		// flush to disk
-		flush();
-
-		return true;
-	}
-
-	return false;
-}
-
-/** @todo See FIO19-C from cert for problems with getting file size
- */
-file::size_type file::size() const
-{
-	if ( get_stat())
-	{
-		return filestat->st_size;
-	}
-
-	return 0;
-}
-
-class file::seek_guard
-{
-public:
-	explicit seek_guard(const file& f) : fd(-1), position(-1)
-	{
-		if ( f.is_open())
-		{
-			position = ::lseek(f.fd, 0, SEEK_CUR);
-
-			if ( position != off_t(-1))
-			{
-				fd = f.fd;
-			}
-		}
-	}
-
-	~seek_guard()
-	{
-		if ( fd != -1 )
-		{
-			::lseek(fd, position, SEEK_SET);
-		}
-	}
-
-private:
-	int   fd;
-	off_t position;
-};
-
-/// @todo seek guard
-int file::compare(const file& other)
-{
-	if ( !is_open() || !other.is_open())
-	{
-		return -1;
-	}
 
 	// files of different size are obviously different
-	if ( size() != other.size())
-	{
+	if (s1.st_size != s2.st_size)
 		return 0;
-	}
 
 	// files with the same dev/inode are obviously the same and don't need to
 	// be compared
-	if ( get_stat() && other.get_stat() && filestat->st_ino == other.filestat->st_ino && filestat->st_dev == other.filestat->st_dev )
+	if ( s1.st_ino == s2.st_ino && s1.st_dev == s2.st_dev )
 	{
 		return 1;
-	}
-
-	// Save the current file position
-	seek_guard g1(*this);
-	seek_guard g2(other);
-
-	// go to the start of each file
-	if ( ::lseek(fd, 0, SEEK_SET) == off_t(-1))
-	{
-		return -1;
-	}
-
-	if ( ::lseek(other.fd, 0, SEEK_SET) == off_t(-1))
-	{
-		return -1;
 	}
 
 	// Start reading buffers
@@ -407,7 +76,7 @@ int file::compare(const file& other)
 		// read from each file
 		if ( !eof1 && size1 < sizeof( buf1 ))
 		{
-			const ssize_t n1 = ::read(fd, buf1 + size1, sizeof( buf1 ) - size1);
+			const ssize_t n1 = ::read(fd1, buf1 + size1, sizeof( buf1 ) - size1);
 
 			if ( n1 == -1 )
 			{
@@ -424,7 +93,7 @@ int file::compare(const file& other)
 
 		if ( !eof2 && size2 < sizeof( buf2 ))
 		{
-			const ssize_t n2 = ::read(other.fd, buf2 + size2, sizeof( buf2 ) - size2);
+			const ssize_t n2 = ::read(fd2, buf2 + size2, sizeof( buf2 ) - size2);
 
 			if ( n2 == -1 )
 			{
@@ -479,7 +148,34 @@ int file::compare(const file& other)
 	}
 
 	return -1;
+}
+}
 
+namespace pbl
+{
+namespace fs
+{
+int compare(const std::string& first, const std::string& second)
+{
+	const int fd1 = ::open(first.c_str(), O_RDONLY);
+
+	int res = -1;
+
+	if (fd1 != -1)
+	{
+		const int fd2 = ::open(second.c_str(), O_RDONLY);
+
+		if (fd2 != -1)
+		{
+			res = compare_inner(fd1, fd2);
+
+			::close(fd2);
+		}
+
+		::close(fd1);
+	}
+
+	return res;
 }
 
 }
