@@ -36,6 +36,7 @@ namespace pbl
 namespace fs
 {
 int compare(const std::string&, const std::string&);
+int compare_fd(int, int);
 }
 }
 
