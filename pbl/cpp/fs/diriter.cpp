@@ -174,16 +174,9 @@ private:
 	{
 		if ( !valid_info && e )
 		{
-			const path  q = p / e->d_name;
-			file_status s = status(q);
-			file_status l;
+			const path q = p / e->d_name;
 
-			if ( is_symlink(s))
-			{
-				l = symlink_status(q);
-			}
-
-			info.assign(q, s, l);
+			info.assign(q);
 			valid_info = true;
 		}
 	}
@@ -332,7 +325,7 @@ recursive_directory_iterator& recursive_directory_iterator::operator++()
 	if ( stack.top()->type() == file_type::directory )
 	{
 		// go to directory's first child (if any)
-		if ( descend(( *stack.top())->get_path()))
+		if ( descend(( *stack.top())->path()))
 		{
 			return *this;
 		}

@@ -54,17 +54,17 @@ std::pair< std::vector< std::string >, std::vector< std::string > > FileSystem::
 
 		if ( cpp::filesystem::is_directory(s))
 		{
-			if ( hidden_dirs || !is_hidden(it->get_path()))
+			if ( hidden_dirs || !is_hidden(it->path()))
 			{
-				const cpp::filesystem::path rel = it->get_path().lexically_relative(path);
+				const cpp::filesystem::path rel = it->path().lexically_relative(path);
 				res.second.push_back(rel.native());
 			}
 		}
 		else if ( cpp::filesystem::is_regular_file(s) || cpp::filesystem::is_symlink(s))
 		{
-			if ( hidden_files || !is_hidden(it->get_path()))
+			if ( hidden_files || !is_hidden(it->path()))
 			{
-				const cpp::filesystem::path rel = it->get_path().lexically_relative(path);
+				const cpp::filesystem::path rel = it->path().lexically_relative(path);
 				res.first.push_back(rel.native());
 			}
 		}

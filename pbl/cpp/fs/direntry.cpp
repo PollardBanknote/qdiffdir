@@ -37,69 +37,100 @@ directory_entry::directory_entry()
 }
 
 directory_entry::directory_entry(const directory_entry& e)
-	: path_(e.path_), mstatus(e.mstatus), sym_status(e.sym_status)
+	: path_(e.path_)
 {
 
 }
 
-directory_entry::directory_entry(
-	const ::cpp17::filesystem::path& p,
-	file_status                      status_,
-	file_status                      sym_status_
-)
-	: path_(p), mstatus(status_), sym_status(sym_status_)
+directory_entry::directory_entry(const ::cpp17::filesystem::path& p)
+	: path_(p)
 {
 
 }
 
 directory_entry& directory_entry::operator=(const directory_entry& e)
 {
-	path_      = e.path_;
-	mstatus    = e.mstatus;
-	sym_status = e.sym_status;
+	path_ = e.path_;
 
 	return *this;
 }
 
-void directory_entry::assign(
-	const ::cpp17::filesystem::path& p,
-	file_status                      status_,
-	file_status                      sym_status_
-)
+void directory_entry::assign(const ::cpp17::filesystem::path& p)
 {
-	path_      = p;
-	mstatus    = status_;
-	sym_status = sym_status_;
+	path_ = p;
 }
 
-const path& directory_entry::get_path() const
+void directory_entry::replace_filename(const ::cpp17::filesystem::path& p)
+{
+	path_ = path_.parent_path() / p;
+}
+
+const path& directory_entry::path() const
 {
 	return path_;
 }
 
-::cpp17::filesystem::path directory_entry::filename() const
+directory_entry::operator const ::cpp17::filesystem::path&() const
 {
-	return path_.filename();
+	return path_;
 }
 
 file_status directory_entry::status() const
 {
-	return mstatus;
+	return ::cpp17::filesystem::status(path_);
 }
 
-file_status directory_entry::symbolic_status() const
+file_status directory_entry::symlink_status() const
 {
-	return sym_status;
+	return ::cpp17::filesystem::symlink_status(path_);
 }
 
-std::ostream& operator<<(
-	std::ostream&          os,
-	const directory_entry& de
+bool operator==(
+	const directory_entry& a,
+	const directory_entry& b
 )
 {
-	os << de.get_path();
+	return a.path() == b.path();
+}
 
-	return os;
+bool operator!=(
+	const directory_entry& a,
+	const directory_entry& b
+)
+{
+	return a.path() != b.path();
+}
+
+bool operator<(
+	const directory_entry& a,
+	const directory_entry& b
+)
+{
+	return a.path() < b.path();
+}
+
+bool operator<=(
+	const directory_entry& a,
+	const directory_entry& b
+)
+{
+	return a.path() <= b.path();
+}
+
+bool operator>(
+	const directory_entry& a,
+	const directory_entry& b
+)
+{
+	return a.path() > b.path();
+}
+
+bool operator>=(
+	const directory_entry& a,
+	const directory_entry& b
+)
+{
+	return a.path() >= b.path();
 }
 
 }

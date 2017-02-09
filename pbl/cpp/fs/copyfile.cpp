@@ -29,6 +29,7 @@
 #include "copyfile.h"
 
 #include <cerrno>
+
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -45,26 +46,26 @@ namespace filesystem
  * @bug If there's an error while overwriting a file, the original is lost
  */
 bool copy_file(
-	const std::string& source,
-	const std::string& dest,
-	copy_options       opt
+	const path&  source,
+	const path&  dest,
+	copy_options opt
 )
 {
-	const int in = ::open(source.c_str(), O_RDONLY);
+	const int in = ::open(source.c_str(), O_RDONLY | O_CLOEXEC);
 
 	if ( in != -1 )
 	{
 		struct stat instat;
 
-		if ( ::fstat(in, &instat) == 0 && ( S_ISREG(instat.st_mode) || S_ISLNK(instat.st_mode)))
+		if ( ::fstat(in, &instat) == 0 && ( S_ISREG(instat.st_mode) || S_ISLNK(instat.st_mode) ) )
 		{
 			// Get the destination file
-			int out = ::open(dest.c_str(), O_CREAT | O_EXCL | O_WRONLY, S_IWUSR);
+			int out = ::open(dest.c_str(), O_CREAT | O_EXCL | O_WRONLY | O_CLOEXEC, S_IWUSR);
 
 			if ( out == -1 && errno == EEXIST )
 			{
 				// File already exists -- maybe we will overwrite it
-				out = ::open(dest.c_str(), O_WRONLY);
+				out = ::open(dest.c_str(), O_WRONLY | O_CLOEXEC);
 
 				if ( out != -1 )
 				{
@@ -72,7 +73,7 @@ bool copy_file(
 
 					struct stat outstat;
 
-					if (( ::fstat(out, &outstat) != 0 ) || ( instat.st_dev == outstat.st_dev && instat.st_ino == outstat.st_ino ) || (( opt & 7 ) == 0 ))
+					if ( ( ::fstat(out, &outstat) != 0 ) || ( instat.st_dev == outstat.st_dev && instat.st_ino == outstat.st_ino ) || ( ( opt & 7 ) == 0 ) )
 					{
 						// Couldn't stat, Same file, or bad copy_options
 						err = true;
@@ -80,7 +81,7 @@ bool copy_file(
 					else
 					{
 						// Replace file or not, depending on flags
-						if ((opt& copy_options::overwrite_existing) || ((opt& copy_options::update_existing) && ( instat.st_mtime > outstat.st_mtime )))
+						if ( (opt& copy_options::overwrite_existing) || ( (opt& copy_options::update_existing) && ( instat.st_mtime > outstat.st_mtime ) ) )
 						{
 							// replace the existing file
 							if ( ::ftruncate(out, 0) != 0 )
@@ -136,7 +137,7 @@ bool copy_file(
 
 						while ( p - buf < n )
 						{
-							const ssize_t m = ::write(out, p, n - ( p - buf ));
+							const ssize_t m = ::write(out, p, static_cast< std::size_t >( n - ( p - buf ) ));
 
 							if ( m == -1 )
 							{
@@ -162,8 +163,8 @@ bool copy_file(
 }
 
 bool copy_file(
-	const std::string& source,
-	const std::string& dest
+	const path& source,
+	const path& dest
 )
 {
 	return copy_file(source, dest, ::copy_options::none);
