@@ -212,9 +212,9 @@ void DirDiffForm::saveAs(
 }
 
 void DirDiffForm::copyfiles(
-	const std::string&                from,
-	const std::string&                to,
-	const std::vector< std::string >& rels
+    const std::vector< std::string >& rels,
+    const std::string&                from,
+    const std::string&                to
 )
 {
 	if ( from.empty() || to.empty())
@@ -275,12 +275,12 @@ std::vector< std::string > DirDiffForm::get_section_files(std::size_t j)
 
 void DirDiffForm::on_copytoright_clicked()
 {
-	copyfiles(section_tree[0].name, section_tree[1].name, get_section_files(0));
+	copyfiles(get_section_files(0), section_tree[0].name, section_tree[1].name);
 }
 
 void DirDiffForm::on_copytoleft_clicked()
 {
-	copyfiles(section_tree[1].name, section_tree[0].name, get_section_files(1));
+	copyfiles(get_section_files(1), section_tree[1].name, section_tree[0].name);
 }
 
 void DirDiffForm::on_renametoright_clicked()

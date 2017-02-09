@@ -204,7 +204,7 @@ private:
 
 	std::vector< std::string > get_section_files(std::size_t);
 
-	void copyfiles(const std::string&, const std::string&, const std::vector< std::string >&);
+	void copyfiles(const std::vector< std::string >&, const std::string&, const std::string&);
 
 	void populate_filters();
 
