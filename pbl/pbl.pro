@@ -30,13 +30,13 @@ SOURCES += \
     cpp/fs/direntry.cpp \
     cpp/fs/perms.cpp \
     cpp/fs/filetype.cpp \
-    util/file.cpp \
     util/strings.cpp \
     cpp/fs/absolute.cpp \
     cpp/fs/create_directory.cpp \
     cpp/fs/remove.cpp \
     cpp/fs/tempdir.cpp \
-    cpp/fs/current_path.cpp
+    cpp/fs/current_path.cpp \
+    fileutil/compare.cpp
 
 HEADERS += \
     cpp/fs/diriter.h \
@@ -50,16 +50,15 @@ HEADERS += \
     cpp/fs/cleanpath.h \
     process/detach.h \
     cpp/filesystem.h \
-    util/file.h \
     cpp/version.h \
     util/strings.h \
-    util/containers.h \
     cpp/fs/absolute.h \
     cpp/os.h \
     cpp/fs/create_directory.h \
     cpp/fs/remove.h \
     cpp/fs/tempdir.h \
-    cpp/fs/current_path.h
+    cpp/fs/current_path.h \
+    fileutil/compare.h
 
 unix {
     target.path = /usr/lib

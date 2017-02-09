@@ -47,9 +47,8 @@
 
 #include "cpp/filesystem.h"
 
-#include "util/file.h"
+#include "fileutil/compare.h"
 #include "util/strings.h"
-#include "util/containers.h"
 
 #include "compare.h"
 #include "matcher.h"

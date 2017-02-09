@@ -1,4 +1,4 @@
-/* Copyright (c) 2016, Pollard Banknote Limited
+/* Copyright (c) 2015, Pollard Banknote Limited
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without modification,
@@ -26,53 +26,17 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef CONTAINERS_H
-#define CONTAINERS_H
+#ifndef PBL_FILEUTIL_COMPARE_H
+#define PBL_FILEUTIL_COMPARE_H
 
-#include <set>
-#include <iterator>
+#include <string>
 
 namespace pbl
 {
-template< typename Iterator, typename T >
-bool contains(
-	Iterator first,
-	Iterator last,
-	const T& value
-)
+namespace fs
 {
-	while ( first != last )
-	{
-		if ( *first == value )
-		{
-			return true;
-		}
-
-		++first;
-	}
-
-	return false;
+int compare(const std::string&, const std::string&);
+}
 }
 
-template< typename Container, typename U >
-bool contains(
-	const Container& c,
-	const U&         value
-)
-{
-	return contains(c.begin(), c.end(), value);
-}
-
-template< typename Container >
-std::set< typename Container::value_type > make_set(const Container& c)
-{
-	std::set< typename Container::value_type > s;
-
-	s.insert(c.begin(), c.end());
-
-	return s;
-}
-
-}
-
-#endif // CONTAINERS_H
+#endif // PBL_FILEUTIL_COMPARE_H
