@@ -181,24 +181,23 @@ private:
 
 	struct comparison_t
 	{
-		std::string left;
-		std::string right;
+		std::string items[2]; // { left, right }
 		compare_result_t res;
 		bool ignore;
 
 		bool left_only() const
 		{
-			return !left.empty() && right.empty();
+			return !items[0].empty() && items[1].empty();
 		}
 
 		bool right_only() const
 		{
-			return left.empty() && !right.empty();
+			return items[0].empty() && !items[1].empty();
 		}
 
 		bool unmatched() const
 		{
-			return left.empty() || right.empty();
+			return items[0].empty() || items[1].empty();
 		}
 
 	};

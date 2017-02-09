@@ -125,8 +125,8 @@ void DirDiffForm::on_viewdiff_clicked()
 
 	if ( r >= 0 )
 	{
-		const std::string s1 = list[r].left;
-		const std::string s2 = list[r].right;
+		const std::string s1 = list[r].items[0];
+		const std::string s2 = list[r].items[1];
 
 		if ( s1.empty() && s2.empty())
 		{
@@ -261,9 +261,9 @@ std::vector< std::string > DirDiffForm::get_left_files()
 
 	for ( int i = 0, n = indices.count(); i < n; ++i )
 	{
-		if ( !list[indices[i]].left.empty())
+		if ( !list[indices[i]].items[0].empty())
 		{
-			rels.push_back(list[indices[i]].left);
+			rels.push_back(list[indices[i]].items[0]);
 		}
 	}
 
@@ -278,9 +278,9 @@ std::vector< std::string > DirDiffForm::get_right_files()
 
 	for ( int i = 0, n = indices.count(); i < n; ++i )
 	{
-		if ( !list[indices[i]].right.empty())
+		if ( !list[indices[i]].items[1].empty())
 		{
-			rels.push_back(list[indices[i]].right);
+			rels.push_back(list[indices[i]].items[1]);
 		}
 	}
 
@@ -358,8 +358,8 @@ void DirDiffForm::viewfiles(int x_)
 {
 	if ( x_ >= 0 )
 	{
-		const std::string s1 = list[x_].left;
-		const std::string s2 = list[x_].right;
+		const std::string s1 = list[x_].items[0];
+		const std::string s2 = list[x_].items[1];
 
 		MySettings& settings = MySettings::instance();
 
@@ -612,8 +612,8 @@ void DirDiffForm::rematch(
 
 		if ( l.files[il] == r.files[ir] )
 		{
-			c.left  = prefix + l.files[il];
-			c.right = prefix + r.files[ir];
+			c.items[0]  = prefix + l.files[il];
+			c.items[1] = prefix + r.files[ir];
 			++il;
 			++ir;
 		}
@@ -621,12 +621,12 @@ void DirDiffForm::rematch(
 		{
 			if ( l.files[il] < r.files[ir] )
 			{
-				c.left = prefix + l.files[il];
+				c.items[0] = prefix + l.files[il];
 				++il;
 			}
 			else
 			{
-				c.right = prefix + r.files[ir];
+				c.items[1] = prefix + r.files[ir];
 				++ir;
 			}
 		}
@@ -650,7 +650,7 @@ void DirDiffForm::rematch(
 	for ( std::size_t i = 0, n = matched_files.size(); i < n; ++i )
 	{
 		// Unmatched left item
-		if ( matched_files[i].right.empty())
+		if ( matched_files[i].items[1].empty())
 		{
 			// Find the best match
 			std::size_t ibest = 0;
@@ -658,9 +658,9 @@ void DirDiffForm::rematch(
 
 			for ( std::size_t j = 0; j < n; ++j )
 			{
-				if ( matched_files[j].left.empty())
+				if ( matched_files[j].items[0].empty())
 				{
-					const int x = matcher.compare(matched_files[i].left, matched_files[j].right);
+					const int x = matcher.compare(matched_files[i].items[0], matched_files[j].items[1]);
 
 					if ( x >= 0 )
 					{
@@ -676,7 +676,7 @@ void DirDiffForm::rematch(
 			// If there is one, delete it and fixup i, n
 			if ( xbest != -1 )
 			{
-				matched_files[i].right = matched_files[ibest].right;
+				matched_files[i].items[1] = matched_files[ibest].items[1];
 				matched_files.erase(matched_files.begin() + ibest);
 				--n;
 
@@ -831,7 +831,7 @@ void DirDiffForm::file_list_changed(
 		{
 			std::vector< comparison_t >::iterator it = std::lower_bound(matched.begin(), matched.end(), list[i], compare_by_items);
 
-			if ( it != matched.end() && list[i].left == it->left && list[i].right == it->right )
+			if ( it != matched.end() && list[i].items[0] == it->items[0] && list[i].items[1] == it->items[1] )
 			{
 				// keep item
 				matched.erase(it);
@@ -853,7 +853,7 @@ void DirDiffForm::file_list_changed(
 			const std::size_t                     j  = it - list.begin();
 			list.insert(it, matched[i]);
 			QStringList labels;
-			labels << qt::convert(matched[i].left) << qt::convert(matched[i].right);
+			labels << qt::convert(matched[i].items[0]) << qt::convert(matched[i].items[1]);
 			ui->multilistview->insertItem(j, labels);
 		}
 	}
@@ -865,7 +865,7 @@ void DirDiffForm::file_list_changed(
 		for ( std::size_t i = 0; i < list.size(); ++i )
 		{
 			QStringList items;
-			items << qt::convert(list[i].left) << qt::convert(list[i].right);
+			items << qt::convert(list[i].items[0]) << qt::convert(list[i].items[1]);
 			ui->multilistview->addItem(items);
 		}
 	}
@@ -1038,8 +1038,8 @@ void DirDiffForm::filesChanged(const std::set< std::string >& files)
 {
 	for ( std::size_t i = 0; i < list.size(); ++i )
 	{
-		if (( !ltree.name.empty() && !list[i].left.empty() && files.count(ltree.name + "/" + list[i].left) != 0 )
-		    || ( !rtree.name.empty() && !list[i].right.empty() && files.count(rtree.name + "/" + list[i].right) != 0 ))
+		if (( !ltree.name.empty() && !list[i].items[0].empty() && files.count(ltree.name + "/" + list[i].items[0]) != 0 )
+		    || ( !rtree.name.empty() && !list[i].items[1].empty() && files.count(rtree.name + "/" + list[i].items[1]) != 0 ))
 		{
 			list[i].res = NOT_COMPARED;
 		}
@@ -1078,7 +1078,7 @@ void DirDiffForm::on_swap_clicked()
 
 	for ( std::size_t i = 0; i < list.size(); ++i )
 	{
-		std::swap(list[i].left, list[i].right);
+		std::swap(list[i].items[0], list[i].items[1]);
 	}
 
 	file_list_changed(get_depth(), true);
@@ -1195,8 +1195,8 @@ bool DirDiffForm::hidden(std::size_t i) const
 
 		for ( int j = 0; j < filters.count(); ++j )
 		{
-			if ( filters.at(j).exactMatch(qt::convert(list[i].left))
-			     || filters.at(j).exactMatch(qt::convert(list[i].right)))
+			if ( filters.at(j).exactMatch(qt::convert(list[i].items[0]))
+			     || filters.at(j).exactMatch(qt::convert(list[i].items[1])))
 			{
 				hideitem = false;
 				break;
@@ -1278,7 +1278,7 @@ void DirDiffForm::items_compared(
 
 	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
 	{
-		if ( ltree.name + "/" + list[i].left == first && rtree.name + "/" + list[i].right == second )
+		if ( ltree.name + "/" + list[i].items[0] == first && rtree.name + "/" + list[i].items[1] == second )
 		{
 			list[i].res = equal ? COMPARED_SAME : COMPARED_DIFFERENT;
 			applyFilters();
@@ -1389,7 +1389,7 @@ void DirDiffForm::on_actionCopy_To_Clipboard_triggered()
 		if ( !hidden(i))
 		{
 			// items
-			ts << qt::convert(list[i].left) << '\t' << qt::convert(list[i].right) << '\t';
+			ts << qt::convert(list[i].items[0]) << '\t' << qt::convert(list[i].items[1]) << '\t';
 
 			// result of comparison
 			if ( list[i].left_only())
@@ -1439,11 +1439,11 @@ void DirDiffForm::startComparison()
 
 		for ( std::size_t i = 0; i < n; ++i )
 		{
-			if ( !list[i].left.empty() && !list[i].right.empty() && list[i].res == NOT_COMPARED )
+			if ( !list[i].items[0].empty() && !list[i].items[1].empty() && list[i].res == NOT_COMPARED )
 			{
 				if ( !hidden(i))
 				{
-					emit compare_files(qt::convert(ltree.name + "/" + list[i].left), qt::convert(rtree.name + "/" + list[i].right));
+					emit compare_files(qt::convert(ltree.name + "/" + list[i].items[0]), qt::convert(rtree.name + "/" + list[i].items[1]));
 
 					return;
 				}
@@ -1454,7 +1454,7 @@ void DirDiffForm::startComparison()
 
 		if ( j < n )
 		{
-			emit compare_files(qt::convert(ltree.name + "/" + list[j].left), qt::convert(rtree.name + "/" + list[j].right));
+			emit compare_files(qt::convert(ltree.name + "/" + list[j].items[0]), qt::convert(rtree.name + "/" + list[j].items[1]));
 		}
 	}
 }
@@ -1495,7 +1495,7 @@ void DirDiffForm::on_actionSelect_Left_Only_triggered()
 
 	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
 	{
-		if ( !list[i].left.empty() && list[i].right.empty())
+		if ( !list[i].items[0].empty() && list[i].items[1].empty())
 		{
 			indices << i;
 		}
@@ -1510,7 +1510,7 @@ void DirDiffForm::on_actionSelect_Right_Only_triggered()
 
 	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
 	{
-		if ( list[i].left.empty() && !list[i].right.empty())
+		if ( list[i].items[0].empty() && !list[i].items[1].empty())
 		{
 			indices << i;
 		}
@@ -1524,8 +1524,8 @@ bool DirDiffForm::compare_by_items(
 	const DirDiffForm::comparison_t& b
 )
 {
-	const std::string l  = a.left.empty() ? a.right : a.left;
-	const std::string r  = b.left.empty() ? b.right : b.left;
+	const std::string l  = a.items[0].empty() ? a.items[1] : a.items[0];
+	const std::string r  = b.items[0].empty() ? b.items[1] : b.items[0];
 	const std::size_t nl = l.length();
 	const std::size_t nr = r.length();
 
