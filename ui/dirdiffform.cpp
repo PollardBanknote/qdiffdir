@@ -121,8 +121,11 @@ void DirDiffForm::settingsChanged()
 
 void DirDiffForm::on_viewdiff_clicked()
 {
-	const int r = ui->multilistview->currentRow();
+	viewfiles(ui->multilistview->currentRow());
+}
 
+void DirDiffForm::viewfiles(int r)
+{
 	if ( r >= 0 )
 	{
 		const std::string s1 = list[r].items[0];
@@ -334,38 +337,6 @@ void DirDiffForm::on_openrightdir_clicked()
 	if ( !s.empty())
 	{
 		changeDirectories(std::string(), s);
-	}
-}
-
-void DirDiffForm::viewfiles(int x_)
-{
-	if ( x_ >= 0 )
-	{
-		const std::string s1 = list[x_].items[0];
-		const std::string s2 = list[x_].items[1];
-
-		MySettings& settings = MySettings::instance();
-
-		if ( s1.empty())
-		{
-			if ( !s2.empty())
-			{
-				QProcess::startDetached(settings.getEditor(),
-				    QStringList(qt::convert(section_tree[1].name + "/" + s2)));
-			}
-		}
-		else if ( s2.empty())
-		{
-			QProcess::startDetached(settings.getEditor(),
-			    QStringList(qt::convert(section_tree[0].name + "/" + s1)));
-		}
-		else
-		{
-			QStringList l;
-			l << qt::convert(section_tree[0].name + "/" + s1)
-			  << qt::convert(section_tree[1].name + "/" + s2);
-			QProcess::startDetached(settings.getDiffTool(), l);
-		}
 	}
 }
 
