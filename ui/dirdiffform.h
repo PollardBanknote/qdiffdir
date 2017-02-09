@@ -42,8 +42,6 @@ class QListWidgetItem;
 class QString;
 class QFileSystemWatcher;
 
-#include "modules/filesystem.h"
-
 #include "filenamematcher.h"
 #include "filecompare.h"
 
@@ -260,8 +258,6 @@ private:
 	bool hide_ignored;
 
 	QString section_name[2];
-
-	FileSystem scanner;
 
 	dirnode section_tree[2];
 

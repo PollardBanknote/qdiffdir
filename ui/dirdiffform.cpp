@@ -50,6 +50,7 @@
 #include "fileutil/compare.h"
 #include "util/strings.h"
 
+#include "modules/filesystem.h"
 #include "compare.h"
 #include "matcher.h"
 #include "mysettings.h"
@@ -356,7 +357,7 @@ bool DirDiffForm::change_root(
 {
 	if ( !dir.empty())
 	{
-		n.name = ( scanner.is_absolute(dir) && scanner.is_directory(dir))
+		n.name = ( FileSystem::is_absolute(dir) && FileSystem::is_directory(dir))
 		         ? cpp::filesystem::cleanpath(dir)
 				 : std::string();
 		n.children.clear();
@@ -424,7 +425,7 @@ void DirDiffForm::change_depth(
 		if ( n.files.empty() && n.children.empty())
 		{
 			// Need to populate this directory's contents
-			std::pair< std::vector< std::string >, std::vector< std::string > > res = scanner.contents(current_path);
+			std::pair< std::vector< std::string >, std::vector< std::string > > res = FileSystem::contents(current_path);
 
 			std::sort(res.first.begin(), res.first.end());
 			n.files.swap(res.first);
@@ -821,7 +822,7 @@ std::pair< bool, DirDiffForm::overwrite_t > DirDiffForm::copyTo(
 	overwrite_t        overwrite
 )
 {
-	if ( scanner.exists(to))
+	if ( FileSystem::exists(to))
 	{
 		switch ( overwrite )
 		{
@@ -852,7 +853,7 @@ std::pair< bool, DirDiffForm::overwrite_t > DirDiffForm::copyTo(
 
 	}
 
-	return std::make_pair(scanner.copy(from, to), overwrite);
+	return std::make_pair(FileSystem::copy(from, to), overwrite);
 }
 
 void DirDiffForm::stopDirectoryWatcher()
@@ -882,7 +883,7 @@ bool DirDiffForm::rescan(
 		if ( dirname == s )
 		{
 			// Found the dir
-			if ( scanner.is_directory(s))
+			if ( FileSystem::is_directory(s))
 			{
 				n.children[i].children.clear();
 				n.children[i].files.clear();
@@ -921,7 +922,7 @@ void DirDiffForm::rescan(
 			n.children.clear();
 			n.files.clear();
 
-			if ( scanner.is_directory(dirname))
+			if ( FileSystem::is_directory(dirname))
 			{
 				change_depth(n, maxdepth);
 			}
