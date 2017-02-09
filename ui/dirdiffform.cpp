@@ -454,7 +454,7 @@ void DirDiffForm::change_depth(
 
 void DirDiffForm::rematch_section(
     std::size_t                  j,
-	std::vector< comparison_t >& m,
+    ComparisonList& m,
     const dirnode&               r,
 	const std::string&           prefix
 )
@@ -474,7 +474,7 @@ void DirDiffForm::rematch_section(
 }
 
 void DirDiffForm::rematch(
-	std::vector< comparison_t >& m,
+    ComparisonList& m,
 	const dirnode&               l,
 	const dirnode&               r,
 	const std::string&           prefix
@@ -521,7 +521,7 @@ void DirDiffForm::rematch(
 	}
 
 	// Match files
-	std::vector< comparison_t > matched_files;
+	ComparisonList matched_files;
 
 	const std::size_t nl = l.files.size();
 	const std::size_t nr = r.files.size();
@@ -599,7 +599,7 @@ void DirDiffForm::rematch(
 			if ( xbest != -1 )
 			{
 				matched_files[i].items[1] = matched_files[ibest].items[1];
-				matched_files.erase(matched_files.begin() + ibest);
+				matched_files.erase(ibest);
 				--n;
 
 				if ( ibest < i )
@@ -610,7 +610,7 @@ void DirDiffForm::rematch(
 		}
 	}
 
-	m.insert(m.end(), matched_files.begin(), matched_files.end());
+	m.append(matched_files);
 }
 
 void DirDiffForm::find_subdirs(
@@ -731,7 +731,7 @@ void DirDiffForm::file_list_changed(
 	}
 
 	// Rematch files
-	std::vector< comparison_t > matched;
+	ComparisonList matched;
 
 	if ( !section_tree[0].name.empty() && !section_tree[1].name.empty())
 	{
@@ -762,7 +762,7 @@ void DirDiffForm::file_list_changed(
 			else
 			{
 				// remove item
-				list.erase(list.begin() + i);
+				list.erase(i);
 				--n;
 				ui->multilistview->removeItem(i);
 			}

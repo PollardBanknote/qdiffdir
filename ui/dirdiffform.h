@@ -180,6 +180,70 @@ private:
 
 	};
 
+	class ComparisonList
+	{
+	public:
+		typedef std::vector< comparison_t >::iterator iterator;
+
+		iterator begin()
+		{
+			return list.begin();
+		}
+
+		iterator end()
+		{
+			return list.end();
+		}
+
+		comparison_t& operator[](std::size_t i)
+		{
+			return list[i];
+		}
+
+		const comparison_t& operator[](std::size_t i) const
+		{
+			return list[i];
+		}
+
+		void append(const ComparisonList& o)
+		{
+			list.insert(list.end(), o.list.begin(), o.list.end());
+		}
+
+		std::size_t size() const
+		{
+			return list.size();
+		}
+
+		void erase(std::size_t i)
+		{
+			list.erase(list.begin() + i);
+		}
+
+		void erase(iterator it)
+		{
+			list.erase(it);
+		}
+
+		void insert(iterator it, const comparison_t& x)
+		{
+			list.insert(it, x);
+		}
+
+		void push_back(const comparison_t& x)
+		{
+			list.push_back(x);
+		}
+
+		void swap(ComparisonList& o)
+		{
+			list.swap(o.list);
+		}
+
+	private:
+		std::vector< comparison_t > list;
+	};
+
 	std::vector< std::string > get_section_files(std::size_t);
 
 	void copyfiles(std::size_t, std::size_t);
@@ -216,8 +280,8 @@ private:
 	void change_dir(const std::string&, const std::string&);
 	void change_depth(dirnode&, int);
 	void change_depth(dirnode&, const std::string&, int, int);
-	void rematch(std::vector< comparison_t >&, const dirnode&, const dirnode&, const std::string&);
-	void rematch_section(std::size_t, std::vector< comparison_t >&, const dirnode&, const std::string&);
+	void rematch(ComparisonList&, const dirnode&, const dirnode&, const std::string&);
+	void rematch_section(std::size_t, ComparisonList&, const dirnode&, const std::string&);
 	void find_subdirs(QStringList& subdirs, const dirnode& n, const std::string&, int, int);
 	QStringList find_subdirs(const dirnode&, int);
 	void refresh();
@@ -261,7 +325,7 @@ private:
 
 	dirnode section_tree[2];
 
-	std::vector< comparison_t > list;
+	ComparisonList list;
 	/*
 	   DirectoryComparison derp;
 	 */
