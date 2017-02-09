@@ -146,9 +146,9 @@ void DirDiffForm::on_viewdiff_clicked()
 		}
 		else
 		{
-			const std::string s = ( s1.empty() ? s2 : s1 );
+			const std::size_t i = ( s1.empty() ? 1 : 0 );
 
-			cpp::filesystem::path p(section_tree[1].name + "/" + s);
+			cpp::filesystem::path p(section_tree[i].name + "/" + list[r].items[i]);
 			cpp::filesystem::path q = p.parent_path();
 			QProcess::startDetached(settings.getEditor(), QStringList(qt::convert(p.filename().native())), qt::convert(q.native()));
 		}
