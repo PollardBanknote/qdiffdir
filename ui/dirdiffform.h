@@ -184,13 +184,34 @@ private:
 	{
 	public:
 		typedef std::vector< comparison_t >::iterator iterator;
+		typedef std::vector< comparison_t >::const_iterator const_iterator;
 
 		iterator begin()
 		{
 			return list.begin();
 		}
 
+		const_iterator begin() const
+		{
+			return list.begin();
+		}
+
+		const_iterator cbegin() const
+		{
+			return list.begin();
+		}
+
 		iterator end()
+		{
+			return list.end();
+		}
+
+		const_iterator end() const
+		{
+			return list.end();
+		}
+
+		const_iterator cend() const
 		{
 			return list.end();
 		}
@@ -205,11 +226,6 @@ private:
 			return list[i];
 		}
 
-		void append(const ComparisonList& o)
-		{
-			list.insert(list.end(), o.list.begin(), o.list.end());
-		}
-
 		std::size_t size() const
 		{
 			return list.size();
@@ -220,20 +236,12 @@ private:
 			list.erase(list.begin() + i);
 		}
 
-		void erase(iterator it)
+		void erase(const_iterator it)
 		{
-			list.erase(it);
+			list.erase(list.begin() + (it - cbegin()));
 		}
 
-		void insert(iterator it, const comparison_t& x)
-		{
-			list.insert(it, x);
-		}
-
-		void push_back(const comparison_t& x)
-		{
-			list.push_back(x);
-		}
+		std::pair< iterator, bool > insert(const comparison_t& x);
 
 		void swap(ComparisonList& o)
 		{
@@ -242,8 +250,15 @@ private:
 
 		void rematch_section(std::size_t, const dirnode&, const std::string&);
 		void rematch(const dirnode&, const dirnode&, const std::string&);
+
+		const_iterator lower_bound(const comparison_t&) const;
+
 	private:
+		static bool compare_by_items(const comparison_t& a, const comparison_t& b);
+
 		FileNameMatcher matcher;
+
+		// maintained in sorted order given by compare_by_items
 		std::vector< comparison_t > list;
 	};
 
@@ -268,8 +283,6 @@ private:
 	void setFilter(const QRegExp&);
 
 	void setFilters(const QString&);
-
-	static bool compare_by_items(const comparison_t& a, const comparison_t& b);
 
 	void saveAs(std::size_t, std::size_t);
 	std::pair< bool, overwrite_t > copyTo(const std::string & file, const std::string&, overwrite_t);
