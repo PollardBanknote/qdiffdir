@@ -163,11 +163,6 @@ void ComparisonList::rematch(
 	std::sort(list.begin(), list.end(), compare_by_items);
 }
 
-ComparisonList::const_iterator ComparisonList::lower_bound(const comparison_t& value) const
-{
-	return std::lower_bound(list.begin(), list.end(), value, compare_by_items);
-}
-
 bool ComparisonList::compare_by_items(
     const comparison_t& a,
     const comparison_t& b

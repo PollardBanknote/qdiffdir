@@ -57,36 +57,6 @@ public:
 	typedef std::vector< comparison_t >::iterator iterator;
 	typedef std::vector< comparison_t >::const_iterator const_iterator;
 
-	iterator begin()
-	{
-		return list.begin();
-	}
-
-	const_iterator begin() const
-	{
-		return list.begin();
-	}
-
-	const_iterator cbegin() const
-	{
-		return list.begin();
-	}
-
-	iterator end()
-	{
-		return list.end();
-	}
-
-	const_iterator end() const
-	{
-		return list.end();
-	}
-
-	const_iterator cend() const
-	{
-		return list.end();
-	}
-
 	comparison_t& operator[](std::size_t i)
 	{
 		return list[i];
@@ -107,11 +77,6 @@ public:
 		list.erase(list.begin() + i);
 	}
 
-	void erase(const_iterator it)
-	{
-		list.erase(list.begin() + (it - cbegin()));
-	}
-
 	std::pair< iterator, bool > insert(const comparison_t& x);
 
 	void swap(ComparisonList& o)
@@ -121,8 +86,6 @@ public:
 
 	void rematch_section(std::size_t, const dirnode&, const std::string&);
 	void rematch(const dirnode&, const dirnode&, const std::string&);
-
-	const_iterator lower_bound(const comparison_t&) const;
 
 	static bool compare_by_items(const comparison_t& a, const comparison_t& b);
 private:
