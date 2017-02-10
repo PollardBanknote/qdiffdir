@@ -153,36 +153,36 @@ private:
 
 	};
 
-	struct comparison_t
-	{
-		std::string items[2]; // { left, right }
-		compare_result_t res;
-		bool ignore;
-
-		bool has_only(std::size_t i) const
-		{
-			if (!items[i].empty())
-			{
-				for (std::size_t j = 0; j < 2; ++j)
-				{
-					if (j != i && !items[j].empty())
-						return false;
-				}
-				return true;
-			}
-			return false;
-		}
-
-		bool unmatched() const
-		{
-			return items[0].empty() || items[1].empty();
-		}
-
-	};
-
 	class ComparisonList
 	{
 	public:
+		struct comparison_t
+		{
+			std::string items[2]; // { left, right }
+			compare_result_t res;
+			bool ignore;
+
+			bool has_only(std::size_t i) const
+			{
+				if (!items[i].empty())
+				{
+					for (std::size_t j = 0; j < 2; ++j)
+					{
+						if (j != i && !items[j].empty())
+							return false;
+					}
+					return true;
+				}
+				return false;
+			}
+
+			bool unmatched() const
+			{
+				return items[0].empty() || items[1].empty();
+			}
+
+		};
+
 		typedef std::vector< comparison_t >::iterator iterator;
 		typedef std::vector< comparison_t >::const_iterator const_iterator;
 

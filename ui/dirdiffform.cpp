@@ -1465,7 +1465,7 @@ void DirDiffForm::ComparisonList::rematch(
 	std::sort(list.begin(), list.end(), compare_by_items);
 }
 
-DirDiffForm::ComparisonList::const_iterator DirDiffForm::ComparisonList::lower_bound(const DirDiffForm::comparison_t& value) const
+DirDiffForm::ComparisonList::const_iterator DirDiffForm::ComparisonList::lower_bound(const comparison_t& value) const
 {
 	return std::lower_bound(list.begin(), list.end(), value, compare_by_items);
 }
@@ -1534,7 +1534,7 @@ bool DirDiffForm::ComparisonList::compare_by_items(
 	}
 }
 
-std::pair< DirDiffForm::ComparisonList::iterator, bool > DirDiffForm::ComparisonList::insert(const DirDiffForm::comparison_t& x)
+std::pair< DirDiffForm::ComparisonList::iterator, bool > DirDiffForm::ComparisonList::insert(const comparison_t& x)
 {
 	std::vector< comparison_t >::iterator it = std::lower_bound(list.begin(), list.end(), x, compare_by_items);
 	if (it != list.end() && !compare_by_items(x, *it))
