@@ -452,9 +452,8 @@ void DirDiffForm::change_depth(
 	}
 }
 
-void DirDiffForm::rematch_section(
+void DirDiffForm::ComparisonList::rematch_section(
     std::size_t                  j,
-    ComparisonList& m,
     const dirnode&               r,
 	const std::string&           prefix
 )
@@ -462,19 +461,18 @@ void DirDiffForm::rematch_section(
 	// Recursively apply to subdirectories
 	for ( std::size_t i = 0, n = r.children.size(); i < n; ++i )
 	{
-		rematch_section(j, m, r.children[i], prefix + r.children[i].name + "/");
+		rematch_section(j, r.children[i], prefix + r.children[i].name + "/");
 	}
 
 	for ( std::size_t i = 0, n = r.files.size(); i < n; ++i )
 	{
 		comparison_t c = { { std::string(), std::string() }, NOT_COMPARED, false };
 		c.items[j] = prefix + r.files[i];
-		m.push_back(c);
+		list.push_back(c);
 	}
 }
 
-void DirDiffForm::rematch(
-    ComparisonList& m,
+void DirDiffForm::ComparisonList::rematch(
 	const dirnode&               l,
 	const dirnode&               r,
 	const std::string&           prefix
@@ -490,7 +488,7 @@ void DirDiffForm::rematch(
 		{
 			if ( l.children[il].name == r.children[ir].name )
 			{
-				rematch(m, l.children[il], r.children[ir], prefix + l.children[il].name + "/");
+				rematch(l.children[il], r.children[ir], prefix + l.children[il].name + "/");
 				++il;
 				++ir;
 			}
@@ -498,12 +496,12 @@ void DirDiffForm::rematch(
 			{
 				if ( l.children[il].name < r.children[ir].name )
 				{
-					rematch_section(0, m, l.children[il], prefix + l.children[il].name + "/");
+					rematch_section(0, l.children[il], prefix + l.children[il].name + "/");
 					++il;
 				}
 				else
 				{
-					rematch_section(1, m, r.children[ir], prefix + r.children[ir].name + "/");
+					rematch_section(1, r.children[ir], prefix + r.children[ir].name + "/");
 					++ir;
 				}
 			}
@@ -511,12 +509,12 @@ void DirDiffForm::rematch(
 
 		for (; il < nl; ++il )
 		{
-			rematch_section(0, m, l.children[il], prefix + l.children[il].name + "/");
+			rematch_section(0, l.children[il], prefix + l.children[il].name + "/");
 		}
 
 		for (; ir < nr; ++ir )
 		{
-			rematch_section(1, m, r.children[ir], prefix + r.children[ir].name + "/");
+			rematch_section(1, r.children[ir], prefix + r.children[ir].name + "/");
 		}
 	}
 
@@ -610,7 +608,7 @@ void DirDiffForm::rematch(
 		}
 	}
 
-	m.append(matched_files);
+	append(matched_files);
 }
 
 void DirDiffForm::find_subdirs(
@@ -735,15 +733,15 @@ void DirDiffForm::file_list_changed(
 
 	if ( !section_tree[0].name.empty() && !section_tree[1].name.empty())
 	{
-		rematch(matched, section_tree[0], section_tree[1], "");
+		matched.rematch(section_tree[0], section_tree[1], "");
 	}
 	else if ( !section_tree[0].name.empty())
 	{
-		rematch_section(0, matched, section_tree[0], "");
+		matched.rematch_section(0, section_tree[0], "");
 	}
 	else if ( !section_tree[1].name.empty())
 	{
-		rematch_section(1, matched, section_tree[1], "");
+		matched.rematch_section(1, section_tree[1], "");
 	}
 
 	if ( !rootchanged )

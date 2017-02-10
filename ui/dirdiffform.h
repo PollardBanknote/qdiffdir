@@ -240,7 +240,10 @@ private:
 			list.swap(o.list);
 		}
 
+		void rematch_section(std::size_t, const dirnode&, const std::string&);
+		void rematch(const dirnode&, const dirnode&, const std::string&);
 	private:
+		FileNameMatcher matcher;
 		std::vector< comparison_t > list;
 	};
 
@@ -280,8 +283,6 @@ private:
 	void change_dir(const std::string&, const std::string&);
 	void change_depth(dirnode&, int);
 	void change_depth(dirnode&, const std::string&, int, int);
-	void rematch(ComparisonList&, const dirnode&, const dirnode&, const std::string&);
-	void rematch_section(std::size_t, ComparisonList&, const dirnode&, const std::string&);
 	void find_subdirs(QStringList& subdirs, const dirnode& n, const std::string&, int, int);
 	QStringList find_subdirs(const dirnode&, int);
 	void refresh();
@@ -306,8 +307,6 @@ private:
 	Ui::DirDiffForm* ui;
 
 	QThread compare_thread;
-
-	FileNameMatcher matcher;
 
 	/// A filter for which items to show
 	QVector< QRegExp > filters;
