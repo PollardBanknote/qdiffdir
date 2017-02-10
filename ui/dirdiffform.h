@@ -253,8 +253,8 @@ private:
 
 		const_iterator lower_bound(const comparison_t&) const;
 
-	private:
 		static bool compare_by_items(const comparison_t& a, const comparison_t& b);
+	private:
 
 		FileNameMatcher matcher;
 

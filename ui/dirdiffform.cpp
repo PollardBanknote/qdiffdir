@@ -587,37 +587,47 @@ void DirDiffForm::file_list_changed(
 
 	if ( !rootchanged )
 	{
-		// Reuse the previous information
-		for ( std::size_t i = 0, n = list.size(); i < n;)
-		{
-			ComparisonList::const_iterator it = matched.lower_bound(list[i]);
+		// Update "list" to match "matched". Update view as well
+		std::size_t i = 0, n = list.size();
+		std::size_t j = 0, m = matched.size();
 
-			if ( it != matched.end() && list[i].items[0] == it->items[0] && list[i].items[1] == it->items[1] )
+		// Both lists are in sorted order
+		while (i < n && j < m)
+		{
+			if (ComparisonList::compare_by_items(list[i], matched[j]))
 			{
-				// keep item
-				matched.erase(it);
-				++i;
-			}
-			else
-			{
-				// remove item
 				list.erase(i);
 				--n;
 				ui->multilistview->removeItem(i);
 			}
+			else if (ComparisonList::compare_by_items(matched[j], list[i]))
+			{
+				list.insert(matched[j]);
+				QStringList labels;
+				labels << qt::convert(matched[j].items[0]) << qt::convert(matched[j].items[1]);
+				ui->multilistview->insertItem(i, labels);
+				++n;
+				++j;
+				++i;
+			}
+			else ++i, ++j;
 		}
 
-		// Insert new items
-		for ( std::size_t i = 0, n = matched.size(); i < n; ++i )
+		while (i < n)
 		{
-			std::pair< ComparisonList::const_iterator, bool > res = list.insert(matched[i]);
-			if (res.second)
-			{
-				const std::size_t                     j  = res.first - list.begin();
-				QStringList labels;
-				labels << qt::convert(matched[i].items[0]) << qt::convert(matched[i].items[1]);
-				ui->multilistview->insertItem(j, labels);
-			}
+			list.erase(i);
+			--n;
+			ui->multilistview->removeItem(i);
+		}
+
+		while (j < m)
+		{
+			list.insert(matched[j]);
+			QStringList labels;
+			labels << qt::convert(matched[j].items[0]) << qt::convert(matched[j].items[1]);
+			ui->multilistview->insertItem(i, labels);
+			++j;
+			++i;
 		}
 	}
 	else
