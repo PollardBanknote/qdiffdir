@@ -30,7 +30,8 @@ SOURCES += main.cpp\
     qutilities/convert.cpp \
     modules/filesystem.cpp \
     filenamematcher.cpp \
-    filecompare.cpp
+    filecompare.cpp \
+    comparisonlist.cpp
 
 HEADERS  += mainwindow.h \
     dirdiffform.h \
@@ -43,7 +44,8 @@ HEADERS  += mainwindow.h \
     qutilities/convert.h \
     modules/filesystem.h \
     filenamematcher.h \
-    filecompare.h
+    filecompare.h \
+    comparisonlist.h
 
 FORMS    += mainwindow.ui \
     dirdiffform.ui \
