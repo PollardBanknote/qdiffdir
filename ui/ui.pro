@@ -31,7 +31,8 @@ SOURCES += main.cpp\
     modules/filesystem.cpp \
     filenamematcher.cpp \
     filecompare.cpp \
-    comparisonlist.cpp
+    comparisonlist.cpp \
+    directorycontents.cpp
 
 HEADERS  += mainwindow.h \
     dirdiffform.h \
@@ -45,7 +46,8 @@ HEADERS  += mainwindow.h \
     modules/filesystem.h \
     filenamematcher.h \
     filecompare.h \
-    comparisonlist.h
+    comparisonlist.h \
+    directorycontents.h
 
 FORMS    += mainwindow.ui \
     dirdiffform.ui \

@@ -166,20 +166,20 @@ private:
 	void filesChanged(const std::set< std::string >&);
 	std::string getDirectory(const std::string& dir);
 	void change_depth(int);
-	bool change_root(dirnode&, const std::string&);
+	bool change_root(DirectoryContents&, const std::string&);
 	void open_section(std::size_t);
 	void change_dir(const std::string&, const std::string&);
-	void change_depth(dirnode&, int);
-	void change_depth(dirnode&, const std::string&, int, int);
-	void find_subdirs(QStringList& subdirs, const dirnode& n, const std::string&, int, int);
-	QStringList find_subdirs(const dirnode&, int);
+	void change_depth(DirectoryContents&, int);
+	void change_depth(DirectoryContents&, const std::string&, int, int);
+	void find_subdirs(QStringList& subdirs, const DirectoryContents& n, const std::string&, int, int);
+	QStringList find_subdirs(const DirectoryContents&, int);
 	void refresh();
 	int get_depth();
 	void explore_section(std::size_t);
 	void select_section_only(std::size_t);
 
-	bool rescan(dirnode&, const std::string&, const std::string&, int, int);
-	void rescan(dirnode&, const std::string&, int);
+	bool rescan(DirectoryContents&, const std::string&, const std::string&, int, int);
+	void rescan(DirectoryContents&, const std::string&, int);
 
 	void file_list_changed(int depth, bool);
 
@@ -210,7 +210,7 @@ private:
 
 	QString section_name[2];
 
-	dirnode section_tree[2];
+	DirectoryContents section_tree[2];
 
 	ComparisonList list;
 	/*

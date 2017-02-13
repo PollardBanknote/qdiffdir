@@ -4,7 +4,7 @@
 
 void ComparisonList::rematch_section(
         std::size_t                  j,
-        const dirnode&               r,
+        const DirectoryContents&               r,
         const std::string&           prefix
         )
 {
@@ -24,8 +24,8 @@ void ComparisonList::rematch_section(
 }
 
 void ComparisonList::rematch(
-    const dirnode&               l,
-    const dirnode&               r,
+    const DirectoryContents&               l,
+    const DirectoryContents&               r,
     const std::string&           prefix
 )
 {
@@ -45,8 +45,8 @@ void ComparisonList::rematch(
 
 
 void ComparisonList::rematch_inner(
-    const dirnode&               l,
-    const dirnode&               r,
+    const DirectoryContents&               l,
+    const DirectoryContents&               r,
     const std::string&           prefix
 )
 {

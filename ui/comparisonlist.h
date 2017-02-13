@@ -5,21 +5,7 @@
 #include <vector>
 
 #include "filenamematcher.h"
-
-struct dirnode
-{
-	std::string name;
-	std::vector< dirnode > children;
-	std::vector< std::string > files;
-
-	void swap(dirnode& n)
-	{
-		name.swap(n.name);
-		children.swap(n.children);
-		files.swap(n.files);
-	}
-
-};
+#include "directorycontents.h"
 
 enum compare_result_t {NOT_COMPARED, COMPARED_SAME, COMPARED_DIFFERENT};
 
@@ -84,12 +70,12 @@ public:
 		list.swap(o.list);
 	}
 
-	void rematch(const dirnode&, const dirnode&, const std::string&);
+	void rematch(const DirectoryContents&, const DirectoryContents&, const std::string&);
 
 	static bool compare_by_items(const comparison_t& a, const comparison_t& b);
 private:
-	void rematch_section(std::size_t, const dirnode&, const std::string&);
-	void rematch_inner(const dirnode&, const dirnode&, const std::string&);
+	void rematch_section(std::size_t, const DirectoryContents&, const std::string&);
+	void rematch_inner(const DirectoryContents&, const DirectoryContents&, const std::string&);
 
 	FileNameMatcher matcher;
 

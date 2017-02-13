@@ -351,7 +351,7 @@ void DirDiffForm::change_depth(int d)
 }
 
 bool DirDiffForm::change_root(
-	dirnode&           n,
+    DirectoryContents&           n,
 	const std::string& dir
 )
 {
@@ -398,7 +398,7 @@ void DirDiffForm::change_dir(
 }
 
 void DirDiffForm::change_depth(
-	dirnode& n,
+    DirectoryContents& n,
 	int      d
 )
 {
@@ -414,7 +414,7 @@ void DirDiffForm::change_depth(
 }
 
 void DirDiffForm::change_depth(
-	dirnode&           n,
+    DirectoryContents&           n,
 	const std::string& current_path,
 	int                current_depth,
 	int                d
@@ -424,19 +424,7 @@ void DirDiffForm::change_depth(
 	{
 		if ( n.files.empty() && n.children.empty())
 		{
-			// Need to populate this directory's contents
-			std::pair< std::vector< std::string >, std::vector< std::string > > res = FileSystem::contents(current_path);
-
-			std::sort(res.first.begin(), res.first.end());
-			n.files.swap(res.first);
-
-			std::sort(res.second.begin(), res.second.end());
-			n.children.resize(res.second.size());
-
-			for ( std::size_t i = 0; i < res.second.size(); ++i )
-			{
-				n.children[i].name.swap(res.second[i]);
-			}
+			n.init(current_path);
 		}
 
 		// Move down a level
@@ -454,7 +442,7 @@ void DirDiffForm::change_depth(
 
 void DirDiffForm::find_subdirs(
 	QStringList&       subdirs,
-	const dirnode&     n,
+    const DirectoryContents&     n,
 	const std::string& s,
 	int                depth,
 	int                maxdepth
@@ -479,7 +467,7 @@ void DirDiffForm::find_subdirs(
 }
 
 QStringList DirDiffForm::find_subdirs(
-	const dirnode& n,
+    const DirectoryContents& n,
 	int            maxdepth
 )
 {
@@ -708,7 +696,7 @@ void DirDiffForm::startDirectoryWatcher()
 
 // dirname begins with current_path + "/"
 bool DirDiffForm::rescan(
-	dirnode&           n,
+    DirectoryContents&           n,
 	const std::string& current_path,
 	const std::string& dirname,
 	int                depth,
@@ -749,7 +737,7 @@ bool DirDiffForm::rescan(
 }
 
 void DirDiffForm::rescan(
-	dirnode&           n,
+    DirectoryContents&           n,
 	const std::string& dirname,
 	int                maxdepth
 )
