@@ -21,44 +21,13 @@ QMAKE_CXXFLAGS_WARN_ON = -Wall -Wsign-compare -Wconversion -Wpointer-arith -Wini
 
 SOURCES += \
     process/detach.cpp \
-    cpp/fs/basename.cpp \
-    cpp/fs/copyfile.cpp \
-    cpp/fs/diriter.cpp \
-    cpp/fs/cleanpath.cpp \
-    cpp/fs/filestatus.cpp \
-    cpp/fs/path.cpp \
-    cpp/fs/direntry.cpp \
-    cpp/fs/perms.cpp \
-    cpp/fs/filetype.cpp \
     util/strings.cpp \
-    cpp/fs/absolute.cpp \
-    cpp/fs/create_directory.cpp \
-    cpp/fs/remove.cpp \
-    cpp/fs/tempdir.cpp \
-    cpp/fs/current_path.cpp \
     fileutil/compare.cpp \
     process/which.cpp
 
 HEADERS += \
-    cpp/fs/diriter.h \
-    cpp/fs/filetype.h \
-    cpp/fs/filestatus.h \
-    cpp/fs/perms.h \
-    cpp/fs/path.h \
-    cpp/fs/direntry.h \
-    cpp/fs/basename.h \
-    cpp/fs/copyfile.h \
-    cpp/fs/cleanpath.h \
     process/detach.h \
-    cpp/filesystem.h \
-    cpp/version.h \
     util/strings.h \
-    cpp/fs/absolute.h \
-    cpp/os.h \
-    cpp/fs/create_directory.h \
-    cpp/fs/remove.h \
-    cpp/fs/tempdir.h \
-    cpp/fs/current_path.h \
     fileutil/compare.h \
     process/which.h
 
@@ -66,3 +35,8 @@ unix {
     target.path = /usr/lib
     INSTALLS += target
 }
+
+LIBS += -L$$OUT_PWD/../cpp/ -lcpp
+INCLUDEPATH += $$PWD/../cpp
+DEPENDPATH += $$PWD/../cpp
+PRE_TARGETDEPS += $$OUT_PWD/../cpp/libcpp.a

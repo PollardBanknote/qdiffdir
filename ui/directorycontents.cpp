@@ -30,7 +30,7 @@
 
 #include <algorithm>
 #include <climits>
-#include "cpp/filesystem.h"
+#include "filesystem.h"
 
 #include "util/strings.h"
 

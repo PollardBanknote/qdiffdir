@@ -45,18 +45,36 @@
 #include <QDesktopServices>
 #include <QUrl>
 
-#include "cpp/filesystem.h"
+#include "filesystem.h"
 
 #include "fileutil/compare.h"
 #include "util/strings.h"
 #include "process/which.h"
 
-#include "modules/filesystem.h"
 #include "compare.h"
 #include "matcher.h"
 #include "mysettings.h"
 #include "qutilities/icons.h"
 #include "qutilities/convert.h"
+
+class FileSystem
+{
+public:
+	static bool exists(const std::string& s)
+	{
+		return cpp::filesystem::exists(s);
+	}
+
+	static bool copy(
+	    const std::string& from,
+	    const std::string& to
+	)
+	{
+		return cpp::filesystem::copy_file(from, to, copy_options::overwrite_existing);
+	}
+};
+
+
 
 DirDiffForm::DirDiffForm(QWidget* parent_) :
 	QWidget(parent_),

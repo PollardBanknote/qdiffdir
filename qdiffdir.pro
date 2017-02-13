@@ -2,6 +2,8 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     pbl \
-    ui
+    ui \
+    cpp
 
+pbl.depends = cpp
 ui.depends = pbl

@@ -28,7 +28,6 @@ SOURCES += main.cpp\
     multilist.cpp \
     qutilities/icons.cpp \
     qutilities/convert.cpp \
-    modules/filesystem.cpp \
     filenamematcher.cpp \
     filecompare.cpp \
     comparisonlist.cpp \
@@ -43,7 +42,6 @@ HEADERS  += mainwindow.h \
     matcher.h \
     qutilities/icons.h \
     qutilities/convert.h \
-    modules/filesystem.h \
     filenamematcher.h \
     filecompare.h \
     comparisonlist.h \
@@ -53,15 +51,12 @@ FORMS    += mainwindow.ui \
     dirdiffform.ui \
     settingsdialog.ui
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../pbl/release/ -lpbl
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../pbl/debug/ -lpbl
-else:unix: LIBS += -L$$OUT_PWD/../pbl/ -lpbl
-
+LIBS += -L$$OUT_PWD/../pbl/ -lpbl
 INCLUDEPATH += $$PWD/../pbl
 DEPENDPATH += $$PWD/../pbl
+PRE_TARGETDEPS += $$OUT_PWD/../pbl/libpbl.a
 
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../pbl/release/libpbl.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../pbl/debug/libpbl.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../pbl/release/pbl.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../pbl/debug/pbl.lib
-else:unix: PRE_TARGETDEPS += $$OUT_PWD/../pbl/libpbl.a
+LIBS += -L$$OUT_PWD/../cpp/ -lcpp
+INCLUDEPATH += $$PWD/../cpp
+DEPENDPATH += $$PWD/../cpp
+PRE_TARGETDEPS += $$OUT_PWD/../cpp/libcpp.a
