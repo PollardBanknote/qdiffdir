@@ -48,7 +48,3 @@ bool FileSystem::is_directory(const std::string& s)
 	return cpp::filesystem::is_directory(s);
 }
 
-bool FileSystem::is_absolute(const std::string& s)
-{
-	return !s.empty() && s[0] == '/';
-}

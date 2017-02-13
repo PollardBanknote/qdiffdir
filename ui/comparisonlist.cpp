@@ -9,15 +9,16 @@ void ComparisonList::rematch_section(
         )
 {
 	// Recursively apply to subdirectories
-	for ( std::size_t i = 0, n = r.children.size(); i < n; ++i )
+	for ( std::size_t i = 0, n = r.dircount(); i < n; ++i )
 	{
-		rematch_section(j, r.children[i], prefix + r.children[i].name + "/");
+		const DirectoryContents& d = r.subdir(i);
+		rematch_section(j, d, prefix + d.name() + "/");
 	}
 
-	for ( std::size_t i = 0, n = r.files.size(); i < n; ++i )
+	for ( std::size_t i = 0, n = r.filecount(); i < n; ++i )
 	{
 		comparison_t c = { { std::string(), std::string() }, NOT_COMPARED, false };
-		c.items[j] = prefix + r.files[i];
+		c.items[j] = prefix + r.filename(i);
 		list.push_back(c);
 	}
 	std::sort(list.begin(), list.end(), compare_by_items);
@@ -29,15 +30,15 @@ void ComparisonList::rematch(
     const std::string&           prefix
 )
 {
-	if ( !l.name.empty() && !r.name.empty())
+	if ( l.valid() && r.valid())
 	{
 		rematch_inner(l, r, prefix);
 	}
-	else if ( !l.name.empty())
+	else if ( l.valid())
 	{
 		rematch_section(0, l, "");
 	}
-	else if ( !r.name.empty())
+	else if ( r.valid())
 	{
 		rematch_section(1, r, "");
 	}
@@ -53,27 +54,29 @@ void ComparisonList::rematch_inner(
 	// Recursively apply to subdirectories
 	{
 		std::size_t       il = 0, ir = 0;
-		const std::size_t nl = l.children.size();
-		const std::size_t nr = r.children.size();
+		const std::size_t nl = l.dircount();
+		const std::size_t nr = r.dircount();
 
 		for (; il < nl && ir < nr;)
 		{
-			if ( l.children[il].name == r.children[ir].name )
+			const DirectoryContents& ldir = l.subdir(il);
+			const DirectoryContents& rdir = r.subdir(ir);
+			if ( ldir.name() == rdir.name() )
 			{
-				rematch(l.children[il], r.children[ir], prefix + l.children[il].name + "/");
+				rematch(ldir, rdir, prefix + ldir.name() + "/");
 				++il;
 				++ir;
 			}
 			else
 			{
-				if ( l.children[il].name < r.children[ir].name )
+				if ( ldir.name() < rdir.name() )
 				{
-					rematch_section(0, l.children[il], prefix + l.children[il].name + "/");
+					rematch_section(0, ldir, prefix + ldir.name() + "/");
 					++il;
 				}
 				else
 				{
-					rematch_section(1, r.children[ir], prefix + r.children[ir].name + "/");
+					rematch_section(1, rdir, prefix + rdir.name() + "/");
 					++ir;
 				}
 			}
@@ -81,44 +84,48 @@ void ComparisonList::rematch_inner(
 
 		for (; il < nl; ++il )
 		{
-			rematch_section(0, l.children[il], prefix + l.children[il].name + "/");
+			const DirectoryContents& ldir = l.subdir(il);
+			rematch_section(0, ldir, prefix + ldir.name() + "/");
 		}
 
 		for (; ir < nr; ++ir )
 		{
-			rematch_section(1, r.children[ir], prefix + r.children[ir].name + "/");
+			const DirectoryContents& rdir = r.subdir(ir);
+			rematch_section(1, rdir, prefix + rdir.name() + "/");
 		}
 	}
 
 	// Match files
 	std::vector< comparison_t > matched_files;
 
-	const std::size_t nl = l.files.size();
-	const std::size_t nr = r.files.size();
+	const std::size_t nl = l.filecount();
+	const std::size_t nr = r.filecount();
 	std::size_t       il = 0;
 	std::size_t       ir = 0;
 
 	for (; il < nl && ir < nr;)
 	{
 		comparison_t c = { std::string(), std::string(), NOT_COMPARED, false };
+		const std::string& lname = l.filename(il);
+		const std::string& rname = r.filename(ir);
 
-		if ( l.files[il] == r.files[ir] )
+		if ( lname == rname )
 		{
-			c.items[0]  = prefix + l.files[il];
-			c.items[1] = prefix + r.files[ir];
+			c.items[0]  = prefix + lname;
+			c.items[1] = prefix + rname;
 			++il;
 			++ir;
 		}
 		else
 		{
-			if ( l.files[il] < r.files[ir] )
+			if ( lname < rname )
 			{
-				c.items[0] = prefix + l.files[il];
+				c.items[0] = prefix + lname;
 				++il;
 			}
 			else
 			{
-				c.items[1] = prefix + r.files[ir];
+				c.items[1] = prefix + rname;
 				++ir;
 			}
 		}
@@ -128,13 +135,13 @@ void ComparisonList::rematch_inner(
 
 	for (; il < nl; ++il )
 	{
-		comparison_t c = { prefix + l.files[il], std::string(), NOT_COMPARED, false };
+		comparison_t c = { prefix + l.filename(il), std::string(), NOT_COMPARED, false };
 		matched_files.push_back(c);
 	}
 
 	for (; ir < nr; ++ir )
 	{
-		comparison_t c = { std::string(), prefix + r.files[ir], NOT_COMPARED, false };
+		comparison_t c = { std::string(), prefix + r.filename(ir), NOT_COMPARED, false };
 		matched_files.push_back(c);
 	}
 

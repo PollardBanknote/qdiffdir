@@ -144,15 +144,15 @@ void DirDiffForm::viewfiles(int r)
 		if ( !s1.empty() && !s2.empty())
 		{
 			QStringList l;
-			l << QString::fromStdString(section_tree[0].name + "/" + s1)
-			  << QString::fromStdString(section_tree[1].name + "/" + s2);
+			l << QString::fromStdString(section_tree[0].name() + "/" + s1)
+			  << QString::fromStdString(section_tree[1].name() + "/" + s2);
 			QProcess::startDetached(settings.getDiffTool(), l);
 		}
 		else
 		{
 			const std::size_t i = ( s1.empty() ? 1 : 0 );
 
-			cpp::filesystem::path p(section_tree[i].name + "/" + list[r].items[i]);
+			cpp::filesystem::path p(section_tree[i].name() + "/" + list[r].items[i]);
 			cpp::filesystem::path q = p.parent_path();
 			QProcess::startDetached(settings.getEditor(), QStringList(qt::convert(p.filename().native())), qt::convert(q.native()));
 		}
@@ -165,8 +165,8 @@ void DirDiffForm::saveAs(
 )
 {
 	const std::vector< std::string >& filenames = get_section_files(ifrom);
-	const std::string&                source = section_tree[ifrom].name;
-	const std::string&                destination = section_tree[ito].name;
+	const std::string&                source = section_tree[ifrom].name();
+	const std::string&                destination = section_tree[ito].name();
 
 	if ( !source.empty() && !destination.empty())
 	{
@@ -221,8 +221,8 @@ void DirDiffForm::copyfiles(
 )
 {
 	const std::vector< std::string >& rels = get_section_files(ifrom);
-	const std::string&                from = section_tree[ifrom].name;
-	const std::string&                to = section_tree[ito].name;
+	const std::string&                from = section_tree[ifrom].name();
+	const std::string&                to = section_tree[ito].name();
 
 	if ( from.empty() || to.empty())
 	{
@@ -337,44 +337,24 @@ void DirDiffForm::on_openrightdir_clicked()
 	open_section(1);
 }
 
-void DirDiffForm::on_depth_valueChanged(int d)
+void DirDiffForm::on_depth_valueChanged(int)
 {
-	change_depth(d);
+	change_depth();
 }
 
 // depth has changed, but dirs are the same
-void DirDiffForm::change_depth(int d)
+void DirDiffForm::change_depth()
 {
-	change_depth(section_tree[0], d);
-	change_depth(section_tree[1], d);
+	const int d = get_depth();
+	section_tree[0].change_depth(d);
+	section_tree[1].change_depth(d);
 	file_list_changed(d, false);
-}
-
-bool DirDiffForm::change_root(
-    DirectoryContents&           n,
-	const std::string& dir
-)
-{
-	if ( !dir.empty())
-	{
-		n.name = ( FileSystem::is_absolute(dir) && FileSystem::is_directory(dir))
-		         ? cpp::filesystem::cleanpath(dir)
-				 : std::string();
-		n.children.clear();
-		n.files.clear();
-
-		change_depth(n, get_depth());
-
-		return true;
-	}
-
-	return false;
 }
 
 void DirDiffForm::open_section(std::size_t i)
 {
 	std::string t[2];
-	t[i] = getDirectory(section_tree[i].name);
+	t[i] = getDirectory(section_tree[i].name());
 
 	if ( !t[i].empty())
 	{
@@ -388,55 +368,13 @@ void DirDiffForm::change_dir(
 	const std::string& right
 )
 {
-	const bool lchanged = change_root(section_tree[0], left);
-	const bool rchanged = change_root(section_tree[1], right);
+	const int d = get_depth();
+	const bool lchanged = section_tree[0].change_root(left, d);
+	const bool rchanged = section_tree[1].change_root(right, d);
 
 	if ( lchanged || rchanged )
 	{
-		file_list_changed(get_depth(), true);
-	}
-}
-
-void DirDiffForm::change_depth(
-    DirectoryContents& n,
-	int      d
-)
-{
-	if ( n.name.empty())
-	{
-		n.children.clear();
-		n.files.clear();
-	}
-	else
-	{
-		change_depth(n, n.name, 0, d);
-	}
-}
-
-void DirDiffForm::change_depth(
-    DirectoryContents&           n,
-	const std::string& current_path,
-	int                current_depth,
-	int                d
-)
-{
-	if ( current_depth < d )
-	{
-		if ( n.files.empty() && n.children.empty())
-		{
-			n.init(current_path);
-		}
-
-		// Move down a level
-		for ( std::size_t i = 0; i < n.children.size(); ++i )
-		{
-			change_depth(n.children[i], current_path + "/" + n.children[i].name, current_depth + 1, d);
-		}
-	}
-	else
-	{
-		n.children.clear();
-		n.files.clear();
+		file_list_changed(d, true);
 	}
 }
 
@@ -448,18 +386,18 @@ void DirDiffForm::find_subdirs(
 	int                maxdepth
 )
 {
-	if ( !n.name.empty())
+	if ( n.valid())
 	{
 		if ( depth < maxdepth )
 		{
 			// don't need to watch dirs at max depth
-			subdirs << qt::convert(s + n.name);
+			subdirs << qt::convert(s + n.name());
 
 			if ( depth + 1 < maxdepth )
 			{
-				for ( std::size_t i = 0; i < n.children.size(); ++i )
+				for ( std::size_t i = 0, m = n.dircount(); i < m; ++i )
 				{
-					find_subdirs(subdirs, n.children[i], s + n.name + "/", depth + 1, maxdepth);
+					find_subdirs(subdirs, n.subdir(i), s + n.name() + "/", depth + 1, maxdepth);
 				}
 			}
 		}
@@ -501,34 +439,34 @@ void DirDiffForm::file_list_changed(
 	stopDirectoryWatcher();
 
 	// Update the text of the open directory buttons
-	if ( section_tree[0].name.empty())
+	if ( !section_tree[0].valid())
 	{
 		ui->openleftdir->setText("Open Left Dir");
 
-		if ( section_tree[1].name.empty())
+		if ( !section_tree[1].valid())
 		{
 			ui->openrightdir->setText("Open Right Dir");
 		}
 		else
 		{
-			ui->openrightdir->setText(qt::convert(cpp::filesystem::basename(section_tree[1].name)));
+			ui->openrightdir->setText(qt::convert(cpp::filesystem::basename(section_tree[1].name())));
 		}
 	}
-	else if ( section_tree[1].name.empty())
+	else if ( !section_tree[1].valid())
 	{
-		ui->openleftdir->setText(qt::convert(cpp::filesystem::basename(section_tree[0].name)));
+		ui->openleftdir->setText(qt::convert(cpp::filesystem::basename(section_tree[0].name())));
 		ui->openrightdir->setText("Open Right Dir");
 	}
 	else
 	{
 		// Prefer to use just the directory name
-		std::string l = cpp::filesystem::basename(section_tree[0].name);
-		std::string r = cpp::filesystem::basename(section_tree[1].name);
+		std::string l = cpp::filesystem::basename(section_tree[0].name());
+		std::string r = cpp::filesystem::basename(section_tree[1].name());
 
 		if ( l == r )
 		{
-			l = section_tree[0].name;
-			r = section_tree[1].name;
+			l = section_tree[0].name();
+			r = section_tree[1].name();
 
 			// Find common ancestor
 			std::size_t       i = 0;
@@ -694,82 +632,6 @@ void DirDiffForm::startDirectoryWatcher()
     watcher->addPaths(watched_dirs);
 }
 
-// dirname begins with current_path + "/"
-bool DirDiffForm::rescan(
-    DirectoryContents&           n,
-	const std::string& current_path,
-	const std::string& dirname,
-	int                depth,
-	int                maxdepth
-)
-{
-	/// @todo binary search because children is sorted
-	for ( std::size_t i = 0; i < n.children.size(); ++i )
-	{
-		const std::string s = current_path + "/" + n.children[i].name;
-
-		if ( dirname == s )
-		{
-			// Found the dir
-			if ( FileSystem::is_directory(s))
-			{
-				n.children[i].children.clear();
-				n.children[i].files.clear();
-				change_depth(n.children[i], s, depth + 1, maxdepth);
-			}
-			else
-			{
-				// no longer exists on disk
-				n.children.erase(n.children.begin() + i);
-			}
-
-			return true;
-		}
-		else if ( pbl::starts_with(dirname, s + "/"))
-		{
-
-			// Descend
-			return rescan(n.children[i], s, dirname, depth + 1, maxdepth);
-		}
-	}
-
-	return false;
-}
-
-void DirDiffForm::rescan(
-    DirectoryContents&           n,
-	const std::string& dirname,
-	int                maxdepth
-)
-{
-	if ( !n.name.empty())
-	{
-		if ( n.name == dirname )
-		{
-			// root has changed
-			n.children.clear();
-			n.files.clear();
-
-			if ( FileSystem::is_directory(dirname))
-			{
-				change_depth(n, maxdepth);
-			}
-			else
-			{
-				// directory doesn't exist anymore
-				n.name.clear();
-			}
-		}
-		else
-		{
-			if ( pbl::starts_with(dirname, n.name + "/"))
-			{
-				rescan(n, n.name, dirname, 0, maxdepth);
-			}
-		}
-	}
-}
-
 // File system has notified us of a change in one of our directories
 /// @todo If we get a lot of these, performance is terrible
 void DirDiffForm::contentsChanged(QString dirname_)
@@ -778,8 +640,8 @@ void DirDiffForm::contentsChanged(QString dirname_)
 
 	const int d = get_depth();
 
-	rescan(section_tree[0], dirname, d);
-	rescan(section_tree[1], dirname, d);
+	section_tree[0].rescan(dirname, d);
+	section_tree[1].rescan(dirname, d);
 
 	file_list_changed(d, false);
 }
@@ -788,8 +650,8 @@ void DirDiffForm::filesChanged(const std::set< std::string >& files)
 {
 	for ( std::size_t i = 0; i < list.size(); ++i )
 	{
-		if (( !section_tree[0].name.empty() && !list[i].items[0].empty() && files.count(section_tree[0].name + "/" + list[i].items[0]) != 0 )
-		    || ( !section_tree[1].name.empty() && !list[i].items[1].empty() && files.count(section_tree[1].name + "/" + list[i].items[1]) != 0 ))
+		if (( section_tree[0].valid() && !list[i].items[0].empty() && files.count(section_tree[0].name() + "/" + list[i].items[0]) != 0 )
+		    || ( section_tree[1].valid() && !list[i].items[1].empty() && files.count(section_tree[1].name() + "/" + list[i].items[1]) != 0 ))
 		{
 			list[i].res = NOT_COMPARED;
 		}
@@ -805,11 +667,9 @@ void DirDiffForm::on_refresh_clicked()
 
 void DirDiffForm::refresh()
 {
-	section_tree[0].children.clear();
-	section_tree[0].files.clear();
-	section_tree[1].children.clear();
-	section_tree[1].files.clear();
-	change_depth(get_depth());
+	section_tree[0].change_depth(0);
+	section_tree[1].change_depth(0);
+	change_depth();
 }
 
 int DirDiffForm::get_depth()
@@ -836,9 +696,9 @@ void DirDiffForm::on_swap_clicked()
 
 void DirDiffForm::explore_section(std::size_t i)
 {
-	if ( !section_tree[i].name.empty())
+	if ( section_tree[i].valid())
 	{
-		QDesktopServices::openUrl(QUrl(qt::convert("file://" + section_tree[i].name)));
+		QDesktopServices::openUrl(QUrl(qt::convert("file://" + section_tree[i].name())));
 	}
 }
 
@@ -1030,7 +890,7 @@ void DirDiffForm::items_compared(
 
 	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
 	{
-		if ( section_tree[0].name + "/" + list[i].items[0] == first && section_tree[1].name + "/" + list[i].items[1] == second )
+		if ( section_tree[0].name() + "/" + list[i].items[0] == first && section_tree[1].name() + "/" + list[i].items[1] == second )
 		{
 			list[i].res = equal ? COMPARED_SAME : COMPARED_DIFFERENT;
 			applyFilters();
@@ -1178,7 +1038,7 @@ void DirDiffForm::on_actionCopy_To_Clipboard_triggered()
 
 void DirDiffForm::startComparison()
 {
-	if ( !section_tree[0].name.empty() && !section_tree[1].name.empty())
+	if ( section_tree[0].valid() && section_tree[1].valid())
 	{
 		const std::size_t n = list.size();
 		std::size_t       j = n;
@@ -1189,7 +1049,7 @@ void DirDiffForm::startComparison()
 			{
 				if ( !hidden(i))
 				{
-					emit compare_files(qt::convert(section_tree[0].name + "/" + list[i].items[0]), qt::convert(section_tree[1].name + "/" + list[i].items[1]));
+					emit compare_files(qt::convert(section_tree[0].name() + "/" + list[i].items[0]), qt::convert(section_tree[1].name() + "/" + list[i].items[1]));
 
 					return;
 				}
@@ -1200,7 +1060,7 @@ void DirDiffForm::startComparison()
 
 		if ( j < n )
 		{
-			emit compare_files(qt::convert(section_tree[0].name + "/" + list[j].items[0]), qt::convert(section_tree[1].name + "/" + list[j].items[1]));
+			emit compare_files(qt::convert(section_tree[0].name() + "/" + list[j].items[0]), qt::convert(section_tree[1].name() + "/" + list[j].items[1]));
 		}
 	}
 }
@@ -1263,7 +1123,7 @@ void DirDiffForm::on_actionSelect_Right_Only_triggered()
 void DirDiffForm::on_depthlimit_toggled(bool checked)
 {
 	ui->depth->setEnabled(checked);
-	change_depth(get_depth());
+	change_depth();
 }
 
 void DirDiffForm::populate_filters()
