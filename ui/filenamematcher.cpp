@@ -13,7 +13,7 @@ int FileNameMatcher::compare(
 		return 0;
 	}
 
-	if ( a == gzalt(b))
+	if ( gzalt(a, b))
 	{
 		return 1;
 	}
@@ -31,16 +31,29 @@ int FileNameMatcher::compare(
 	return -1;
 }
 
-std::string FileNameMatcher::gzalt(const std::string& s)
+bool FileNameMatcher::gzalt(const std::string& s1, const std::string& s2)
 {
-	if ( !pbl::ends_with(s, ".gz"))
+	const std::size_t n1 = s1.length();
+	const std::size_t n2 = s2.length();
+
+	if (n1 != n2)
 	{
-		return s + ".gz";
+		if (n1 < n2)
+		{
+			if (s2[n1] == '.' && s2.compare(0, n1, s1) == 0)
+			{
+				if (n2 - n1 == 3 && s2.compare(n1 + 1, std::string::npos, "gz", 2) == 0)
+					return true;
+			}
+		}
+		else if (s1[n2] == '.' && s1.compare(0, n2, s2) == 0)
+		{
+			if (n1 - n2 == 3 && s1.compare(n2 + 1, std::string::npos, "gz", 2) == 0)
+				return true;
+		}
 	}
 
-	std::string t(s, 0, s.length() - 3);
-
-	return t;
+	return false;
 }
 
 std::string FileNameMatcher::cppalt(const std::string& s)

@@ -84,11 +84,12 @@ public:
 		list.swap(o.list);
 	}
 
-	void rematch_section(std::size_t, const dirnode&, const std::string&);
 	void rematch(const dirnode&, const dirnode&, const std::string&);
 
 	static bool compare_by_items(const comparison_t& a, const comparison_t& b);
 private:
+	void rematch_section(std::size_t, const dirnode&, const std::string&);
+	void rematch_inner(const dirnode&, const dirnode&, const std::string&);
 
 	FileNameMatcher matcher;
 

@@ -9,7 +9,7 @@ public:
 	int compare(const std::string& a, const std::string& b) const;
 private:
 	// ext <=> ext.gz
-	static std::string gzalt(const std::string& s);
+	static bool gzalt(const std::string&, const std::string&);
 
 	// c <=> cpp
 	static std::string cppalt(const std::string& s);

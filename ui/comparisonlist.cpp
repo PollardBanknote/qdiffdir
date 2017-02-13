@@ -29,6 +29,27 @@ void ComparisonList::rematch(
     const std::string&           prefix
 )
 {
+	if ( !l.name.empty() && !r.name.empty())
+	{
+		rematch_inner(l, r, prefix);
+	}
+	else if ( !l.name.empty())
+	{
+		rematch_section(0, l, "");
+	}
+	else if ( !r.name.empty())
+	{
+		rematch_section(1, r, "");
+	}
+}
+
+
+void ComparisonList::rematch_inner(
+    const dirnode&               l,
+    const dirnode&               r,
+    const std::string&           prefix
+)
+{
 	// Recursively apply to subdirectories
 	{
 		std::size_t       il = 0, ir = 0;

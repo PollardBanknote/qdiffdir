@@ -572,18 +572,7 @@ void DirDiffForm::file_list_changed(
 	// Rematch files
 	ComparisonList matched;
 
-	if ( !section_tree[0].name.empty() && !section_tree[1].name.empty())
-	{
-		matched.rematch(section_tree[0], section_tree[1], "");
-	}
-	else if ( !section_tree[0].name.empty())
-	{
-		matched.rematch_section(0, section_tree[0], "");
-	}
-	else if ( !section_tree[1].name.empty())
-	{
-		matched.rematch_section(1, section_tree[1], "");
-	}
+	matched.rematch(section_tree[0], section_tree[1], "");
 
 	if ( !rootchanged )
 	{
