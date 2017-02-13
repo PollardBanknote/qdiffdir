@@ -19,6 +19,16 @@
      <property name="fieldGrowthPolicy">
       <enum>QFormLayout::ExpandingFieldsGrow</enum>
      </property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="editorLabel">
+       <property name="text">
+        <string>Editor</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="editorLineEdit"/>
+     </item>
      <item row="1" column="0">
       <widget class="QLabel" name="diffToolLabel">
        <property name="text">
@@ -29,15 +39,25 @@
      <item row="1" column="1">
       <widget class="QLineEdit" name="diffToolLineEdit"/>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="editorLabel">
+     <item row="2" column="0">
+      <widget class="QLabel" name="fileSizeCompareLimitMBLabel">
        <property name="text">
-        <string>Editor</string>
+        <string>File Size Compare Limit (MB)</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="editorLineEdit"/>
+     <item row="2" column="1">
+      <widget class="QSpinBox" name="fileSizeCompareLimitMBSpinBox">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Files larger than this limit will not be compared. 0 will be treated as &amp;quot;no limit&amp;quot;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="specialValueText">
+        <string>Unlimited</string>
+       </property>
+       <property name="maximum">
+        <number>2147483647</number>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

@@ -45,7 +45,8 @@ namespace fs
 {
 int compare(
 	const std::string& first,
-	const std::string& second
+    const std::string& second,
+    long long sizelimit
 )
 {
 	const int fd1 = ::open(first.c_str(), O_RDONLY);
@@ -58,7 +59,7 @@ int compare(
 
 		if ( fd2 != -1 )
 		{
-			res = compare_fd(fd1, fd2);
+			res = compare_fd(fd1, fd2, sizelimit);
 
 			::close(fd2);
 		}
@@ -71,7 +72,8 @@ int compare(
 
 int compare_fd(
 	int fd1,
-	int fd2
+    int fd2,
+    long long sizelimit
 )
 {
 	if ( fd1 == -1 || fd2 == -1 )
@@ -79,23 +81,31 @@ int compare_fd(
 		return -1;
 	}
 
-	struct stat s1;
-	struct stat s2;
-
-	if ( ::fstat(fd1, &s1) == 0 && ::fstat(fd2, &s2) == 0 )
 	{
-		// files of different size are obviously different
-		if ( s1.st_size != s2.st_size )
+		struct stat s1;
+		struct stat s2;
+
+		const bool res1 = ::fstat(fd1, &s1) == 0;
+		const bool res2 = ::fstat(fd2, &s2) == 0;
+
+		if ( res1 && res2 )
 		{
-			return 0;
+			// files of different size are obviously different
+			if ( s1.st_size != s2.st_size )
+			{
+				return 0;
+			}
+
+			// files with the same dev/inode are obviously the same and don't need to
+			// be compared
+			if ( s1.st_ino == s2.st_ino && s1.st_dev == s2.st_dev )
+			{
+				return 1;
+			}
 		}
 
-		// files with the same dev/inode are obviously the same and don't need to
-		// be compared
-		if ( s1.st_ino == s2.st_ino && s1.st_dev == s2.st_dev )
-		{
-			return 1;
-		}
+		if (sizelimit != 0 && ((res1 && s1.st_size > sizelimit) || (res2 && s2.st_size > sizelimit)))
+			return -1;
 	}
 
 	// Start reading buffers

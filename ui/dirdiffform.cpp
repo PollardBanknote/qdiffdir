@@ -711,6 +711,7 @@ void DirDiffForm::refresh()
 {
 	section_tree[0].change_depth(0);
 	section_tree[1].change_depth(0);
+	list.forget();
 	change_depth();
 }
 
@@ -1092,20 +1093,19 @@ void DirDiffForm::startComparison()
 		{
 			if ( !list[i].items[0].empty() && !list[i].items[1].empty() && list[i].res == NOT_COMPARED )
 			{
+				j = i;
+
 				if ( !hidden(i))
 				{
-					emit compare_files(qt::convert(section_tree[0].name() + "/" + list[i].items[0]), qt::convert(section_tree[1].name() + "/" + list[i].items[1]));
-
-					return;
+					break;
 				}
-
-				j = i;
 			}
 		}
 
 		if ( j < n )
 		{
-			emit compare_files(qt::convert(section_tree[0].name() + "/" + list[j].items[0]), qt::convert(section_tree[1].name() + "/" + list[j].items[1]));
+			MySettings& settings = MySettings::instance();
+			emit compare_files(qt::convert(section_tree[0].name() + "/" + list[j].items[0]), qt::convert(section_tree[1].name() + "/" + list[j].items[1]), settings.getFileSizeCompareLimit());
 		}
 	}
 }

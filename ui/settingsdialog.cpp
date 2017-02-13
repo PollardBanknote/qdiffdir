@@ -43,6 +43,7 @@ SettingsDialog::SettingsDialog(QWidget* parent) :
 	MySettings& settings = MySettings::instance();
 	ui->diffToolLineEdit->setText(settings.getDiffTool());
 	ui->editorLineEdit->setText(settings.getEditor());
+	ui->fileSizeCompareLimitMBSpinBox->setValue(settings.getFileSizeCompareLimit());
 
 	const QMap< QString, QString > filters = settings.getFilters();
 	int                            nrows   = 0;
@@ -69,6 +70,7 @@ void SettingsDialog::on_save_clicked()
 
 	settings.setDiffTool(ui->diffToolLineEdit->text());
 	settings.setEditor(ui->editorLineEdit->text());
+	settings.setFileSizeCompareLimit(ui->fileSizeCompareLimitMBSpinBox->value());
 
 	QMap< QString, QString > m;
 

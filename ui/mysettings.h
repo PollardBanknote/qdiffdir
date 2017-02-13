@@ -46,6 +46,8 @@ public:
 	void setDiffTool(const QString&);
 	QMap< QString, QString > getFilters() const;
 	void setFilters(const QMap< QString, QString >&);
+	int getFileSizeCompareLimit() const;
+	void setFileSizeCompareLimit(int);
 private:
 	MySettings();
 	MySettings(const MySettings&);

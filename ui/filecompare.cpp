@@ -37,7 +37,8 @@
 
 void FileCompare::compare(
 	const QString& first,
-	const QString& second
+    const QString& second,
+    long long filesizelimit // in megabytes
 )
 {
 	bool res;
@@ -53,7 +54,7 @@ void FileCompare::compare(
 	}
 	else
 	{
-		res = ( pbl::fs::compare(first.toStdString(), second.toStdString()) == 1 );
+		res = ( pbl::fs::compare(first.toStdString(), second.toStdString(), filesizelimit * 1024 * 1024) == 1 );
 	}
 
 	emit compared(first, second, res);

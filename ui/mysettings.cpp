@@ -34,6 +34,7 @@
 const char difftool_key[] = "difftool";
 const char editor_key[]   = "editor";
 const char filters_key[]  = "filters";
+const char compare_limit_key[] = "comparelimit";
 
 MySettings& MySettings::instance()
 {
@@ -86,6 +87,19 @@ void MySettings::setFilters(const QMap< QString, QString >& m)
 	}
 
 	store->setValue(filters_key, v);
+}
+
+int MySettings::getFileSizeCompareLimit() const
+{
+	QVariant v = store->value(compare_limit_key);
+	if (!v.isNull())
+		return v.toInt();
+	return 0;
+}
+
+void MySettings::setFileSizeCompareLimit(int x)
+{
+	store->setValue(compare_limit_key, x);
 }
 
 MySettings::MySettings()

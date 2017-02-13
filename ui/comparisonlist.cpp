@@ -284,6 +284,12 @@ bool ComparisonList::compare_by_items(
 	}
 }
 
+void ComparisonList::forget()
+{
+	for (std::size_t i = 0, n = list.size(); i < n; ++i)
+		list[i].res = NOT_COMPARED;
+}
+
 std::pair< ComparisonList::iterator, bool > ComparisonList::insert(const comparison_t& x)
 {
 	std::vector< comparison_t >::iterator it = std::lower_bound(list.begin(), list.end(), x, compare_by_items);
