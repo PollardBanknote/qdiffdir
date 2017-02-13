@@ -187,24 +187,7 @@ void DirDiffForm::viewfiles(int r)
 
 			if (program.isEmpty())
 			{
-				const char* editors[] = {
-				    "kate", "kwrite", "gedit", "gvim"
-				};
-
-				for (std::size_t i = 0, n = sizeof(editors) / sizeof(editors[0]); i < n; ++i)
-				{
-					const std::string path = pbl::which(editors[i]);
-					if (!path.empty())
-					{
-						program = QString::fromStdString(path);
-						break;
-					}
-				}
-			}
-
-			if (program.isEmpty())
-			{
-				QMessageBox::critical(this, "Please configure an editor", "No editor has been configured and could not find one in the path.");
+				QDesktopServices::openUrl(QUrl(qt::convert("file://" + p.native())));
 			}
 			else
 			{
