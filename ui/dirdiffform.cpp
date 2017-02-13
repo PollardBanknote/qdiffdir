@@ -49,6 +49,7 @@
 
 #include "fileutil/compare.h"
 #include "util/strings.h"
+#include "process/which.h"
 
 #include "modules/filesystem.h"
 #include "compare.h"
@@ -146,7 +147,34 @@ void DirDiffForm::viewfiles(int r)
 			QStringList l;
 			l << QString::fromStdString(section_tree[0].name() + "/" + s1)
 			  << QString::fromStdString(section_tree[1].name() + "/" + s2);
-			QProcess::startDetached(settings.getDiffTool(), l);
+
+			QString program = settings.getDiffTool();
+
+			if (program.isEmpty())
+			{
+				const char* difftools[] = {
+				    "kompare", "gvimdiff", "meld"
+				};
+
+				for (std::size_t i = 0, n = sizeof(difftools) / sizeof(difftools[0]); i < n; ++i)
+				{
+					const std::string path = pbl::which(difftools[i]);
+					if (!path.empty())
+					{
+						program = QString::fromStdString(path);
+						break;
+					}
+				}
+			}
+
+			if (program.isEmpty())
+			{
+				QMessageBox::critical(this, "Please configure a difftool", "No difftool has been configured and could not find one in the path.");
+			}
+			else
+			{
+				QProcess::startDetached(program, l);
+			}
 		}
 		else
 		{
@@ -154,7 +182,34 @@ void DirDiffForm::viewfiles(int r)
 
 			cpp::filesystem::path p(section_tree[i].name() + "/" + list[r].items[i]);
 			cpp::filesystem::path q = p.parent_path();
-			QProcess::startDetached(settings.getEditor(), QStringList(qt::convert(p.filename().native())), qt::convert(q.native()));
+
+			QString program = settings.getEditor();
+
+			if (program.isEmpty())
+			{
+				const char* editors[] = {
+				    "kate", "kwrite", "gedit", "gvim"
+				};
+
+				for (std::size_t i = 0, n = sizeof(editors) / sizeof(editors[0]); i < n; ++i)
+				{
+					const std::string path = pbl::which(editors[i]);
+					if (!path.empty())
+					{
+						program = QString::fromStdString(path);
+						break;
+					}
+				}
+			}
+
+			if (program.isEmpty())
+			{
+				QMessageBox::critical(this, "Please configure an editor", "No editor has been configured and could not find one in the path.");
+			}
+			else
+			{
+				QProcess::startDetached(program, QStringList(qt::convert(p.filename().native())), qt::convert(q.native()));
+			}
 		}
 	}
 }

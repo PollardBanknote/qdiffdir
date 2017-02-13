@@ -44,18 +44,6 @@ MySettings& MySettings::instance()
 
 QString MySettings::getEditor() const
 {
-	QString s = getEditorSetting();
-
-	if ( s.isEmpty())
-	{
-		s = "gvim";
-	}
-
-	return s;
-}
-
-QString MySettings::getEditorSetting() const
-{
 	return store->value(editor_key).toString();
 }
 
@@ -65,18 +53,6 @@ void MySettings::setEditor(const QString& s)
 }
 
 QString MySettings::getDiffTool() const
-{
-	QString s = getDiffToolSetting();
-
-	if ( s.isEmpty())
-	{
-		s = "kompare";
-	}
-
-	return s;
-}
-
-QString MySettings::getDiffToolSetting() const
 {
 	return store->value(difftool_key).toString();
 }

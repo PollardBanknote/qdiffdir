@@ -40,11 +40,9 @@ public:
 	static MySettings& instance();
 
 	QString getEditor() const;
-	QString getEditorSetting() const;
 	void setEditor(const QString&);
 
 	QString getDiffTool() const;
-	QString getDiffToolSetting() const;
 	void setDiffTool(const QString&);
 	QMap< QString, QString > getFilters() const;
 	void setFilters(const QMap< QString, QString >&);

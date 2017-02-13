@@ -41,8 +41,8 @@ SettingsDialog::SettingsDialog(QWidget* parent) :
 	ui->setupUi(this);
 
 	MySettings& settings = MySettings::instance();
-	ui->diffToolLineEdit->setText(settings.getDiffToolSetting());
-	ui->editorLineEdit->setText(settings.getEditorSetting());
+	ui->diffToolLineEdit->setText(settings.getDiffTool());
+	ui->editorLineEdit->setText(settings.getEditor());
 
 	const QMap< QString, QString > filters = settings.getFilters();
 	int                            nrows   = 0;

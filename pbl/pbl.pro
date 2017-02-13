@@ -36,7 +36,8 @@ SOURCES += \
     cpp/fs/remove.cpp \
     cpp/fs/tempdir.cpp \
     cpp/fs/current_path.cpp \
-    fileutil/compare.cpp
+    fileutil/compare.cpp \
+    process/which.cpp
 
 HEADERS += \
     cpp/fs/diriter.h \
@@ -58,7 +59,8 @@ HEADERS += \
     cpp/fs/remove.h \
     cpp/fs/tempdir.h \
     cpp/fs/current_path.h \
-    fileutil/compare.h
+    fileutil/compare.h \
+    process/which.h
 
 unix {
     target.path = /usr/lib
