@@ -31,9 +31,9 @@
 
 #include <QApplication>
 
-#include "filesystem.h"
+#include "cpp/filesystem.h"
 
-#include "process/detach.h"
+#include "pbl/process/detach.h"
 
 #include "mainwindow.h"
 

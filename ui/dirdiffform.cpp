@@ -45,11 +45,11 @@
 #include <QDesktopServices>
 #include <QUrl>
 
-#include "filesystem.h"
+#include "cpp/filesystem.h"
 
-#include "fileutil/compare.h"
-#include "util/strings.h"
-#include "process/which.h"
+#include "pbl/fileutil/compare.h"
+#include "pbl/util/strings.h"
+#include "pbl/process/which.h"
 
 #include "compare.h"
 #include "matcher.h"

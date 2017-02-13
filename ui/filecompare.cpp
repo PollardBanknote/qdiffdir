@@ -31,8 +31,8 @@
 #include <QProcess>
 #include <QFile>
 
-#include "fileutil/compare.h"
-#include "util/strings.h"
+#include "pbl/fileutil/compare.h"
+#include "pbl/util/strings.h"
 #include "qutilities/convert.h"
 
 void FileCompare::compare(

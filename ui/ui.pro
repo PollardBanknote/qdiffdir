@@ -51,12 +51,12 @@ FORMS    += mainwindow.ui \
     dirdiffform.ui \
     settingsdialog.ui
 
+INCLUDEPATH += $$PWD/..
+
 LIBS += -L$$OUT_PWD/../pbl/ -lpbl
-INCLUDEPATH += $$PWD/../pbl
 DEPENDPATH += $$PWD/../pbl
 PRE_TARGETDEPS += $$OUT_PWD/../pbl/libpbl.a
 
 LIBS += -L$$OUT_PWD/../cpp/ -lcpp
-INCLUDEPATH += $$PWD/../cpp
 DEPENDPATH += $$PWD/../cpp
 PRE_TARGETDEPS += $$OUT_PWD/../cpp/libcpp.a

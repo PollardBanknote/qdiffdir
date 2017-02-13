@@ -36,7 +36,8 @@ unix {
     INSTALLS += target
 }
 
+INCLUDEPATH += $$PWD/..
+
 LIBS += -L$$OUT_PWD/../cpp/ -lcpp
-INCLUDEPATH += $$PWD/../cpp
 DEPENDPATH += $$PWD/../cpp
 PRE_TARGETDEPS += $$OUT_PWD/../cpp/libcpp.a

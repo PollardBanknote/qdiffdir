@@ -28,7 +28,7 @@
  */
 #include "filenamematcher.h"
 
-#include "util/strings.h"
+#include "pbl/util/strings.h"
 
 /// @todo file.bak
 int FileNameMatcher::compare(
