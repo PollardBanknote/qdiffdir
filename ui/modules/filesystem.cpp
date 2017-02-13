@@ -42,9 +42,3 @@ bool FileSystem::copy(
 {
 	return cpp::filesystem::copy_file(from, to, copy_options::overwrite_existing);
 }
-
-bool FileSystem::is_directory(const std::string& s)
-{
-	return cpp::filesystem::is_directory(s);
-}
-

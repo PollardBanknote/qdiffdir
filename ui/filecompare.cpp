@@ -8,8 +8,8 @@
 #include "qutilities/convert.h"
 
 void FileCompare::compare(
-    const QString& first,
-    const QString& second
+	const QString& first,
+	const QString& second
 )
 {
 	bool res;
@@ -60,4 +60,3 @@ QByteArray FileCompare::gunzip(const std::string& filename)
 		return file.readAll();
 	}
 }
-

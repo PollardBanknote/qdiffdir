@@ -38,7 +38,6 @@ public:
 	// return (files, subdirs) of path
 	static bool exists(const std::string&);
 	static bool copy(const std::string&, const std::string&);
-	static bool is_directory(const std::string&);
 	static bool is_absolute(const std::string&);
 private:
 };

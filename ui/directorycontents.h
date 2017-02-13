@@ -24,9 +24,9 @@ private:
 	void init(const std::string&);
 	void change_depth(const std::string&, int, int);
 
-	std::string name_;
+	std::string                      name_;
 	std::vector< DirectoryContents > children;
-	std::vector< std::string > files;
+	std::vector< std::string >       files;
 };
 
 

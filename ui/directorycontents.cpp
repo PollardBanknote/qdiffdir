@@ -19,6 +19,7 @@ bool is_absolute(const std::string& s)
 {
 	return !s.empty() && s[0] == '/';
 }
+
 }
 
 void DirectoryContents::swap(DirectoryContents& n)
@@ -76,7 +77,6 @@ void DirectoryContents::init(const std::string& path)
 	{
 		children[i].name_.swap(dirs[i]);
 	}
-
 }
 
 void DirectoryContents::change_depth()
@@ -84,9 +84,7 @@ void DirectoryContents::change_depth()
 	change_depth(INT_MAX);
 }
 
-void DirectoryContents::change_depth(
-    int      d
-)
+void DirectoryContents::change_depth(int d)
 {
 	if ( name_.empty())
 	{
@@ -100,9 +98,9 @@ void DirectoryContents::change_depth(
 }
 
 void DirectoryContents::change_depth(
-    const std::string& current_path,
-    int                current_depth,
-    int                d
+	const std::string& current_path,
+	int                current_depth,
+	int                d
 )
 {
 	if ( current_depth < d )
@@ -126,15 +124,15 @@ void DirectoryContents::change_depth(
 }
 
 bool DirectoryContents::change_root(
-    const std::string& dir,
-    int d
+	const std::string& dir,
+	int                d
 )
 {
 	if ( !dir.empty())
 	{
 		name_ = ( is_absolute(dir) && cpp::filesystem::is_directory(dir))
-		         ? cpp::filesystem::cleanpath(dir)
-		         : std::string();
+		        ? cpp::filesystem::cleanpath(dir)
+				: std::string();
 		children.clear();
 		files.clear();
 
@@ -148,10 +146,10 @@ bool DirectoryContents::change_root(
 
 // dirname begins with current_path + "/"
 bool DirectoryContents::rescan(
-    const std::string& current_path,
-    const std::string& dirname,
-    int                depth,
-    int                maxdepth
+	const std::string& current_path,
+	const std::string& dirname,
+	int                depth,
+	int                maxdepth
 )
 {
 	/// @todo binary search because children is sorted
@@ -188,8 +186,8 @@ bool DirectoryContents::rescan(
 }
 
 void DirectoryContents::rescan(
-    const std::string& dirname,
-    int                maxdepth
+	const std::string& dirname,
+	int                maxdepth
 )
 {
 	if ( !name_.empty())
@@ -235,14 +233,12 @@ const DirectoryContents& DirectoryContents::subdir(std::size_t i) const
 	return children[i];
 }
 
-const std::string&DirectoryContents::filename(std::size_t i) const
+const std::string& DirectoryContents::filename(std::size_t i) const
 {
 	return files[i];
 }
 
-const std::string&DirectoryContents::name() const
+const std::string& DirectoryContents::name() const
 {
 	return name_;
 }
-
-

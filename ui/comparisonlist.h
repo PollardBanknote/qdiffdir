@@ -21,15 +21,19 @@ public:
 
 		bool has_only(std::size_t i) const
 		{
-			if (!items[i].empty())
+			if ( !items[i].empty())
 			{
-				for (std::size_t j = 0; j < 2; ++j)
+				for ( std::size_t j = 0; j < 2; ++j )
 				{
-					if (j != i && !items[j].empty())
+					if ( j != i && !items[j].empty())
+					{
 						return false;
+					}
 				}
+
 				return true;
 			}
+
 			return false;
 		}
 

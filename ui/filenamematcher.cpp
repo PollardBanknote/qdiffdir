@@ -4,8 +4,8 @@
 
 /// @todo file.bak
 int FileNameMatcher::compare(
-    const std::string& a,
-    const std::string& b
+	const std::string& a,
+	const std::string& b
 ) const
 {
 	if ( a == b )
@@ -31,25 +31,32 @@ int FileNameMatcher::compare(
 	return -1;
 }
 
-bool FileNameMatcher::gzalt(const std::string& s1, const std::string& s2)
+bool FileNameMatcher::gzalt(
+	const std::string& s1,
+	const std::string& s2
+)
 {
 	const std::size_t n1 = s1.length();
 	const std::size_t n2 = s2.length();
 
-	if (n1 != n2)
+	if ( n1 != n2 )
 	{
-		if (n1 < n2)
+		if ( n1 < n2 )
 		{
-			if (s2[n1] == '.' && s2.compare(0, n1, s1) == 0)
+			if ( s2[n1] == '.' && s2.compare(0, n1, s1) == 0 )
 			{
-				if (n2 - n1 == 3 && s2.compare(n1 + 1, std::string::npos, "gz", 2) == 0)
+				if ( n2 - n1 == 3 && s2.compare(n1 + 1, std::string::npos, "gz", 2) == 0 )
+				{
 					return true;
+				}
 			}
 		}
-		else if (s1[n2] == '.' && s1.compare(0, n2, s2) == 0)
+		else if ( s1[n2] == '.' && s1.compare(0, n2, s2) == 0 )
 		{
-			if (n1 - n2 == 3 && s1.compare(n2 + 1, std::string::npos, "gz", 2) == 0)
+			if ( n1 - n2 == 3 && s1.compare(n2 + 1, std::string::npos, "gz", 2) == 0 )
+			{
 				return true;
+			}
 		}
 	}
 
@@ -103,4 +110,3 @@ std::string FileNameMatcher::cgalt(const std::string& s)
 
 	return std::string();
 }
-

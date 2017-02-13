@@ -43,17 +43,20 @@ namespace pbl
 {
 namespace fs
 {
-int compare(const std::string& first, const std::string& second)
+int compare(
+	const std::string& first,
+	const std::string& second
+)
 {
 	const int fd1 = ::open(first.c_str(), O_RDONLY);
 
 	int res = -1;
 
-	if (fd1 != -1)
+	if ( fd1 != -1 )
 	{
 		const int fd2 = ::open(second.c_str(), O_RDONLY);
 
-		if (fd2 != -1)
+		if ( fd2 != -1 )
 		{
 			res = compare_fd(fd1, fd2);
 
@@ -66,19 +69,26 @@ int compare(const std::string& first, const std::string& second)
 	return res;
 }
 
-int compare_fd(int fd1, int fd2)
+int compare_fd(
+	int fd1,
+	int fd2
+)
 {
-	if (fd1 == -1 || fd2 == -1)
+	if ( fd1 == -1 || fd2 == -1 )
+	{
 		return -1;
+	}
 
 	struct stat s1;
 	struct stat s2;
 
-	if (::fstat(fd1, &s1) == 0 && ::fstat(fd2, &s2) == 0)
+	if ( ::fstat(fd1, &s1) == 0 && ::fstat(fd2, &s2) == 0 )
 	{
 		// files of different size are obviously different
-		if (s1.st_size != s2.st_size)
+		if ( s1.st_size != s2.st_size )
+		{
 			return 0;
+		}
 
 		// files with the same dev/inode are obviously the same and don't need to
 		// be compared
@@ -176,5 +186,6 @@ int compare_fd(int fd1, int fd2)
 
 	return -1;
 }
+
 }
 }

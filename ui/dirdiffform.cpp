@@ -60,8 +60,8 @@
 DirDiffForm::DirDiffForm(QWidget* parent_) :
 	QWidget(parent_),
 	ui(new Ui::DirDiffForm),
-    hide_section_only(),
-    hide_identical_items(false), hide_ignored(false),
+	hide_section_only(),
+	hide_identical_items(false), hide_ignored(false),
 	watcher()
 {
 	ui->setupUi(this);
@@ -93,8 +93,8 @@ DirDiffForm::DirDiffForm(QWidget* parent_) :
 	ui->multilistview->addAction(ui->actionSelect_Right_Only);
 	connect(ui->multilistview, &MultiList::itemActivated, this, &DirDiffForm::viewfiles);
 
-    watcher = new QFileSystemWatcher(this);
-    connect(watcher, &QFileSystemWatcher::directoryChanged, this, &DirDiffForm::contentsChanged);
+	watcher = new QFileSystemWatcher(this);
+	connect(watcher, &QFileSystemWatcher::directoryChanged, this, &DirDiffForm::contentsChanged);
 }
 
 DirDiffForm::~DirDiffForm()
@@ -160,12 +160,12 @@ void DirDiffForm::viewfiles(int r)
 }
 
 void DirDiffForm::saveAs(
-        std::size_t ifrom,
-        std::size_t ito
+	std::size_t ifrom,
+	std::size_t ito
 )
 {
-	const std::vector< std::string >& filenames = get_section_files(ifrom);
-	const std::string&                source = section_tree[ifrom].name();
+	const std::vector< std::string >& filenames   = get_section_files(ifrom);
+	const std::string&                source      = section_tree[ifrom].name();
 	const std::string&                destination = section_tree[ito].name();
 
 	if ( !source.empty() && !destination.empty())
@@ -216,13 +216,13 @@ void DirDiffForm::saveAs(
 }
 
 void DirDiffForm::copyfiles(
-        std::size_t ifrom,
-        std::size_t ito
+	std::size_t ifrom,
+	std::size_t ito
 )
 {
 	const std::vector< std::string >& rels = get_section_files(ifrom);
 	const std::string&                from = section_tree[ifrom].name();
-	const std::string&                to = section_tree[ito].name();
+	const std::string&                to   = section_tree[ito].name();
 
 	if ( from.empty() || to.empty())
 	{
@@ -324,7 +324,7 @@ std::string DirDiffForm::getDirectory(const std::string& dir)
 
 	return QString();
 
-	#endif
+	#endif // if 1
 }
 
 void DirDiffForm::on_openleftdir_clicked()
@@ -346,6 +346,7 @@ void DirDiffForm::on_depth_valueChanged(int)
 void DirDiffForm::change_depth()
 {
 	const int d = get_depth();
+
 	section_tree[0].change_depth(d);
 	section_tree[1].change_depth(d);
 	file_list_changed(d, false);
@@ -368,7 +369,7 @@ void DirDiffForm::change_dir(
 	const std::string& right
 )
 {
-	const int d = get_depth();
+	const int  d        = get_depth();
 	const bool lchanged = section_tree[0].change_root(left, d);
 	const bool rchanged = section_tree[1].change_root(right, d);
 
@@ -379,11 +380,11 @@ void DirDiffForm::change_dir(
 }
 
 void DirDiffForm::find_subdirs(
-	QStringList&       subdirs,
-    const DirectoryContents&     n,
-	const std::string& s,
-	int                depth,
-	int                maxdepth
+	QStringList&             subdirs,
+	const DirectoryContents& n,
+	const std::string&       s,
+	int                      depth,
+	int                      maxdepth
 )
 {
 	if ( n.valid())
@@ -405,8 +406,8 @@ void DirDiffForm::find_subdirs(
 }
 
 QStringList DirDiffForm::find_subdirs(
-    const DirectoryContents& n,
-	int            maxdepth
+	const DirectoryContents& n,
+	int                      maxdepth
 )
 {
 	QStringList r;
@@ -507,15 +508,15 @@ void DirDiffForm::file_list_changed(
 		std::size_t j = 0, m = matched.size();
 
 		// Both lists are in sorted order
-		while (i < n && j < m)
+		while ( i < n && j < m )
 		{
-			if (ComparisonList::compare_by_items(list[i], matched[j]))
+			if ( ComparisonList::compare_by_items(list[i], matched[j]))
 			{
 				list.erase(i);
 				--n;
 				ui->multilistview->removeItem(i);
 			}
-			else if (ComparisonList::compare_by_items(matched[j], list[i]))
+			else if ( ComparisonList::compare_by_items(matched[j], list[i]))
 			{
 				list.insert(matched[j]);
 				QStringList labels;
@@ -525,17 +526,20 @@ void DirDiffForm::file_list_changed(
 				++j;
 				++i;
 			}
-			else ++i, ++j;
+			else
+			{
+				++i, ++j;
+			}
 		}
 
-		while (i < n)
+		while ( i < n )
 		{
 			list.erase(i);
 			--n;
 			ui->multilistview->removeItem(i);
 		}
 
-		while (j < m)
+		while ( j < m )
 		{
 			list.insert(matched[j]);
 			QStringList labels;
@@ -624,12 +628,12 @@ std::pair< bool, DirDiffForm::overwrite_t > DirDiffForm::copyTo(
 
 void DirDiffForm::stopDirectoryWatcher()
 {
-    watcher->removePaths(watched_dirs);
+	watcher->removePaths(watched_dirs);
 }
 
 void DirDiffForm::startDirectoryWatcher()
 {
-    watcher->addPaths(watched_dirs);
+	watcher->addPaths(watched_dirs);
 }
 
 // File system has notified us of a change in one of our directories
@@ -935,7 +939,10 @@ void DirDiffForm::showSame(bool checked)
 	applyFilters();
 }
 
-void DirDiffForm::show_only_section(std::size_t i, bool checked)
+void DirDiffForm::show_only_section(
+	std::size_t i,
+	bool        checked
+)
 {
 	hide_section_only[i] = !checked;
 	applyFilters();
@@ -1140,4 +1147,3 @@ void DirDiffForm::populate_filters()
 		ui->filter->addItem(it.key() + " (" + it.value() + ")", it.value());
 	}
 }
-

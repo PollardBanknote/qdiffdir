@@ -3,10 +3,10 @@
 #include <algorithm>
 
 void ComparisonList::rematch_section(
-        std::size_t                  j,
-        const DirectoryContents&               r,
-        const std::string&           prefix
-        )
+	std::size_t              j,
+	const DirectoryContents& r,
+	const std::string&       prefix
+)
 {
 	// Recursively apply to subdirectories
 	for ( std::size_t i = 0, n = r.dircount(); i < n; ++i )
@@ -21,13 +21,14 @@ void ComparisonList::rematch_section(
 		c.items[j] = prefix + r.filename(i);
 		list.push_back(c);
 	}
+
 	std::sort(list.begin(), list.end(), compare_by_items);
 }
 
 void ComparisonList::rematch(
-    const DirectoryContents&               l,
-    const DirectoryContents&               r,
-    const std::string&           prefix
+	const DirectoryContents& l,
+	const DirectoryContents& r,
+	const std::string&       prefix
 )
 {
 	if ( l.valid() && r.valid())
@@ -44,11 +45,10 @@ void ComparisonList::rematch(
 	}
 }
 
-
 void ComparisonList::rematch_inner(
-    const DirectoryContents&               l,
-    const DirectoryContents&               r,
-    const std::string&           prefix
+	const DirectoryContents& l,
+	const DirectoryContents& r,
+	const std::string&       prefix
 )
 {
 	// Recursively apply to subdirectories
@@ -61,6 +61,7 @@ void ComparisonList::rematch_inner(
 		{
 			const DirectoryContents& ldir = l.subdir(il);
 			const DirectoryContents& rdir = r.subdir(ir);
+
 			if ( ldir.name() == rdir.name() )
 			{
 				rematch(ldir, rdir, prefix + ldir.name() + "/");
@@ -105,13 +106,13 @@ void ComparisonList::rematch_inner(
 
 	for (; il < nl && ir < nr;)
 	{
-		comparison_t c = { std::string(), std::string(), NOT_COMPARED, false };
+		comparison_t       c     = { std::string(), std::string(), NOT_COMPARED, false };
 		const std::string& lname = l.filename(il);
 		const std::string& rname = r.filename(ir);
 
 		if ( lname == rname )
 		{
-			c.items[0]  = prefix + lname;
+			c.items[0] = prefix + lname;
 			c.items[1] = prefix + rname;
 			++il;
 			++ir;
@@ -192,8 +193,8 @@ void ComparisonList::rematch_inner(
 }
 
 bool ComparisonList::compare_by_items(
-    const comparison_t& a,
-    const comparison_t& b
+	const comparison_t& a,
+	const comparison_t& b
 )
 {
 	const std::string l  = a.items[0].empty() ? a.items[1] : a.items[0];
@@ -255,10 +256,14 @@ bool ComparisonList::compare_by_items(
 	}
 }
 
-std::pair<ComparisonList::iterator, bool >ComparisonList::insert(const comparison_t& x)
+std::pair< ComparisonList::iterator, bool > ComparisonList::insert(const comparison_t& x)
 {
 	std::vector< comparison_t >::iterator it = std::lower_bound(list.begin(), list.end(), x, compare_by_items);
-	if (it != list.end() && !compare_by_items(x, *it))
+
+	if ( it != list.end() && !compare_by_items(x, *it))
+	{
 		return std::pair< iterator, bool >(it, false);
+	}
+
 	return std::pair< iterator, bool >(list.insert(it, x), true);
 }
