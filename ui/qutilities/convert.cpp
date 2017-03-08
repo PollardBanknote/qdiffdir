@@ -46,7 +46,7 @@ std::list< std::string > convert(const QStringList& l)
 
 	for ( int i = 0; i < l.count(); ++i )
 	{
-		r.push_back(convert(l.at(i)));
+		r.push_back( convert( l.at(i) ) );
 	}
 
 	return r;

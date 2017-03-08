@@ -33,7 +33,8 @@
 #include <QString>
 #include <QByteArray>
 
-class FileCompare : public QObject
+class FileCompare
+	: public QObject
 {
 	Q_OBJECT
 public slots:

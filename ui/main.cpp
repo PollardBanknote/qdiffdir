@@ -40,7 +40,7 @@ std::string make_absolute(
 	const std::string& cwd
 )
 {
-	if ( !s.empty())
+	if ( !s.empty() )
 	{
 		if ( s[0] != '/' )
 		{
@@ -77,7 +77,7 @@ int main(
 	{
 		if ( no_more_switches )
 		{
-			filenames.push_back(make_absolute(argv[i], cwd));
+			filenames.push_back( make_absolute(argv[i], cwd) );
 		}
 		else
 		{
@@ -115,9 +115,9 @@ int main(
 			{
 				no_more_switches = true;
 			}
-			else if ( !( s.find("--") == 0 ))
+			else if ( !( s.find("--") == 0 ) )
 			{
-				filenames.push_back(make_absolute(s, cwd));
+				filenames.push_back( make_absolute(s, cwd) );
 			}
 		}
 	}

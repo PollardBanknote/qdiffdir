@@ -30,7 +30,7 @@
 
 #include <cstring>
 
-#if !defined( _WIN32 ) && ( defined( __unix__ ) || defined( __unix ) || ( defined( __APPLE__ ) && defined( __MACH__ )))
+#if !defined( _WIN32 ) && ( defined( __unix__ ) || defined( __unix ) || ( defined( __APPLE__ ) && defined( __MACH__ )  ) )
 #include <unistd.h>
 #if defined( _POSIX_VERSION )
 #include <sys/types.h>
@@ -111,7 +111,7 @@ int compare_fd(
 	while ( true )
 	{
 		// read from each file
-		if ( !eof1 && size1 < sizeof( buf1 ))
+		if ( !eof1 && size1 < sizeof( buf1 ) )
 		{
 			const ssize_t n1 = ::read(fd1, buf1 + size1, sizeof( buf1 ) - size1);
 
@@ -128,7 +128,7 @@ int compare_fd(
 			size1 += n1;
 		}
 
-		if ( !eof2 && size2 < sizeof( buf2 ))
+		if ( !eof2 && size2 < sizeof( buf2 ) )
 		{
 			const ssize_t n2 = ::read(fd2, buf2 + size2, sizeof( buf2 ) - size2);
 
@@ -177,7 +177,7 @@ int compare_fd(
 			size2 -= m;
 
 			// files have different size
-			if (( eof1 && size2 != 0 ) || ( eof2 && size1 != 0 ))
+			if ( ( eof1 && size2 != 0 ) || ( eof2 && size1 != 0 ) )
 			{
 				return 0;
 			}

@@ -41,17 +41,17 @@ int FileNameMatcher::compare(
 		return 0;
 	}
 
-	if ( gzalt(a, b))
+	if ( gzalt(a, b) )
 	{
 		return 1;
 	}
 
-	if ( a == cppalt(b))
+	if ( a == cppalt(b) )
 	{
 		return 2;
 	}
 
-	if ( a == cgalt(b))
+	if ( a == cgalt(b) )
 	{
 		return 3;
 	}
@@ -93,14 +93,14 @@ bool FileNameMatcher::gzalt(
 
 std::string FileNameMatcher::cppalt(const std::string& s)
 {
-	if ( pbl::ends_with(s, ".cpp"))
+	if ( pbl::ends_with(s, ".cpp") )
 	{
 		std::string t(s, 0, s.length() - 2);
 
 		return t;
 	}
 
-	if ( pbl::ends_with(s, ".c"))
+	if ( pbl::ends_with(s, ".c") )
 	{
 		return s + "pp";
 	}
@@ -110,26 +110,26 @@ std::string FileNameMatcher::cppalt(const std::string& s)
 
 std::string FileNameMatcher::cgalt(const std::string& s)
 {
-	if ( pbl::ends_with(s, ".cpp"))
+	if ( pbl::ends_with(s, ".cpp") )
 	{
 		std::string t(s, 0, s.length() - 2);
 
 		return t + ".gz";
 	}
 
-	if ( pbl::ends_with(s, ".c"))
+	if ( pbl::ends_with(s, ".c") )
 	{
 		return s + "pp.gz";
 	}
 
-	if ( pbl::ends_with(s, ".c.gz"))
+	if ( pbl::ends_with(s, ".c.gz") )
 	{
 		std::string t(s, 0, s.length() - 3);
 
 		return t + "pp";
 	}
 
-	if ( pbl::ends_with(s, ".cpp.gz"))
+	if ( pbl::ends_with(s, ".cpp.gz") )
 	{
 		std::string t(s, 0, s.length() - 5);
 

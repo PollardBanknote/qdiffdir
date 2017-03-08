@@ -40,7 +40,7 @@ std::string getpath()
 {
 	std::string s;
 
-	if ( const char* path = std::getenv("PATH"))
+	if ( const char* path = std::getenv("PATH") )
 	{
 		s = path;
 	}
@@ -59,9 +59,9 @@ std::string myrealpath(const std::string& path)
 	std::string s;
 
 	// relative path
-	#if (( defined( _POSIX_VERSION ) && _POSIX_VERSION >= 200809l ) || defined( __GLIBC__ ))
+	#if ( ( defined( _POSIX_VERSION ) && _POSIX_VERSION >= 200809l ) || defined( __GLIBC__ ) )
 
-	if ( char* res = ::realpath(path.c_str(), NULL))
+	if ( char* res = ::realpath(path.c_str(), NULL) )
 	{
 		s = res;
 		::free(res);
@@ -86,7 +86,7 @@ std::string which(const std::string& filename)
 		if ( filename[0] == '/' )
 		{
 			// absolute path
-			if ( is_executable(filename))
+			if ( is_executable(filename) )
 			{
 				return filename;
 			}
@@ -95,13 +95,13 @@ std::string which(const std::string& filename)
 		{
 			std::string abs = myrealpath(filename);
 
-			if ( is_executable(abs))
+			if ( is_executable(abs) )
 			{
 				return abs;
 			}
 		}
 	}
-	else if ( !filename.empty())
+	else if ( !filename.empty() )
 	{
 		/// @todo Provide an iterator over the parts of the string
 		const std::string path = getpath();
@@ -126,7 +126,7 @@ std::string which(const std::string& filename)
 
 			const std::string full = prefix + "/" + filename;
 
-			if ( is_executable(full))
+			if ( is_executable(full) )
 			{
 				return full;
 			}
@@ -139,7 +139,7 @@ std::string which(const std::string& filename)
 		{
 			const std::string full = "./" + filename;
 
-			if ( is_executable(full))
+			if ( is_executable(full) )
 			{
 				return full;
 			}

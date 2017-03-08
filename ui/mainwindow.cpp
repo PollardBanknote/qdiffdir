@@ -36,14 +36,15 @@ MainWindow::MainWindow(
 	bool                              show_left_only,
 	bool                              show_right_only,
 	bool                              show_identical
-) : QMainWindow(0), ui(new Ui::MainWindow)
+)
+	: QMainWindow(0), ui(new Ui::MainWindow)
 {
 	ui->setupUi(this);
 	ui->widget->setFlags(show_left_only, show_right_only, show_identical);
 
 	if ( dirnames.size() == 1 )
 	{
-		ui->widget->changeDirectories(dirnames[0], std::string());
+		ui->widget->changeDirectories( dirnames[0], std::string() );
 	}
 	else if ( dirnames.size() > 1 )
 	{

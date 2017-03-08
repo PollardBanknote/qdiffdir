@@ -33,7 +33,7 @@
 QIcon get_icon(const QString& name)
 {
 	// hopefully we have the free desktop icon
-	if ( QIcon::hasThemeIcon(name))
+	if ( QIcon::hasThemeIcon(name) )
 	{
 		return QIcon::fromTheme(name);
 	}

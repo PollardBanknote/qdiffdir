@@ -39,7 +39,8 @@ class QListWidgetItem;
  * @todo Use QListView-s or QTreeView-s
  * @todo Share selection model so we don't have to manually copy selections
  */
-class MultiList : public QWidget
+class MultiList
+	: public QWidget
 {
 	Q_OBJECT
 public:

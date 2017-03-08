@@ -59,15 +59,15 @@ void ComparisonList::rematch(
 	const std::string&       prefix
 )
 {
-	if ( l.valid() && r.valid())
+	if ( l.valid() && r.valid() )
 	{
 		rematch_inner(l, r, prefix);
 	}
-	else if ( l.valid())
+	else if ( l.valid() )
 	{
 		rematch_section(0, l, "");
 	}
-	else if ( r.valid())
+	else if ( r.valid() )
 	{
 		rematch_section(1, r, "");
 	}
@@ -178,7 +178,7 @@ void ComparisonList::rematch_inner(
 	for ( std::size_t i = 0, n = matched_files.size(); i < n; ++i )
 	{
 		// Unmatched left item
-		if ( matched_files[i].items[1].empty())
+		if ( matched_files[i].items[1].empty() )
 		{
 			// Find the best match
 			std::size_t ibest = 0;
@@ -186,7 +186,7 @@ void ComparisonList::rematch_inner(
 
 			for ( std::size_t j = 0; j < n; ++j )
 			{
-				if ( matched_files[j].items[0].empty())
+				if ( matched_files[j].items[0].empty() )
 				{
 					const int x = matcher.compare(matched_files[i].items[0], matched_files[j].items[1]);
 
@@ -216,7 +216,7 @@ void ComparisonList::rematch_inner(
 		}
 	}
 
-	list.insert(list.end(), matched_files.begin(), matched_files.end());
+	list.insert( list.end(), matched_files.begin(), matched_files.end() );
 	std::sort(list.begin(), list.end(), compare_by_items);
 }
 
@@ -288,7 +288,7 @@ std::pair< ComparisonList::iterator, bool > ComparisonList::insert(const compari
 {
 	std::vector< comparison_t >::iterator it = std::lower_bound(list.begin(), list.end(), x, compare_by_items);
 
-	if ( it != list.end() && !compare_by_items(x, *it))
+	if ( it != list.end() && !compare_by_items(x, *it) )
 	{
 		return std::pair< iterator, bool >(it, false);
 	}

@@ -41,7 +41,8 @@ class MainWindow;
  * Basically loads the widget and sets them to point at the appropriate
  * directories
  */
-class MainWindow : public QMainWindow
+class MainWindow
+	: public QMainWindow
 {
 	Q_OBJECT
 public:

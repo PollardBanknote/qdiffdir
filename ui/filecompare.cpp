@@ -43,17 +43,17 @@ void FileCompare::compare(
 	bool res;
 
 	/// @todo Support different archive types (ex., bz2)
-	if ( first.endsWith(".gz") || second.endsWith(".gz"))
+	if ( first.endsWith(".gz") || second.endsWith(".gz") )
 	{
 		/// @todo use popen and compare streams
-		const QByteArray data1 = gunzip(first.toStdString());
-		const QByteArray data2 = gunzip(second.toStdString());
+		const QByteArray data1 = gunzip( first.toStdString() );
+		const QByteArray data2 = gunzip( second.toStdString() );
 
 		res = ( data1 == data2 );
 	}
 	else
 	{
-		res = ( pbl::fs::compare(first.toStdString(), second.toStdString()) == 1 );
+		res = ( pbl::fs::compare( first.toStdString(), second.toStdString() ) == 1 );
 	}
 
 	emit compared(first, second, res);
@@ -61,7 +61,7 @@ void FileCompare::compare(
 
 QByteArray FileCompare::gunzip(const std::string& filename)
 {
-	if ( pbl::ends_with(filename, ".gz"))
+	if ( pbl::ends_with(filename, ".gz") )
 	{
 		QStringList l;
 		l << "-c" << qt::convert(filename);
@@ -69,7 +69,7 @@ QByteArray FileCompare::gunzip(const std::string& filename)
 		QProcess gz;
 		gz.start("gunzip", l);
 
-		if ( !gz.waitForFinished())
+		if ( !gz.waitForFinished() )
 		{
 			return QByteArray();
 		}
@@ -78,9 +78,9 @@ QByteArray FileCompare::gunzip(const std::string& filename)
 	}
 	else
 	{
-		QFile file(qt::convert(filename));
+		QFile file( qt::convert(filename) );
 
-		if ( !file.open(QIODevice::ReadOnly))
+		if ( !file.open(QIODevice::ReadOnly) )
 		{
 			return QByteArray();
 		}

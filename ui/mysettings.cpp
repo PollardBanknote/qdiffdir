@@ -70,7 +70,7 @@ QMap< QString, QString > MySettings::getFilters() const
 
 	for ( QMap< QString, QVariant >::const_iterator it = v.constBegin(); it != v.constEnd(); ++it )
 	{
-		m.insert(it.key(), it.value().toString());
+		m.insert( it.key(), it.value().toString() );
 	}
 
 	return m;
@@ -82,7 +82,7 @@ void MySettings::setFilters(const QMap< QString, QString >& m)
 
 	for ( QMap< QString, QString >::const_iterator it = m.constBegin(); it != m.constEnd(); ++it )
 	{
-		v.insert(it.key(), it.value());
+		v.insert( it.key(), it.value() );
 	}
 
 	store->setValue(filters_key, v);
@@ -103,7 +103,7 @@ void MySettings::setValue(
 	const QString& value
 )
 {
-	if ( value.isEmpty())
+	if ( value.isEmpty() )
 	{
 		store->remove(key);
 	}
