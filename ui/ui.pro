@@ -8,7 +8,8 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = ui
+TARGET = qdiffdir
+DESTDIR = ../
 TEMPLATE = app
 
 QMAKE_CXXFLAGS = -pipe
