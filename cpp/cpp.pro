@@ -28,7 +28,6 @@ SOURCES += \
 
 HEADERS += \
     filesystem.h \
-    os.h \
     version.h \
     fs/absolute.h \
     fs/basename.h \
@@ -43,7 +42,8 @@ HEADERS += \
     fs/path.h \
     fs/perms.h \
     fs/remove.h \
-    fs/tempdir.h
+    fs/tempdir.h \
+    config/os.h
 unix {
     target.path = /usr/lib
     INSTALLS += target

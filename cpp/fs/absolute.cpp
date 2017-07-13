@@ -31,7 +31,7 @@
 #include <climits>
 #include <cstdlib>
 
-#include "../os.h"
+#include "../config/os.h"
 
 namespace cpp17
 {
@@ -40,7 +40,7 @@ namespace filesystem
 
 path absolute(const path& filename)
 {
-	if ( !filename.empty())
+	if ( !filename.empty() )
 	{
 		#if (( defined( _POSIX_VERSION ) && _POSIX_VERSION >= 200809l ) || defined( __GLIBC__ ))
 		// Preferred - POSIX-2008 and glibc will allocate the path buffer
