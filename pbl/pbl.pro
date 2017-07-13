@@ -29,7 +29,8 @@ HEADERS += \
     process/detach.h \
     util/strings.h \
     fileutil/compare.h \
-    process/which.h
+    process/which.h \
+    config/os.h
 
 unix {
     target.path = /usr/lib

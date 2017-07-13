@@ -43,7 +43,8 @@ HEADERS += \
     fs/perms.h \
     fs/remove.h \
     fs/tempdir.h \
-    config/os.h
+    config/os.h \
+    cstdlib.h
 unix {
     target.path = /usr/lib
     INSTALLS += target

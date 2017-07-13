@@ -1,4 +1,4 @@
-/* Copyright (c) 2015, Pollard Banknote Limited
+/* Copyright (c) 2016, Pollard Banknote Limited
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without modification,
@@ -26,29 +26,25 @@
    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef PBL_PROCESS_DETACH_H
-#define PBL_PROCESS_DETACH_H
+#ifndef PBL_CPP_CSTDLIB_H
+#define PBL_CPP_CSTDLIB_H
 
-namespace pbl
+#include <cstdlib>
+
+#include "version.h"
+#ifndef CPP11
+namespace cpp11
 {
-namespace process
+#if _XOPEN_SOURCE >= 600 || _ISOC99_SOURCE || _POSIX_C_SOURCE >= 200112L
+void _Exit(int code) __attribute__( ( noreturn ) );
+
+inline void _Exit(int code)
 {
-
-/** @brief Try to detach from terminal
- *
- * This function tries to achieve two effects: allow the calling process to
- * continue, and allow this process to continue to run if the calling process
- * ends. In particular, on *nix, the program will not block the terminal and
- * will continue to run if the terminal closes.
- *
- * This function may (silently) fail.
- *
- * @note On *nix this function results in a new process ID, and stdin/out/err
- * will be closed.
- */
-void detach();
-
-}
+	::_Exit(code);
 }
 
-#endif // PBL_PROCESS_DETACH_H
+#endif
+}
+#endif
+
+#endif // PBL_CPP_CSTDLIB_H

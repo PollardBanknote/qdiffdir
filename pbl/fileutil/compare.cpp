@@ -30,7 +30,7 @@
 
 #include <cstring>
 
-#if !defined( _WIN32 ) && ( defined( __unix__ ) || defined( __unix ) || ( defined( __APPLE__ ) && defined( __MACH__ )))
+#if !defined( _WIN32 ) && ( defined( __unix__ ) || defined( __unix ) || ( defined( __APPLE__ ) && defined( __MACH__ )  ) )
 #include <unistd.h>
 #if defined( _POSIX_VERSION )
 #include <sys/types.h>
@@ -45,8 +45,8 @@ namespace fs
 {
 int compare(
 	const std::string& first,
-    const std::string& second,
-    long long sizelimit
+	const std::string& second,
+	long long          sizelimit
 )
 {
 	const int fd1 = ::open(first.c_str(), O_RDONLY);
@@ -71,9 +71,9 @@ int compare(
 }
 
 int compare_fd(
-	int fd1,
-    int fd2,
-    long long sizelimit
+	int       fd1,
+	int       fd2,
+	long long sizelimit
 )
 {
 	if ( fd1 == -1 || fd2 == -1 )
@@ -104,8 +104,10 @@ int compare_fd(
 			}
 		}
 
-		if (sizelimit != 0 && ((res1 && s1.st_size > sizelimit) || (res2 && s2.st_size > sizelimit)))
+		if ( sizelimit != 0 && ( ( res1 && s1.st_size > sizelimit ) || ( res2 && s2.st_size > sizelimit ) ) )
+		{
 			return -1;
+		}
 	}
 
 	// Start reading buffers
@@ -121,7 +123,7 @@ int compare_fd(
 	while ( true )
 	{
 		// read from each file
-		if ( !eof1 && size1 < sizeof( buf1 ))
+		if ( !eof1 && size1 < sizeof( buf1 ) )
 		{
 			const ssize_t n1 = ::read(fd1, buf1 + size1, sizeof( buf1 ) - size1);
 
@@ -138,7 +140,7 @@ int compare_fd(
 			size1 += n1;
 		}
 
-		if ( !eof2 && size2 < sizeof( buf2 ))
+		if ( !eof2 && size2 < sizeof( buf2 ) )
 		{
 			const ssize_t n2 = ::read(fd2, buf2 + size2, sizeof( buf2 ) - size2);
 
@@ -187,7 +189,7 @@ int compare_fd(
 			size2 -= m;
 
 			// files have different size
-			if (( eof1 && size2 != 0 ) || ( eof2 && size1 != 0 ))
+			if ( ( eof1 && size2 != 0 ) || ( eof2 && size1 != 0 ) )
 			{
 				return 0;
 			}
