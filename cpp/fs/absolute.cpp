@@ -57,7 +57,7 @@ path absolute(const path& filename)
 		#else
 		#ifdef _GNU_SOURCE
 		// Maybe we can rely on the GNU extension
-		char* res = ::canonicalize_file_name(filename.c_str());
+		char* res = ::canonicalize_file_name( filename.c_str() );
 
 		if ( res )
 		{
