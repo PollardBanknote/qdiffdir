@@ -24,7 +24,8 @@ SOURCES += \
     util/strings.cpp \
     fileutil/compare.cpp \
     process/which.cpp \
-    fileutil/directorycontents.cpp
+    fileutil/directorycontents.cpp \
+    fileutil/reduce_paths.cpp
 
 HEADERS += \
     process/detach.h \
@@ -33,7 +34,8 @@ HEADERS += \
     process/which.h \
     config/os.h \
     fileutil/directorycontents.h \
-    util/return_code.h
+    util/return_code.h \
+    fileutil/reduce_paths.h
 
 unix {
     target.path = /usr/lib

@@ -48,6 +48,7 @@
 #include "cpp/filesystem.h"
 
 #include "pbl/fileutil/compare.h"
+#include "pbl/fileutil/reduce_paths.h"
 #include "pbl/util/strings.h"
 #include "pbl/process/which.h"
 
@@ -455,21 +456,6 @@ QStringList DirDiffForm::find_subdirs(
 	return r;
 }
 
-void replace_intermediate_paths(std::string& s)
-{
-	const std::size_t i = s.find_first_of('/');
-
-	if ( i != std::string::npos )
-	{
-		const std::size_t j = s.find_last_of('/');
-
-		if ( j > i )
-		{
-			s.replace(i + 1, j - i - 1, "..");
-		}
-	}
-}
-
 void DirDiffForm::file_list_changed(
 	int  depth,
 	bool rootchanged
@@ -498,40 +484,11 @@ void DirDiffForm::file_list_changed(
 	}
 	else
 	{
+		const std::pair< std::string, std::string > p = pbl::fs::reduce_paths(section_tree[0].name(), section_tree[1].name());
+
 		// Prefer to use just the directory name
-		std::string l = cpp::filesystem::basename(section_tree[0].name());
-		std::string r = cpp::filesystem::basename(section_tree[1].name());
-
-		if ( l == r )
-		{
-			l = section_tree[0].name();
-			r = section_tree[1].name();
-
-			// Find common ancestor
-			std::size_t       i = 0;
-			const std::size_t n = std::min(l.length(), r.length());
-
-			while ( i < n && l[i] == r[i] )
-			{
-				++i;
-			}
-
-			while ( i > 0 && l[i - 1] != '/' )
-			{
-				--i;
-			}
-
-			// Erase common ancestor
-			l.erase(0, i);
-			r.erase(0, i);
-
-			// Remove intermediate directories
-			replace_intermediate_paths(l);
-			replace_intermediate_paths(r);
-		}
-
-		ui->openleftdir->setText(qt::convert(l));
-		ui->openrightdir->setText(qt::convert(r));
+		ui->openleftdir->setText(qt::convert(p.first));
+		ui->openrightdir->setText(qt::convert(p.second));
 	}
 
 	// Rematch files
