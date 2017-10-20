@@ -28,6 +28,8 @@
  */
 #include "filecompare.h"
 
+#include <cstdio>
+
 #include <QProcess>
 #include <QFile>
 
@@ -41,21 +43,45 @@ void FileCompare::compare(
     long long filesizelimit // in megabytes
 )
 {
-	bool res;
+	std::FILE* file1;
+	bool is_process1 = false;
 
-	/// @todo Support different archive types (ex., bz2)
-	if ( first.endsWith(".gz") || second.endsWith(".gz"))
 	{
-		/// @todo use popen and compare streams
-		const QByteArray data1 = gunzip(first.toStdString());
-		const QByteArray data2 = gunzip(second.toStdString());
-
-		res = ( data1 == data2 );
+		const std::string p = qt::convert(first);
+		if (first.endsWith(".gz"))
+		{
+			const std::string cmd = "gunzip -c " + p;
+			file1 = ::popen(cmd.c_str(), "r");
+			is_process1 = true;
+		}
+		else file1 = std::fopen(p.c_str(), "rb");
 	}
+
+	std::FILE* file2;
+	bool is_process2 = false;
+
+	{
+		const std::string p = qt::convert(second);
+		if (second.endsWith(".gz"))
+		{
+			const std::string cmd = "gunzip -c " + p;
+			file2 = ::popen(cmd.c_str(), "r");
+			is_process2 = true;
+		}
+		else file2 = std::fopen(p.c_str(), "rb");
+	}
+
+	const bool res = ( pbl::fs::compare(file1, file2, filesizelimit * 1024 * 1024) == pbl::fs::compare_equal );
+
+	if (is_process1)
+		::pclose(file1);
 	else
-	{
-		res = ( pbl::fs::compare(first.toStdString(), second.toStdString(), filesizelimit * 1024 * 1024) == pbl::fs::compare_equal );
-	}
+		std::fclose(file1);
+
+	if (is_process2)
+		::pclose(file2);
+	else
+		std::fclose(file2);
 
 	emit compared(first, second, res);
 }

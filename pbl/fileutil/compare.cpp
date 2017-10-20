@@ -71,6 +71,9 @@ compare_result compare(
 	long long sizelimit
 )
 {
+	if (!file1 || !file2)
+		return compare_error;
+
 	{
 		/* Check if the files are obviously the same or different. Ex., because
 		 * of file size or hardlinks.
@@ -89,7 +92,7 @@ compare_result compare(
 			if ( res1 && res2 )
 			{
 				// files of different size are obviously different
-				if ( s1.st_size != s2.st_size )
+				if ( S_ISREG(s1.st_mode) && S_ISREG(s2.st_mode) && (s1.st_size != s2.st_size ))
 				{
 					return compare_notequal;
 				}
@@ -103,7 +106,7 @@ compare_result compare(
 			}
 
 			// Don't check files that are larger than the size limit
-			if ( sizelimit != 0 && ( ( res1 && s1.st_size > sizelimit ) || ( res2 && s2.st_size > sizelimit ) ) )
+			if ( sizelimit != 0 && ( ( res1 && S_ISREG(s1.st_mode) && s1.st_size > sizelimit ) || ( res2 && S_ISREG(s2.st_mode) && s2.st_size > sizelimit ) ) )
 			{
 				return compare_error;
 			}
