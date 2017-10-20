@@ -49,64 +49,64 @@ int compare(
 	long long          sizelimit
 )
 {
-	const int fd1 = ::open(first.c_str(), O_RDONLY);
-
 	int res = -1;
 
-	if ( fd1 != -1 )
+	if (FILE* fd1 = std::fopen(first.c_str(), "rb"))
 	{
-		const int fd2 = ::open(second.c_str(), O_RDONLY);
-
-		if ( fd2 != -1 )
+		if (FILE* fd2 = std::fopen(second.c_str(), "rb"))
 		{
-			res = compare_fd(fd1, fd2, sizelimit);
+			res = compare(fd1, fd2, sizelimit);
 
-			::close(fd2);
+			std::fclose(fd2);
 		}
-
-		::close(fd1);
+		std::fclose(fd1);
 	}
 
 	return res;
 }
 
-int compare_fd(
-	int       fd1,
-	int       fd2,
+int compare(
+    FILE*       file1,
+    FILE*       file2,
 	long long sizelimit
 )
 {
-	if ( fd1 == -1 || fd2 == -1 )
 	{
-		return -1;
-	}
+		/* Check if the files are obviously the same or different. Ex., because
+		 * of file size or hardlinks.
+		 */
+		int fd1 = fileno(file1);
+		int fd2 = fileno(file2);
 
-	{
-		struct stat s1;
-		struct stat s2;
-
-		const bool res1 = ::fstat(fd1, &s1) == 0;
-		const bool res2 = ::fstat(fd2, &s2) == 0;
-
-		if ( res1 && res2 )
+		if (fd1 != -1 && fd2 != -1)
 		{
-			// files of different size are obviously different
-			if ( s1.st_size != s2.st_size )
+			struct stat s1;
+			struct stat s2;
+
+			const bool res1 = ::fstat(fd1, &s1) == 0;
+			const bool res2 = ::fstat(fd2, &s2) == 0;
+
+			if ( res1 && res2 )
 			{
-				return 0;
+				// files of different size are obviously different
+				if ( s1.st_size != s2.st_size )
+				{
+					return 0;
+				}
+
+				// files with the same dev/inode are obviously the same and don't need to
+				// be compared
+				if ( s1.st_ino == s2.st_ino && s1.st_dev == s2.st_dev )
+				{
+					return 1;
+				}
 			}
 
-			// files with the same dev/inode are obviously the same and don't need to
-			// be compared
-			if ( s1.st_ino == s2.st_ino && s1.st_dev == s2.st_dev )
+			// Don't check files that are larger than the size limit
+			if ( sizelimit != 0 && ( ( res1 && s1.st_size > sizelimit ) || ( res2 && s2.st_size > sizelimit ) ) )
 			{
-				return 1;
+				return -1;
 			}
-		}
-
-		if ( sizelimit != 0 && ( ( res1 && s1.st_size > sizelimit ) || ( res2 && s2.st_size > sizelimit ) ) )
-		{
-			return -1;
 		}
 	}
 
@@ -125,15 +125,18 @@ int compare_fd(
 		// read from each file
 		if ( !eof1 && size1 < sizeof( buf1 ) )
 		{
-			const ssize_t n1 = ::read(fd1, buf1 + size1, sizeof( buf1 ) - size1);
+			const std::size_t m1 = sizeof( buf1 ) - size1;
+			const std::size_t n1 = std::fread(buf1 + size1, 1, m1, file1);
 
-			if ( n1 == -1 )
+			if (n1 < m1)
 			{
-				return -1;
-			}
+				// eof or error
+				if (std::ferror(file1))
+				{
+					return -1;
+				}
 
-			if ( n1 == 0 )
-			{
+				// must be end of file, then
 				eof1 = true;
 			}
 
@@ -142,15 +145,18 @@ int compare_fd(
 
 		if ( !eof2 && size2 < sizeof( buf2 ) )
 		{
-			const ssize_t n2 = ::read(fd2, buf2 + size2, sizeof( buf2 ) - size2);
+			const std::size_t m2 = sizeof( buf2 ) - size2;
+			const std::size_t n2 = std::fread(buf2 + size2, 1, m2, file2);
 
-			if ( n2 == -1 )
+			if (n2 < m2)
 			{
-				return -1;
-			}
+				// eof or error
+				if (std::ferror(file2))
+				{
+					return -1;
+				}
 
-			if ( n2 == 0 )
-			{
+				// must be end of file, then
 				eof2 = true;
 			}
 
