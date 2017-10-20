@@ -28,8 +28,7 @@ SOURCES += main.cpp\
     multilist.cpp \
     filenamematcher.cpp \
     filecompare.cpp \
-    comparisonlist.cpp \
-    directorycontents.cpp
+    comparisonlist.cpp
 
 HEADERS  += mainwindow.h \
     dirdiffform.h \
@@ -40,8 +39,7 @@ HEADERS  += mainwindow.h \
     matcher.h \
     filenamematcher.h \
     filecompare.h \
-    comparisonlist.h \
-    directorycontents.h
+    comparisonlist.h
 
 FORMS    += mainwindow.ui \
     dirdiffform.ui \

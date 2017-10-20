@@ -23,14 +23,16 @@ SOURCES += \
     process/detach.cpp \
     util/strings.cpp \
     fileutil/compare.cpp \
-    process/which.cpp
+    process/which.cpp \
+    fileutil/directorycontents.cpp
 
 HEADERS += \
     process/detach.h \
     util/strings.h \
     fileutil/compare.h \
     process/which.h \
-    config/os.h
+    config/os.h \
+    fileutil/directorycontents.h
 
 unix {
     target.path = /usr/lib

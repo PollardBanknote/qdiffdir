@@ -32,8 +32,9 @@
 #include <string>
 #include <vector>
 
+#include "pbl/fileutil/directorycontents.h"
+
 #include "filenamematcher.h"
-#include "directorycontents.h"
 
 enum compare_result_t {NOT_COMPARED, COMPARED_SAME, COMPARED_DIFFERENT};
 
