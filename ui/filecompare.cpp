@@ -54,7 +54,7 @@ void FileCompare::compare(
 	}
 	else
 	{
-		res = ( pbl::fs::compare(first.toStdString(), second.toStdString(), filesizelimit * 1024 * 1024) == 1 );
+		res = ( pbl::fs::compare(first.toStdString(), second.toStdString(), filesizelimit * 1024 * 1024) == pbl::fs::compare_equal );
 	}
 
 	emit compared(first, second, res);

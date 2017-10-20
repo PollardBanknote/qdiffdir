@@ -32,7 +32,8 @@ HEADERS += \
     fileutil/compare.h \
     process/which.h \
     config/os.h \
-    fileutil/directorycontents.h
+    fileutil/directorycontents.h \
+    util/return_code.h
 
 unix {
     target.path = /usr/lib

@@ -43,13 +43,13 @@ namespace pbl
 {
 namespace fs
 {
-int compare(
+compare_result compare(
 	const std::string& first,
 	const std::string& second,
 	long long          sizelimit
 )
 {
-	int res = -1;
+	compare_result res(compare_error);
 
 	if (std::FILE* fd1 = std::fopen(first.c_str(), "rb"))
 	{
@@ -65,7 +65,7 @@ int compare(
 	return res;
 }
 
-int compare(
+compare_result compare(
     std::FILE*       file1,
     std::FILE*       file2,
 	long long sizelimit
@@ -91,21 +91,21 @@ int compare(
 				// files of different size are obviously different
 				if ( s1.st_size != s2.st_size )
 				{
-					return 0;
+					return compare_result(compare_notequal);
 				}
 
 				// files with the same dev/inode are obviously the same and don't need to
 				// be compared
 				if ( s1.st_ino == s2.st_ino && s1.st_dev == s2.st_dev )
 				{
-					return 1;
+					return compare_result(compare_equal);
 				}
 			}
 
 			// Don't check files that are larger than the size limit
 			if ( sizelimit != 0 && ( ( res1 && s1.st_size > sizelimit ) || ( res2 && s2.st_size > sizelimit ) ) )
 			{
-				return -1;
+				return compare_result(compare_error);
 			}
 		}
 	}
@@ -133,7 +133,7 @@ int compare(
 				// eof or error
 				if (std::ferror(file1))
 				{
-					return -1;
+					return compare_result(compare_error);
 				}
 
 				// must be end of file, then
@@ -153,7 +153,7 @@ int compare(
 				// eof or error
 				if (std::ferror(file2))
 				{
-					return -1;
+					return compare_result(compare_error);
 				}
 
 				// must be end of file, then
@@ -169,14 +169,14 @@ int compare(
 		// files are different
 		if ( std::memcmp(buf1, buf2, m) != 0 )
 		{
-			return 0;
+			return compare_result(compare_notequal);
 		}
 		else
 		{
 			// files are the same
 			if ( eof1 && eof2 )
 			{
-				return 1;
+				return compare_result(compare_equal);
 			}
 
 			// files are the same so far... save the data
@@ -197,12 +197,12 @@ int compare(
 			// files have different size
 			if ( ( eof1 && size2 != 0 ) || ( eof2 && size1 != 0 ) )
 			{
-				return 0;
+				return compare_result(compare_notequal);
 			}
 		}
 	}
 
-	return -1;
+	return compare_result(compare_error);
 }
 
 }
