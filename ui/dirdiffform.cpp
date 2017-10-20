@@ -58,25 +58,6 @@
 #include "matcher.h"
 #include "mysettings.h"
 
-class FileSystem
-{
-public:
-	static bool exists(const std::string& s)
-	{
-		return cpp::filesystem::exists(s);
-	}
-
-	static bool copy(
-	    const std::string& from,
-	    const std::string& to
-	)
-	{
-		return cpp::filesystem::copy_file(from, to, copy_options::overwrite_existing);
-	}
-};
-
-
-
 DirDiffForm::DirDiffForm(QWidget* parent_) :
 	QWidget(parent_),
 	ui(new Ui::DirDiffForm),
@@ -649,7 +630,7 @@ std::pair< bool, DirDiffForm::overwrite_t > DirDiffForm::copyTo(
 	overwrite_t        overwrite
 )
 {
-	if ( FileSystem::exists(to))
+	if ( cpp::filesystem::exists(to))
 	{
 		switch ( overwrite )
 		{
@@ -680,7 +661,7 @@ std::pair< bool, DirDiffForm::overwrite_t > DirDiffForm::copyTo(
 
 	}
 
-	return std::make_pair(FileSystem::copy(from, to), overwrite);
+	return std::make_pair(cpp::filesystem::copy_file(from, to, copy_options::overwrite_existing), overwrite);
 }
 
 void DirDiffForm::stopDirectoryWatcher()
