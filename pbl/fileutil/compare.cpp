@@ -49,7 +49,7 @@ compare_result compare(
 	long long          sizelimit
 )
 {
-	compare_result res(compare_error);
+	compare_result res = compare_error;
 
 	if (std::FILE* fd1 = std::fopen(first.c_str(), "rb"))
 	{
@@ -91,21 +91,21 @@ compare_result compare(
 				// files of different size are obviously different
 				if ( s1.st_size != s2.st_size )
 				{
-					return compare_result(compare_notequal);
+					return compare_notequal;
 				}
 
 				// files with the same dev/inode are obviously the same and don't need to
 				// be compared
 				if ( s1.st_ino == s2.st_ino && s1.st_dev == s2.st_dev )
 				{
-					return compare_result(compare_equal);
+					return compare_equal;
 				}
 			}
 
 			// Don't check files that are larger than the size limit
 			if ( sizelimit != 0 && ( ( res1 && s1.st_size > sizelimit ) || ( res2 && s2.st_size > sizelimit ) ) )
 			{
-				return compare_result(compare_error);
+				return compare_error;
 			}
 		}
 	}
@@ -133,7 +133,7 @@ compare_result compare(
 				// eof or error
 				if (std::ferror(file1))
 				{
-					return compare_result(compare_error);
+					return compare_error;
 				}
 
 				// must be end of file, then
@@ -153,7 +153,7 @@ compare_result compare(
 				// eof or error
 				if (std::ferror(file2))
 				{
-					return compare_result(compare_error);
+					return compare_error;
 				}
 
 				// must be end of file, then
@@ -169,14 +169,14 @@ compare_result compare(
 		// files are different
 		if ( std::memcmp(buf1, buf2, m) != 0 )
 		{
-			return compare_result(compare_notequal);
+			return compare_notequal;
 		}
 		else
 		{
 			// files are the same
 			if ( eof1 && eof2 )
 			{
-				return compare_result(compare_equal);
+				return compare_equal;
 			}
 
 			// files are the same so far... save the data
@@ -197,12 +197,12 @@ compare_result compare(
 			// files have different size
 			if ( ( eof1 && size2 != 0 ) || ( eof2 && size1 != 0 ) )
 			{
-				return compare_result(compare_notequal);
+				return compare_notequal;
 			}
 		}
 	}
 
-	return compare_result(compare_error);
+	return compare_error;
 }
 
 }

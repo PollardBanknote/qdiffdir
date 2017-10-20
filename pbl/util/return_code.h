@@ -3,42 +3,23 @@
 
 namespace pbl
 {
+/** Wrapper around an enum E that prevents unwanted conversions (ex., to bool)
+ */
 template< typename E >
 class return_code
 {
 public:
-	explicit return_code(E value_) : value(value_) { }
+	return_code(E value_) : value(value_) { }
 
 	friend bool operator==(const return_code& l, const return_code& r)
 	{
 		return l.value == r.value;
 	}
 
-	friend bool operator==(const return_code& l, E r)
-	{
-		return l.value == r;
-	}
-
-	friend bool operator==(E l, const return_code& r)
-	{
-		return l == r.value;
-	}
-
 	friend bool operator!=(const return_code& l, const return_code& r)
 	{
-		return l.value == r.value;
+		return l.value != r.value;
 	}
-
-	friend bool operator!=(const return_code& l, E r)
-	{
-		return l.value == r;
-	}
-
-	friend bool operator!=(E l, const return_code& r)
-	{
-		return l == r.value;
-	}
-
 private:
 	E value;
 };
