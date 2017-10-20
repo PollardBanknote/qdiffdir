@@ -25,7 +25,6 @@ SOURCES += main.cpp\
     dirdiffform.cpp \
     mysettings.cpp \
     settingsdialog.cpp \
-    multilist.cpp \
     filenamematcher.cpp \
     filecompare.cpp \
     comparisonlist.cpp
@@ -34,7 +33,6 @@ HEADERS  += mainwindow.h \
     dirdiffform.h \
     mysettings.h \
     settingsdialog.h \
-    multilist.h \
     compare.h \
     matcher.h \
     filenamematcher.h \
