@@ -37,7 +37,7 @@ namespace pbl
 namespace fs
 {
 int compare(const std::string&, const std::string&, long long);
-int compare(FILE*, FILE*, long long);
+int compare(std::FILE*, std::FILE*, long long);
 }
 }
 

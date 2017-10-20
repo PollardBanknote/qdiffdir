@@ -51,9 +51,9 @@ int compare(
 {
 	int res = -1;
 
-	if (FILE* fd1 = std::fopen(first.c_str(), "rb"))
+	if (std::FILE* fd1 = std::fopen(first.c_str(), "rb"))
 	{
-		if (FILE* fd2 = std::fopen(second.c_str(), "rb"))
+		if (std::FILE* fd2 = std::fopen(second.c_str(), "rb"))
 		{
 			res = compare(fd1, fd2, sizelimit);
 
@@ -66,8 +66,8 @@ int compare(
 }
 
 int compare(
-    FILE*       file1,
-    FILE*       file2,
+    std::FILE*       file1,
+    std::FILE*       file2,
 	long long sizelimit
 )
 {
@@ -75,8 +75,8 @@ int compare(
 		/* Check if the files are obviously the same or different. Ex., because
 		 * of file size or hardlinks.
 		 */
-		int fd1 = fileno(file1);
-		int fd2 = fileno(file2);
+		int fd1 = ::fileno(file1);
+		int fd2 = ::fileno(file2);
 
 		if (fd1 != -1 && fd2 != -1)
 		{
