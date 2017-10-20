@@ -40,8 +40,6 @@ public slots:
 	void compare(const QString& first, const QString& second, long long);
 signals:
 	void compared(const QString& first, const QString& second, bool);
-private:
-	static QByteArray gunzip(const std::string& filename);
 };
 
 
