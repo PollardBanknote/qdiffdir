@@ -26,8 +26,6 @@ SOURCES += main.cpp\
     mysettings.cpp \
     settingsdialog.cpp \
     multilist.cpp \
-    qutilities/icons.cpp \
-    qutilities/convert.cpp \
     filenamematcher.cpp \
     filecompare.cpp \
     comparisonlist.cpp \
@@ -40,8 +38,6 @@ HEADERS  += mainwindow.h \
     multilist.h \
     compare.h \
     matcher.h \
-    qutilities/icons.h \
-    qutilities/convert.h \
     filenamematcher.h \
     filecompare.h \
     comparisonlist.h \
@@ -52,6 +48,10 @@ FORMS    += mainwindow.ui \
     settingsdialog.ui
 
 INCLUDEPATH += $$PWD/..
+
+LIBS += -L$$OUT_PWD/../qutility/ -lqutility
+DEPENDPATH += $$PWD/../qutility
+PRE_TARGETDEPS += $$OUT_PWD/../qutility/libqutility.a
 
 LIBS += -L$$OUT_PWD/../pbl/ -lpbl
 DEPENDPATH += $$PWD/../pbl

@@ -51,11 +51,12 @@
 #include "pbl/util/strings.h"
 #include "pbl/process/which.h"
 
+#include "qutility/icons.h"
+#include "qutility/convert.h"
+
 #include "compare.h"
 #include "matcher.h"
 #include "mysettings.h"
-#include "qutilities/icons.h"
-#include "qutilities/convert.h"
 
 class FileSystem
 {

@@ -3,7 +3,9 @@ TEMPLATE = subdirs
 SUBDIRS += \
     pbl \
     ui \
-    cpp
+    cpp \
+    qutility
 
 pbl.depends = cpp
-ui.depends = pbl
+qutility.depends = pbl
+ui.depends = pbl qutility

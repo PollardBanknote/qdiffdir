@@ -33,7 +33,7 @@
 
 #include "pbl/fileutil/compare.h"
 #include "pbl/util/strings.h"
-#include "qutilities/convert.h"
+#include "qutility/convert.h"
 
 void FileCompare::compare(
 	const QString& first,
