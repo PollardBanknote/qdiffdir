@@ -494,7 +494,7 @@ void DirDiffForm::file_list_changed(
 	// Rematch files
 	ComparisonList matched;
 
-	matched.rematch(section_tree[0], section_tree[1], "");
+	matched.rematch(section_tree[0], section_tree[1]);
 
 	if ( !rootchanged )
 	{

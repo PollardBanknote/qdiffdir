@@ -30,6 +30,71 @@
 
 #include <algorithm>
 
+namespace
+{
+/* Compare paths directory by directory. Last path component of each must be
+ * a file. Files are sorted after directories within the same directory
+ */
+bool compare_paths(const std::string& l, const std::string& r)
+{
+	const std::size_t nl = l.length();
+	const std::size_t nr = r.length();
+
+	// directories before files
+	std::size_t il = 0; // start of path component
+	std::size_t ir = 0;
+
+	while ( true )
+	{
+		std::size_t jl = il; // find end of path component
+		std::size_t jr = ir;
+
+		while ( jl < nl && l[jl] != '/' )
+		{
+			++jl;
+		}
+
+		while ( jr < nr && r[jr] != '/' )
+		{
+			++jr;
+		}
+
+		if ( jl == nl && jr == nr )
+		{
+
+			// at last path component for both
+			return l.compare(il, jl - il, r, ir, jr - ir) < 0;
+		}
+
+		if ( jl == nl )
+		{
+
+			// first points to a file and files come after directories
+			return false;
+		}
+
+		if ( jr == nr )
+		{
+
+			// second points to a file and files come after directories
+			return true;
+		}
+
+		// both at directories
+		const int res = l.compare(il, jl - il, r, ir, jr - ir);
+
+		if ( res != 0 )
+		{
+			return res < 0;
+		}
+
+		// next path component
+		il = jl + 1;
+		ir = jr + 1;
+	}
+}
+}
+
 void ComparisonList::rematch_section(
 	std::size_t              j,
 	const DirectoryContents& r,
@@ -51,6 +116,11 @@ void ComparisonList::rematch_section(
 	}
 
 	std::sort(list.begin(), list.end(), compare_by_items);
+}
+
+void ComparisonList::rematch(const DirectoryContents&l, const DirectoryContents&r)
+{
+	rematch(l, r, "");
 }
 
 void ComparisonList::rematch(
@@ -225,63 +295,7 @@ bool ComparisonList::compare_by_items(
 	const comparison_t& b
 )
 {
-	const std::string l  = a.items[0].empty() ? a.items[1] : a.items[0];
-	const std::string r  = b.items[0].empty() ? b.items[1] : b.items[0];
-	const std::size_t nl = l.length();
-	const std::size_t nr = r.length();
-
-	// directories before files
-	std::size_t il = 0; // start of path component
-	std::size_t ir = 0;
-
-	while ( true )
-	{
-		std::size_t jl = il; // find end of path component
-		std::size_t jr = ir;
-
-		while ( jl < nl && l[jl] != '/' )
-		{
-			++jl;
-		}
-
-		while ( jr < nr && r[jr] != '/' )
-		{
-			++jr;
-		}
-
-		if ( jl == nl && jr == nr )
-		{
-
-			// at last path component for both
-			return l.compare(il, jl - il, r, ir, jr - ir) < 0;
-		}
-
-		if ( jl == nl )
-		{
-
-			// first points to a file and files come after directories
-			return false;
-		}
-
-		if ( jr == nr )
-		{
-
-			// second points to a file and files come after directories
-			return true;
-		}
-
-		// both at directories
-		const int res = l.compare(il, jl - il, r, ir, jr - ir);
-
-		if ( res != 0 )
-		{
-			return res < 0;
-		}
-
-		// next path component
-		il = jl + 1;
-		ir = jr + 1;
-	}
+	return compare_paths(a.items[0].empty() ? a.items[1] : a.items[0], b.items[0].empty() ? b.items[1] : b.items[0]);
 }
 
 void ComparisonList::forget()

@@ -103,12 +103,14 @@ public:
 		list.swap(o.list);
 	}
 
-	void rematch(const DirectoryContents&, const DirectoryContents&, const std::string&);
+	void rematch(const DirectoryContents&, const DirectoryContents&);
 
 	static bool compare_by_items(const comparison_t& a, const comparison_t& b);
 
 	void forget();
 private:
+	void rematch(const DirectoryContents&, const DirectoryContents&, const std::string&);
+
 	void rematch_section(std::size_t, const DirectoryContents&, const std::string&);
 	void rematch_inner(const DirectoryContents&, const DirectoryContents&, const std::string&);
 
