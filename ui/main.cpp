@@ -145,7 +145,7 @@ int main(
 	}
 
 	// Detach from the terminal and start up the GUI
-	#if 1
+    #if 1
 	#warning Detach is disabled
 	#else
 	pbl::process::detach();

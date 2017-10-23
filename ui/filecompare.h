@@ -43,5 +43,4 @@ signals:
 	void compared(const QString& first, const QString& second, bool);
 };
 
-
 #endif // FILECOMPARE_H

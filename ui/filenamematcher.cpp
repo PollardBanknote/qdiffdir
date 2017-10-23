@@ -28,13 +28,33 @@
  */
 #include "filenamematcher.h"
 
+#include <iostream>
+
+#include <QRegularExpression>
+#include <QString>
+#include <QDebug>
+
 #include "pbl/util/strings.h"
 
 /// @todo file.bak
 FileNameMatcher::match_result FileNameMatcher::compare(
-	const std::string& a,
-	const std::string& b
+    const std::string& a,
+    const std::string& b
 ) const
+{
+	// Check one way, then the other
+	const match_result res1 = compare_inner(a, b);
+	const match_result res2 = compare_inner(b, a);
+
+	if (res1.weight == -1)
+		return res2;
+	if (res2.weight == -1)
+		return res1;
+
+	return (res1.weight < res2.weight) ? res1 : res2;
+}
+
+FileNameMatcher::match_result FileNameMatcher::compare_inner(const std::string& a, const std::string& b) const
 {
 	if ( a == b )
 	{
@@ -42,51 +62,42 @@ FileNameMatcher::match_result FileNameMatcher::compare(
 		return t;
 	}
 
-	// Archives should by un-archived
-	if ( b == a + ".gz" )
+	match_condition conditions[] =
 	{
-		match_result t = { 1, "", "gunzip -c" };
-		return t;
+	    { "^(.*)$", "\\1.gz", "", "gunzip -c", 1 },
+	    { "^(.*)\\.c$", "\\1.cpp", "", "", 2 },
+	    { "^(.*)\\.cpp$", "\\1.c.gz", "", "gunzip -c", 3 },
+	    { "^(.*)\\.c$", "\\1.cpp.gz", "", "gunzip -c", 3 }
+	};
+
+	std::size_t best = static_cast< std::size_t >(-1);
+
+	for (std::size_t i = 0; i < sizeof(conditions) / sizeof(conditions[0]); ++i)
+	{
+		QRegularExpression pattern(conditions[i].pattern);
+		QString replace = conditions[i].replacement;
+
+		QString b2 = QString::fromStdString(a);
+		b2.replace(pattern, replace);
+
+		if (b2.toStdString() == b)
+		{
+			if (best == static_cast< std::size_t >(-1) || conditions[i].weight < conditions[best].weight)
+			{
+				best = i;
+			}
+
+		}
 	}
 
-	if (a == b + ".gz")
+	if (best != static_cast< std::size_t >(-1))
 	{
-		match_result t = { 1, "gunzip -c", "" };
-		return t;
-	}
-
-	// C and C++ files can be compared directly
-	if ( (pbl::ends_with(b, ".cpp") && (a + "pp" == b))
-	     || (pbl::ends_with(a, ".cpp") && (b + "pp" == a)))
+	    match_result t = { conditions[best].weight, conditions[best].first_command.toStdString(), conditions[best].second_command.toStdString() };
+	    return t;
+    }
+	else
 	{
-		match_result t = { 2, "", "" };
-		return t;
-	}
-
-	if (pbl::ends_with(b, ".cpp") && pbl::ends_with(a, ".c.gz") && a.compare(0, a.length() - 5, b, 0, b.length() - 4) == 0)
-	{
-		match_result t = { 3, "gunzip -c", "" };
-		return t;
-	}
-
-	if (pbl::ends_with(a, ".cpp") && pbl::ends_with(b, ".c.gz") && b.compare(0, b.length() - 5, a, 0, a.length() - 4) == 0)
-	{
-		match_result t = { 3, "", "gunzip -c" };
-		return t;
-	}
-
-	if (pbl::ends_with(a, ".cpp.gz") && a == b + "pp.gz")
-	{
-		match_result t = { 3, "gunzip -c", "" };
-		return t;
-	}
-
-	if (pbl::ends_with(b, ".cpp.gz") && b == a + "pp.gz")
-	{
-		match_result t = { 3, "", "gunzip -c" };
-		return t;
-	}
-
-	match_result fail = { -1, "", "" };
-	return fail;
+	    match_result fail = { -1, "", "" };
+	    return fail;
+    }
 }

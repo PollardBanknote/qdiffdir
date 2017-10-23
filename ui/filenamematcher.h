@@ -31,6 +31,8 @@
 
 #include <string>
 
+#include <QString>
+
 class FileNameMatcher
 {
 public:
@@ -42,6 +44,17 @@ public:
 	};
 
 	match_result compare(const std::string& a, const std::string& b) const;
+private:
+	struct match_condition
+	{
+		QString pattern;
+		QString replacement;
+		QString first_command;
+		QString second_command;
+		int weight;
+	};
+
+	match_result compare_inner(const std::string& a, const std::string& b) const;
 };
 
 
