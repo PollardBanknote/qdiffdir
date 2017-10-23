@@ -106,6 +106,19 @@ void MySettings::setFileSizeCompareLimit(int x)
 	store->setValue(compare_limit_key, x);
 }
 
+std::vector<FileNameMatcher::match_descriptor> MySettings::getMatchRules() const
+{
+	FileNameMatcher::match_descriptor conditions[] =
+	{
+	    { "(.*)", "\\1.gz", "", "gunzip -c", 1 },
+	    { "(.*)\\.c", "\\1.cpp", "", "", 2 },
+	    { "(.*)\\.cpp", "\\1.c.gz", "", "gunzip -c", 3 },
+	    { "(.*)\\.c", "\\1.cpp.gz", "", "gunzip -c", 3 }
+	};
+
+	return std::vector< FileNameMatcher::match_descriptor >(conditions, conditions + sizeof(conditions)/sizeof(conditions[0]));
+}
+
 MySettings::MySettings()
 {
 	store = new QSettings("Pollard Banknote", "qdiffdir");

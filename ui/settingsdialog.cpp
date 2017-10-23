@@ -57,6 +57,17 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 		ui->filter_list->setItem(nrows, 1, second);
 		++nrows;
 	}
+
+	std::vector< FileNameMatcher::match_descriptor > matchrules = settings.getMatchRules();
+	for (std::size_t i = 0; i < matchrules.size(); ++i)
+	{
+		QStringList l;
+		l << matchrules[i].pattern << matchrules[i].replacement
+		  << matchrules[i].first_command << matchrules[i].second_command
+		  << QString::number(matchrules[i].weight);
+
+		new QTreeWidgetItem(ui->match_rules, l);
+	}
 }
 
 SettingsDialog::~SettingsDialog()

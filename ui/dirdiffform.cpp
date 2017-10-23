@@ -494,8 +494,10 @@ void DirDiffForm::file_list_changed(
 		ui->openrightdir->setText( qt::convert(p.second) );
 	}
 
+	const MySettings& settings = MySettings::instance();
+
 	// Rematch files
-	FileNameMatcher             name_matcher;
+	FileNameMatcher             name_matcher(settings.getMatchRules());
 	std::vector< comparison_t > matched = match_directories(name_matcher, section_tree[0], section_tree[1]);
 
 	if ( !rootchanged )

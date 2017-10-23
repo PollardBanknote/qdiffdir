@@ -29,10 +29,14 @@
 #ifndef MYSETTINGS_H
 #define MYSETTINGS_H
 
+#include <vector>
+
 class QString;
 class QSettings;
 class QRegExp;
 #include <QMap>
+
+#include "filenamematcher.h"
 
 class MySettings
 {
@@ -48,6 +52,8 @@ public:
 	void setFilters(const QMap< QString, QString >&);
 	int getFileSizeCompareLimit() const;
 	void setFileSizeCompareLimit(int);
+
+	std::vector< FileNameMatcher::match_descriptor > getMatchRules() const;
 private:
 	MySettings();
 	MySettings(const MySettings&);

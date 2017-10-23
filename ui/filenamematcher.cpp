@@ -37,6 +37,12 @@
 #include "pbl/util/strings.h"
 
 /// @todo file.bak
+FileNameMatcher::FileNameMatcher(const std::vector<FileNameMatcher::match_descriptor>& conditions_)
+    : conditions(conditions_)
+{
+
+}
+
 FileNameMatcher::match_result FileNameMatcher::compare(
     const std::string& a,
     const std::string& b
@@ -62,19 +68,11 @@ FileNameMatcher::match_result FileNameMatcher::compare_inner(const std::string& 
 		return t;
 	}
 
-	match_condition conditions[] =
-	{
-	    { "^(.*)$", "\\1.gz", "", "gunzip -c", 1 },
-	    { "^(.*)\\.c$", "\\1.cpp", "", "", 2 },
-	    { "^(.*)\\.cpp$", "\\1.c.gz", "", "gunzip -c", 3 },
-	    { "^(.*)\\.c$", "\\1.cpp.gz", "", "gunzip -c", 3 }
-	};
-
 	std::size_t best = static_cast< std::size_t >(-1);
 
-	for (std::size_t i = 0; i < sizeof(conditions) / sizeof(conditions[0]); ++i)
+	for (std::size_t i = 0; i < conditions.size(); ++i)
 	{
-		QRegularExpression pattern(conditions[i].pattern);
+		QRegularExpression pattern("^" + conditions[i].pattern + "$");
 		QString replace = conditions[i].replacement;
 
 		QString b2 = QString::fromStdString(a);
@@ -92,12 +90,12 @@ FileNameMatcher::match_result FileNameMatcher::compare_inner(const std::string& 
 
 	if (best != static_cast< std::size_t >(-1))
 	{
-	    match_result t = { conditions[best].weight, conditions[best].first_command.toStdString(), conditions[best].second_command.toStdString() };
-	    return t;
-    }
+		match_result t = { conditions[best].weight, conditions[best].first_command.toStdString(), conditions[best].second_command.toStdString() };
+		return t;
+	}
 	else
 	{
-	    match_result fail = { -1, "", "" };
-	    return fail;
-    }
+		match_result fail = { -1, "", "" };
+		return fail;
+	}
 }

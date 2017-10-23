@@ -30,6 +30,7 @@
 #define FILENAMEMATCHER_H
 
 #include <string>
+#include <vector>
 
 #include <QString>
 
@@ -43,9 +44,7 @@ public:
 		std::string rcommand;
 	};
 
-	match_result compare(const std::string& a, const std::string& b) const;
-private:
-	struct match_condition
+	struct match_descriptor
 	{
 		QString pattern;
 		QString replacement;
@@ -54,7 +53,12 @@ private:
 		int weight;
 	};
 
+	explicit FileNameMatcher(const std::vector< match_descriptor >&);
+
+	match_result compare(const std::string& a, const std::string& b) const;
+private:
 	match_result compare_inner(const std::string& a, const std::string& b) const;
+	std::vector< match_descriptor > conditions;
 };
 
 
