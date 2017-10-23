@@ -497,7 +497,7 @@ void DirDiffForm::file_list_changed(
 	const MySettings& settings = MySettings::instance();
 
 	// Rematch files
-	FileNameMatcher             name_matcher(settings.getMatchRules());
+	FileNameMatcher             name_matcher( settings.getMatchRules() );
 	std::vector< comparison_t > matched = match_directories(name_matcher, section_tree[0], section_tree[1]);
 
 	if ( !rootchanged )

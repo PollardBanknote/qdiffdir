@@ -1,16 +1,23 @@
 #include "editmatchruledialog.h"
 #include "ui_editmatchruledialog.h"
 
-EditMatchRuleDialog::EditMatchRuleDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::EditMatchRuleDialog)
+EditMatchRuleDialog::EditMatchRuleDialog(QWidget* parent)
+	: QDialog(parent),
+	ui(new Ui::EditMatchRuleDialog)
 {
 	ui->setupUi(this);
 }
 
-EditMatchRuleDialog::EditMatchRuleDialog(QString p, QString r, QString pcmd, QString rcmd, int w, QWidget* parent)
-    : QDialog(parent),
-    ui(new Ui::EditMatchRuleDialog)
+EditMatchRuleDialog::EditMatchRuleDialog(
+	QString  p,
+	QString  r,
+	QString  pcmd,
+	QString  rcmd,
+	int      w,
+	QWidget* parent
+)
+	: QDialog(parent),
+	ui(new Ui::EditMatchRuleDialog)
 {
 	ui->setupUi(this);
 	ui->pattern->setText(p);
@@ -52,6 +59,8 @@ int EditMatchRuleDialog::getWeight() const
 
 void EditMatchRuleDialog::on_buttonBox_accepted()
 {
-	if (!ui->pattern->text().isEmpty() && !ui->replacement->text().isEmpty())
+	if ( !ui->pattern->text().isEmpty() && !ui->replacement->text().isEmpty() )
+	{
 		accept();
+	}
 }

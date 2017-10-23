@@ -59,7 +59,6 @@ private slots:
 	void on_remove_match_clicked();
 
 	void on_pushButton_clicked();
-
 private:
 	Ui::SettingsDialog* ui;
 };

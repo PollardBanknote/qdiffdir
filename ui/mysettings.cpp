@@ -36,11 +36,11 @@ const char editor_key[]        = "editor";
 const char filters_key[]       = "filters";
 const char matches_key[]       = "matchrules";
 const char compare_limit_key[] = "comparelimit";
-const char pattern_key[] = "pattern";
-const char replace_key[] = "replace";
-const char command1_key[] = "command1";
-const char command2_key[] = "command2";
-const char weight_key[] = "weight";
+const char pattern_key[]       = "pattern";
+const char replace_key[]       = "replace";
+const char command1_key[]      = "command1";
+const char command2_key[]      = "command2";
+const char weight_key[]        = "weight";
 
 MySettings& MySettings::instance()
 {
@@ -112,23 +112,23 @@ void MySettings::setFileSizeCompareLimit(int x)
 	store->setValue(compare_limit_key, x);
 }
 
-std::vector<FileNameMatcher::match_descriptor> MySettings::getMatchRules() const
+std::vector< FileNameMatcher::match_descriptor > MySettings::getMatchRules() const
 {
 	std::vector< FileNameMatcher::match_descriptor > v;
 
 	const int n = store->beginReadArray(matches_key);
 
-	for (int i = 0; i < n; ++i)
+	for ( int i = 0; i < n; ++i )
 	{
 		store->setArrayIndex(i);
 
 		FileNameMatcher::match_descriptor t =
 		{
-		    store->value(pattern_key).toString(),
-		    store->value(replace_key).toString(),
-		    store->value(command1_key).toString(),
-		    store->value(command2_key).toString(),
-		    store->value(weight_key).toInt()
+			store->value(pattern_key).toString(),
+			store->value(replace_key).toString(),
+			store->value(command1_key).toString(),
+			store->value(command2_key).toString(),
+			store->value(weight_key).toInt()
 		};
 		v.push_back(t);
 	}
@@ -138,11 +138,13 @@ std::vector<FileNameMatcher::match_descriptor> MySettings::getMatchRules() const
 	return v;
 }
 
-void MySettings::setMatchRules(const std::vector<FileNameMatcher::match_descriptor>& v)
+void MySettings::setMatchRules(const std::vector< FileNameMatcher::match_descriptor >& v)
 {
 	const std::size_t n = v.size();
+
 	store->beginWriteArray(matches_key, n);
-	for (std::size_t i = 0; i < n; ++i)
+
+	for ( std::size_t i = 0; i < n; ++i )
 	{
 		store->setArrayIndex(i);
 		store->setValue(pattern_key, v[i].pattern);
@@ -151,6 +153,7 @@ void MySettings::setMatchRules(const std::vector<FileNameMatcher::match_descript
 		store->setValue(command2_key, v[i].second_command);
 		store->setValue(weight_key, v[i].weight);
 	}
+
 	store->endArray();
 }
 

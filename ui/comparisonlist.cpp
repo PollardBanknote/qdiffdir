@@ -214,10 +214,10 @@ private:
 	}
 
 	void match_filenames(
-	        const FileNameMatcher&   matcher,
-	        const DirectoryContents& l,
-	        const DirectoryContents& r,
-	        const std::string&       prefix
+		const FileNameMatcher&   matcher,
+		const DirectoryContents& l,
+		const DirectoryContents& r,
+		const std::string&       prefix
 	)
 	{
 		/* Match file names exactly. Merge both file lists as if by set union.
@@ -300,8 +300,8 @@ private:
 						{
 							if ( xbest == -1 || res.weight < xbest )
 							{
-								ibest = j;
-								xbest = res.weight;
+								ibest    = j;
+								xbest    = res.weight;
 								lcommand = res.lcommand;
 								rcommand = res.rcommand;
 							}
@@ -312,7 +312,7 @@ private:
 				// If there is one, delete it and fixup i, n
 				if ( xbest != -1 )
 				{
-					matched_files[i].items[1] = matched_files[ibest].items[1];
+					matched_files[i].items[1]   = matched_files[ibest].items[1];
 					matched_files[i].command[0] = lcommand;
 					matched_files[i].command[1] = rcommand;
 					matched_files.erase(matched_files.begin() + ibest);

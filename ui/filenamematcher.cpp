@@ -37,30 +37,38 @@
 #include "pbl/util/strings.h"
 
 /// @todo file.bak
-FileNameMatcher::FileNameMatcher(const std::vector<FileNameMatcher::match_descriptor>& conditions_)
-    : conditions(conditions_)
+FileNameMatcher::FileNameMatcher(const std::vector< FileNameMatcher::match_descriptor >& conditions_)
+	: conditions(conditions_)
 {
 
 }
 
 FileNameMatcher::match_result FileNameMatcher::compare(
-    const std::string& a,
-    const std::string& b
+	const std::string& a,
+	const std::string& b
 ) const
 {
 	// Check one way, then the other
 	const match_result res1 = compare_inner(a, b);
 	const match_result res2 = compare_inner(b, a);
 
-	if (res1.weight == -1)
+	if ( res1.weight == -1 )
+	{
 		return res2;
-	if (res2.weight == -1)
-		return res1;
+	}
 
-	return (res1.weight < res2.weight) ? res1 : res2;
+	if ( res2.weight == -1 )
+	{
+		return res1;
+	}
+
+	return ( res1.weight < res2.weight ) ? res1 : res2;
 }
 
-FileNameMatcher::match_result FileNameMatcher::compare_inner(const std::string& a, const std::string& b) const
+FileNameMatcher::match_result FileNameMatcher::compare_inner(
+	const std::string& a,
+	const std::string& b
+) const
 {
 	if ( a == b )
 	{
@@ -68,27 +76,26 @@ FileNameMatcher::match_result FileNameMatcher::compare_inner(const std::string& 
 		return t;
 	}
 
-	std::size_t best = static_cast< std::size_t >(-1);
+	std::size_t best = static_cast< std::size_t >( -1 );
 
-	for (std::size_t i = 0; i < conditions.size(); ++i)
+	for ( std::size_t i = 0; i < conditions.size(); ++i )
 	{
 		QRegularExpression pattern("^" + conditions[i].pattern + "$");
-		QString replace = conditions[i].replacement;
+		QString            replace = conditions[i].replacement;
 
 		QString b2 = QString::fromStdString(a);
 		b2.replace(pattern, replace);
 
-		if (b2.toStdString() == b)
+		if ( b2.toStdString() == b )
 		{
-			if (best == static_cast< std::size_t >(-1) || conditions[i].weight < conditions[best].weight)
+			if ( best == static_cast< std::size_t >( -1 ) || conditions[i].weight < conditions[best].weight )
 			{
 				best = i;
 			}
-
 		}
 	}
 
-	if (best != static_cast< std::size_t >(-1))
+	if ( best != static_cast< std::size_t >( -1 ) )
 	{
 		match_result t = { conditions[best].weight, conditions[best].first_command.toStdString(), conditions[best].second_command.toStdString() };
 		return t;

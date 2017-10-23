@@ -3,16 +3,17 @@
 
 #include <QDialog>
 
-namespace Ui {
+namespace Ui
+{
 class EditMatchRuleDialog;
 }
 
-class EditMatchRuleDialog : public QDialog
+class EditMatchRuleDialog
+	: public QDialog
 {
 	Q_OBJECT
-
 public:
-	explicit EditMatchRuleDialog(QWidget *parent = 0);
+	explicit EditMatchRuleDialog(QWidget* parent = 0);
 	EditMatchRuleDialog(QString, QString, QString, QString, int, QWidget* parent = 0);
 	~EditMatchRuleDialog();
 
@@ -23,9 +24,8 @@ public:
 	int getWeight() const;
 private slots:
 	void on_buttonBox_accepted();
-
 private:
-	Ui::EditMatchRuleDialog *ui;
+	Ui::EditMatchRuleDialog* ui;
 };
 
 #endif // EDITMATCHRULEDIALOG_H

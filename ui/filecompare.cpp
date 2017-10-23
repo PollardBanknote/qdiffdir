@@ -40,15 +40,15 @@
 void FileCompare::compare(
 	const QString& first,
 	const QString& second,
-    const QString& lcommand,
-    const QString& rcommand,
+	const QString& lcommand,
+	const QString& rcommand,
 	long long      filesizelimit // in megabytes
 )
 {
 	std::FILE* file1;
 	bool       is_process1 = false;
 
-	if (!lcommand.isEmpty())
+	if ( !lcommand.isEmpty() )
 	{
 		const std::string cmd = qt::convert(lcommand + " " + first);
 		file1       = ::popen(cmd.c_str(), "r");
@@ -63,7 +63,7 @@ void FileCompare::compare(
 	std::FILE* file2;
 	bool       is_process2 = false;
 
-	if (!rcommand.isEmpty())
+	if ( !rcommand.isEmpty() )
 	{
 		const std::string cmd = qt::convert(rcommand + " " + second);
 		file2       = ::popen(cmd.c_str(), "r");

@@ -60,7 +60,8 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 	}
 
 	std::vector< FileNameMatcher::match_descriptor > matchrules = settings.getMatchRules();
-	for (std::size_t i = 0; i < matchrules.size(); ++i)
+
+	for ( std::size_t i = 0; i < matchrules.size(); ++i )
 	{
 		QStringList l;
 		l << matchrules[i].pattern << matchrules[i].replacement
@@ -95,17 +96,19 @@ void SettingsDialog::on_save_clicked()
 
 	std::vector< FileNameMatcher::match_descriptor > match_rules;
 
-	for (int i = 0, n = ui->match_rules->topLevelItemCount(); i < n; ++i)
+	for ( int i = 0, n = ui->match_rules->topLevelItemCount(); i < n; ++i )
 	{
 		QTreeWidgetItem* item = ui->match_rules->topLevelItem(i);
 
-		FileNameMatcher::match_descriptor t = {
-		    item->text(0), item->text(1), item->text(2), item->text(3),
-		    item->text(4).toInt()
+		FileNameMatcher::match_descriptor t =
+		{
+			item->text(0), item->text(1), item->text(2), item->text(3),
+			item->text(4).toInt()
 		};
 
 		match_rules.push_back(t);
 	}
+
 	settings.setMatchRules(match_rules);
 
 	accept();
@@ -179,12 +182,13 @@ void SettingsDialog::on_edit_filter_clicked()
 void SettingsDialog::on_add_match_clicked()
 {
 	EditMatchRuleDialog dlg;
-	if (dlg.exec() == QDialog::Accepted)
+
+	if ( dlg.exec() == QDialog::Accepted )
 	{
 		QStringList l;
 		l << dlg.getPattern() << dlg.getReplacement()
 		  << dlg.getPatternCommand() << dlg.getReplacementCommand()
-		  << QString::number(dlg.getWeight());
+		  << QString::number( dlg.getWeight() );
 
 		new QTreeWidgetItem(ui->match_rules, l);
 	}
@@ -198,15 +202,15 @@ void SettingsDialog::on_pushButton_clicked()
 	{
 		QTreeWidgetItem* item = items.at(0);
 
-		EditMatchRuleDialog dlg(item->text(0), item->text(1), item->text(2), item->text(3), item->text(4).toInt());
+		EditMatchRuleDialog dlg( item->text(0), item->text(1), item->text(2), item->text(3), item->text(4).toInt() );
 
-		if (dlg.exec() == QDialog::Accepted)
+		if ( dlg.exec() == QDialog::Accepted )
 		{
-			item->setText(0, dlg.getPattern());
-			item->setText(1, dlg.getReplacement());
-			item->setText(2, dlg.getPatternCommand());
-			item->setText(3, dlg.getReplacementCommand());
-			item->setText(4, QString::number(dlg.getWeight()));
+			item->setText( 0, dlg.getPattern() );
+			item->setText( 1, dlg.getReplacement() );
+			item->setText( 2, dlg.getPatternCommand() );
+			item->setText( 3, dlg.getReplacementCommand() );
+			item->setText( 4, QString::number( dlg.getWeight() ) );
 		}
 	}
 }
@@ -219,11 +223,10 @@ void SettingsDialog::on_remove_match_clicked()
 	{
 		if ( QMessageBox::question(this, "Delete match rule", "Are you sure?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes )
 		{
-			const int i = ui->match_rules->indexOfTopLevelItem(items.at(0));
+			const int i = ui->match_rules->indexOfTopLevelItem( items.at(0) );
 
 			ui->match_rules->takeTopLevelItem(i);
 			delete items.at(0);
 		}
 	}
 }
-
