@@ -278,7 +278,7 @@
   <customwidget>
    <class>MultiList</class>
    <extends>QWidget</extends>
-   <header>multilist.h</header>
+   <header>qutility/widgets/multilist.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

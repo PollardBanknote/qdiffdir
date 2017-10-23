@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>699</width>
+    <height>590</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,6 +19,16 @@
      <property name="fieldGrowthPolicy">
       <enum>QFormLayout::ExpandingFieldsGrow</enum>
      </property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="editorLabel">
+       <property name="text">
+        <string>Editor</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="editorLineEdit"/>
+     </item>
      <item row="1" column="0">
       <widget class="QLabel" name="diffToolLabel">
        <property name="text">
@@ -29,15 +39,25 @@
      <item row="1" column="1">
       <widget class="QLineEdit" name="diffToolLineEdit"/>
      </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="editorLabel">
+     <item row="2" column="0">
+      <widget class="QLabel" name="fileSizeCompareLimitMBLabel">
        <property name="text">
-        <string>Editor</string>
+        <string>File Size Compare Limit (MB)</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="editorLineEdit"/>
+     <item row="2" column="1">
+      <widget class="QSpinBox" name="fileSizeCompareLimitMBSpinBox">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Files larger than this limit will not be compared. 0 will be treated as &amp;quot;no limit&amp;quot;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="specialValueText">
+        <string>Unlimited</string>
+       </property>
+       <property name="maximum">
+        <number>2147483647</number>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>
@@ -96,17 +116,67 @@
     </widget>
    </item>
    <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Matching</string>
      </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <item>
+       <widget class="QTreeWidget" name="match_rules">
+        <column>
+         <property name="text">
+          <string>Pattern</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Match</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Pattern Command</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Match Command</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Weight</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QPushButton" name="add_match">
+          <property name="text">
+           <string>Add</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButton">
+          <property name="text">
+           <string>Edit</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="remove_match">
+          <property name="text">
+           <string>Remove</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">

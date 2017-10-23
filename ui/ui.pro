@@ -26,43 +26,37 @@ SOURCES += main.cpp\
     dirdiffform.cpp \
     mysettings.cpp \
     settingsdialog.cpp \
-    multilist.cpp \
-    qutilities/icons.cpp \
-    qutilities/convert.cpp \
-    modules/filesystem.cpp \
     filenamematcher.cpp \
     filecompare.cpp \
     comparisonlist.cpp \
-    directorycontents.cpp
+    editmatchruledialog.cpp
 
 HEADERS  += mainwindow.h \
     dirdiffform.h \
     mysettings.h \
     settingsdialog.h \
-    multilist.h \
     compare.h \
     matcher.h \
-    qutilities/icons.h \
-    qutilities/convert.h \
-    modules/filesystem.h \
     filenamematcher.h \
     filecompare.h \
     comparisonlist.h \
-    directorycontents.h
+    editmatchruledialog.h
 
 FORMS    += mainwindow.ui \
     dirdiffform.ui \
-    settingsdialog.ui
+    settingsdialog.ui \
+    editmatchruledialog.ui
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../pbl/release/ -lpbl
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../pbl/debug/ -lpbl
-else:unix: LIBS += -L$$OUT_PWD/../pbl/ -lpbl
+INCLUDEPATH += $$PWD/..
 
-INCLUDEPATH += $$PWD/../pbl
+LIBS += -L$$OUT_PWD/../qutility/ -lqutility
+DEPENDPATH += $$PWD/../qutility
+PRE_TARGETDEPS += $$OUT_PWD/../qutility/libqutility.a
+
+LIBS += -L$$OUT_PWD/../pbl/ -lpbl
 DEPENDPATH += $$PWD/../pbl
+PRE_TARGETDEPS += $$OUT_PWD/../pbl/libpbl.a
 
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../pbl/release/libpbl.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../pbl/debug/libpbl.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../pbl/release/pbl.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../pbl/debug/pbl.lib
-else:unix: PRE_TARGETDEPS += $$OUT_PWD/../pbl/libpbl.a
+LIBS += -L$$OUT_PWD/../cpp/ -lcpp
+DEPENDPATH += $$PWD/../cpp
+PRE_TARGETDEPS += $$OUT_PWD/../cpp/libcpp.a

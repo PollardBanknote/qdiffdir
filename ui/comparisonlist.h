@@ -32,88 +32,25 @@
 #include <string>
 #include <vector>
 
-#include "filenamematcher.h"
-#include "directorycontents.h"
+class FileNameMatcher;
+class DirectoryContents;
 
 enum compare_result_t {NOT_COMPARED, COMPARED_SAME, COMPARED_DIFFERENT};
 
-class ComparisonList
+struct comparison_t
 {
-public:
+	std::string items[2];   // { left, right }
+	std::string command[2]; // command to run on left and right items when comparing
+	compare_result_t res;
+	bool ignore;
 
-	struct comparison_t
-	{
-		std::string items[2]; // { left, right }
-		compare_result_t res;
-		bool ignore;
+	bool has_only(std::size_t i) const;
 
-		bool has_only(std::size_t i) const
-		{
-			if ( !items[i].empty() )
-			{
-				for ( std::size_t j = 0; j < 2; ++j )
-				{
-					if ( j != i && !items[j].empty() )
-					{
-						return false;
-					}
-				}
+	bool unmatched() const;
 
-				return true;
-			}
-
-			return false;
-		}
-
-		bool unmatched() const
-		{
-			return items[0].empty() || items[1].empty();
-		}
-
-	};
-
-	typedef std::vector< comparison_t >::iterator iterator;
-	typedef std::vector< comparison_t >::const_iterator const_iterator;
-
-	comparison_t& operator[](std::size_t i)
-	{
-		return list[i];
-	}
-
-	const comparison_t& operator[](std::size_t i) const
-	{
-		return list[i];
-	}
-
-	std::size_t size() const
-	{
-		return list.size();
-	}
-
-	void erase(std::size_t i)
-	{
-		list.erase(list.begin() + i);
-	}
-
-	std::pair< iterator, bool > insert(const comparison_t& x);
-
-	void swap(ComparisonList& o)
-	{
-		list.swap(o.list);
-	}
-
-	void rematch(const DirectoryContents&, const DirectoryContents&, const std::string&);
-
-	static bool compare_by_items(const comparison_t& a, const comparison_t& b);
-private:
-	void rematch_section(std::size_t, const DirectoryContents&, const std::string&);
-	void rematch_inner(const DirectoryContents&, const DirectoryContents&, const std::string&);
-
-	FileNameMatcher matcher;
-
-	// maintained in sorted order given by compare_by_items
-	std::vector< comparison_t > list;
+	bool operator<(const comparison_t&) const;
 };
 
+std::vector< comparison_t > match_directories(const FileNameMatcher&, const DirectoryContents&, const DirectoryContents&);
 
 #endif // COMPARISONLIST_H

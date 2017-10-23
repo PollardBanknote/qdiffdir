@@ -31,9 +31,8 @@
 #include <cstdlib>
 #include <cstdio>
 
-#ifdef _POSIX_C_SOURCE
-#include <unistd.h>
-#endif
+#include "config/os.h"
+#include "cpp/cstdlib.h"
 
 namespace pbl
 {
@@ -44,10 +43,9 @@ namespace process
  */
 void detach()
 {
-	#if defined( _POSIX_VERSION )
-
+	#ifdef OS_POSIX
 	// Detach process
-	pid_t res = fork();
+	::pbl::os::pid_type res = ::fork();
 
 	if ( res != -1 )
 	{
@@ -78,7 +76,7 @@ void detach()
 		std::freopen("/dev/null", "a", stderr);
 	}
 
-	#endif  // if defined( _POSIX_VERSION )
+	#endif  // ifdef OS_POSIX
 }
 
 }

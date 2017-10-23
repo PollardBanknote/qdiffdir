@@ -38,12 +38,9 @@ class FileCompare
 {
 	Q_OBJECT
 public slots:
-	void compare(const QString& first, const QString& second);
+	void compare(const QString& first, const QString& second, const QString&, const QString&, long long);
 signals:
 	void compared(const QString& first, const QString& second, bool);
-private:
-	static QByteArray gunzip(const std::string& filename);
 };
-
 
 #endif // FILECOMPARE_H

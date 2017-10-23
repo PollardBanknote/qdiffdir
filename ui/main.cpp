@@ -31,9 +31,11 @@
 
 #include <QApplication>
 
-#include "mainwindow.h"
-#include "process/detach.h"
 #include "cpp/filesystem.h"
+
+#include "pbl/process/detach.h"
+
+#include "mainwindow.h"
 
 std::string make_absolute(
 	const std::string& s,

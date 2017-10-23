@@ -47,16 +47,18 @@
 
 #include "cpp/filesystem.h"
 
-#include "fileutil/compare.h"
-#include "util/strings.h"
-#include "process/which.h"
+#include "pbl/fileutil/compare.h"
+#include "pbl/fileutil/reduce_paths.h"
+#include "pbl/util/strings.h"
+#include "pbl/process/which.h"
 
-#include "modules/filesystem.h"
+#include "qutility/icons.h"
+#include "qutility/convert.h"
+
 #include "compare.h"
 #include "matcher.h"
 #include "mysettings.h"
-#include "qutilities/icons.h"
-#include "qutilities/convert.h"
+#include "filenamematcher.h"
 
 DirDiffForm::DirDiffForm(QWidget* parent_)
 	: QWidget(parent_),
@@ -457,21 +459,6 @@ QStringList DirDiffForm::find_subdirs(
 	return r;
 }
 
-void replace_intermediate_paths(std::string& s)
-{
-	const std::size_t i = s.find_first_of('/');
-
-	if ( i != std::string::npos )
-	{
-		const std::size_t j = s.find_last_of('/');
-
-		if ( j > i )
-		{
-			s.replace(i + 1, j - i - 1, "..");
-		}
-	}
-}
-
 void DirDiffForm::file_list_changed(
 	int  depth,
 	bool rootchanged
@@ -500,46 +487,18 @@ void DirDiffForm::file_list_changed(
 	}
 	else
 	{
+		const std::pair< std::string, std::string > p = pbl::fs::reduce_paths( section_tree[0].name(), section_tree[1].name() );
+
 		// Prefer to use just the directory name
-		std::string l = cpp::filesystem::basename( section_tree[0].name() );
-		std::string r = cpp::filesystem::basename( section_tree[1].name() );
-
-		if ( l == r )
-		{
-			l = section_tree[0].name();
-			r = section_tree[1].name();
-
-			// Find common ancestor
-			std::size_t       i = 0;
-			const std::size_t n = std::min( l.length(), r.length() );
-
-			while ( i < n && l[i] == r[i] )
-			{
-				++i;
-			}
-
-			while ( i > 0 && l[i - 1] != '/' )
-			{
-				--i;
-			}
-
-			// Erase common ancestor
-			l.erase(0, i);
-			r.erase(0, i);
-
-			// Remove intermediate directories
-			replace_intermediate_paths(l);
-			replace_intermediate_paths(r);
-		}
-
-		ui->openleftdir->setText( qt::convert(l) );
-		ui->openrightdir->setText( qt::convert(r) );
+		ui->openleftdir->setText( qt::convert(p.first) );
+		ui->openrightdir->setText( qt::convert(p.second) );
 	}
 
-	// Rematch files
-	ComparisonList matched;
+	const MySettings& settings = MySettings::instance();
 
-	matched.rematch(section_tree[0], section_tree[1], "");
+	// Rematch files
+	FileNameMatcher             name_matcher(settings.getMatchRules());
+	std::vector< comparison_t > matched = match_directories(name_matcher, section_tree[0], section_tree[1]);
 
 	if ( !rootchanged )
 	{
@@ -550,15 +509,15 @@ void DirDiffForm::file_list_changed(
 		// Both lists are in sorted order
 		while ( i < n && j < m )
 		{
-			if ( ComparisonList::compare_by_items(list[i], matched[j]) )
+			if ( list[i] < matched[j] )
 			{
-				list.erase(i);
+				list.erase(list.begin() + i);
 				--n;
 				ui->multilistview->removeItem(i);
 			}
-			else if ( ComparisonList::compare_by_items(matched[j], list[i]) )
+			else if ( matched[j] < list[i] )
 			{
-				list.insert(matched[j]);
+				list.insert(list.begin() + i, matched[j]);
 				QStringList labels;
 				labels << qt::convert(matched[j].items[0]) << qt::convert(matched[j].items[1]);
 				ui->multilistview->insertItem(i, labels);
@@ -574,14 +533,14 @@ void DirDiffForm::file_list_changed(
 
 		while ( i < n )
 		{
-			list.erase(i);
+			list.erase(list.begin() + i);
 			--n;
 			ui->multilistview->removeItem(i);
 		}
 
 		while ( j < m )
 		{
-			list.insert(matched[j]);
+			list.insert(list.end(), matched[j]);
 			QStringList labels;
 			labels << qt::convert(matched[j].items[0]) << qt::convert(matched[j].items[1]);
 			ui->multilistview->insertItem(i, labels);
@@ -632,7 +591,7 @@ std::pair< bool, DirDiffForm::overwrite_t > DirDiffForm::copyTo(
 	overwrite_t        overwrite
 )
 {
-	if ( FileSystem::exists(to) )
+	if ( cpp::filesystem::exists(to) )
 	{
 		switch ( overwrite )
 		{
@@ -663,7 +622,7 @@ std::pair< bool, DirDiffForm::overwrite_t > DirDiffForm::copyTo(
 
 	}
 
-	return std::make_pair(FileSystem::copy(from, to), overwrite);
+	return std::make_pair(cpp::filesystem::copy_file(from, to, copy_options::overwrite_existing), overwrite);
 }
 
 void DirDiffForm::stopDirectoryWatcher()
@@ -713,6 +672,12 @@ void DirDiffForm::refresh()
 {
 	section_tree[0].change_depth(0);
 	section_tree[1].change_depth(0);
+
+	for ( std::size_t i = 0, n = list.size(); i < n; ++i )
+	{
+		list[i].res = NOT_COMPARED;
+	}
+
 	change_depth();
 }
 
@@ -1094,20 +1059,19 @@ void DirDiffForm::startComparison()
 		{
 			if ( !list[i].items[0].empty() && !list[i].items[1].empty() && list[i].res == NOT_COMPARED )
 			{
+				j = i;
+
 				if ( !hidden(i) )
 				{
-					emit compare_files( qt::convert(section_tree[0].name() + "/" + list[i].items[0]), qt::convert(section_tree[1].name() + "/" + list[i].items[1]) );
-
-					return;
+					break;
 				}
-
-				j = i;
 			}
 		}
 
 		if ( j < n )
 		{
-			emit compare_files( qt::convert(section_tree[0].name() + "/" + list[j].items[0]), qt::convert(section_tree[1].name() + "/" + list[j].items[1]) );
+			MySettings& settings = MySettings::instance();
+			emit        compare_files( qt::convert(section_tree[0].name() + "/" + list[j].items[0]), qt::convert(section_tree[1].name() + "/" + list[j].items[1]), qt::convert(list[j].command[0]), qt::convert(list[j].command[1]), settings.getFileSizeCompareLimit() );
 		}
 	}
 }

@@ -210,7 +210,6 @@ const std::string& path::native() const
 	return s;
 }
 
-/// @bug argument isn't used... that can't be right.
 path path::lexically_relative(const path& p) const
 {
 	const_iterator first1 = begin(), last1 = end();

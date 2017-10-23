@@ -30,13 +30,19 @@
 #define PBL_FILEUTIL_COMPARE_H
 
 #include <string>
+#include <cstdio>
+#include "../util/return_code.h"
 
 namespace pbl
 {
 namespace fs
 {
-int compare(const std::string&, const std::string&);
-int compare_fd(int, int);
+enum compare_result_enum {compare_notequal, compare_equal, compare_error};
+
+typedef return_code< compare_result_enum > compare_result;
+
+compare_result compare(const std::string&, const std::string&, long long);
+compare_result compare(std::FILE*, std::FILE*, long long);
 }
 }
 

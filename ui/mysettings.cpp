@@ -31,9 +31,16 @@
 #include <QSettings>
 #include <QString>
 
-const char difftool_key[] = "difftool";
-const char editor_key[]   = "editor";
-const char filters_key[]  = "filters";
+const char difftool_key[]      = "difftool";
+const char editor_key[]        = "editor";
+const char filters_key[]       = "filters";
+const char matches_key[]       = "matchrules";
+const char compare_limit_key[] = "comparelimit";
+const char pattern_key[] = "pattern";
+const char replace_key[] = "replace";
+const char command1_key[] = "command1";
+const char command2_key[] = "command2";
+const char weight_key[] = "weight";
 
 MySettings& MySettings::instance()
 {
@@ -86,6 +93,65 @@ void MySettings::setFilters(const QMap< QString, QString >& m)
 	}
 
 	store->setValue(filters_key, v);
+}
+
+int MySettings::getFileSizeCompareLimit() const
+{
+	QVariant v = store->value(compare_limit_key);
+
+	if ( !v.isNull() )
+	{
+		return v.toInt();
+	}
+
+	return 0;
+}
+
+void MySettings::setFileSizeCompareLimit(int x)
+{
+	store->setValue(compare_limit_key, x);
+}
+
+std::vector<FileNameMatcher::match_descriptor> MySettings::getMatchRules() const
+{
+	std::vector< FileNameMatcher::match_descriptor > v;
+
+	const int n = store->beginReadArray(matches_key);
+
+	for (int i = 0; i < n; ++i)
+	{
+		store->setArrayIndex(i);
+
+		FileNameMatcher::match_descriptor t =
+		{
+		    store->value(pattern_key).toString(),
+		    store->value(replace_key).toString(),
+		    store->value(command1_key).toString(),
+		    store->value(command2_key).toString(),
+		    store->value(weight_key).toInt()
+		};
+		v.push_back(t);
+	}
+
+	store->endArray();
+
+	return v;
+}
+
+void MySettings::setMatchRules(const std::vector<FileNameMatcher::match_descriptor>& v)
+{
+	const std::size_t n = v.size();
+	store->beginWriteArray(matches_key, n);
+	for (std::size_t i = 0; i < n; ++i)
+	{
+		store->setArrayIndex(i);
+		store->setValue(pattern_key, v[i].pattern);
+		store->setValue(replace_key, v[i].replacement);
+		store->setValue(command1_key, v[i].first_command);
+		store->setValue(command2_key, v[i].second_command);
+		store->setValue(weight_key, v[i].weight);
+	}
+	store->endArray();
 }
 
 MySettings::MySettings()

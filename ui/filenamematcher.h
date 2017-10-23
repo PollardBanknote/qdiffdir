@@ -30,21 +30,35 @@
 #define FILENAMEMATCHER_H
 
 #include <string>
+#include <vector>
+
+#include <QString>
 
 class FileNameMatcher
 {
 public:
-	int compare(const std::string& a, const std::string& b) const;
+	struct match_result
+	{
+		int weight;
+		std::string lcommand;
+		std::string rcommand;
+	};
+
+	struct match_descriptor
+	{
+		QString pattern;
+		QString replacement;
+		QString first_command;
+		QString second_command;
+		int weight;
+	};
+
+	explicit FileNameMatcher(const std::vector< match_descriptor >&);
+
+	match_result compare(const std::string& a, const std::string& b) const;
 private:
-	// ext <=> ext.gz
-	static bool gzalt(const std::string&, const std::string&);
-
-	// c <=> cpp
-	static std::string cppalt(const std::string& s);
-
-	// c <=> cpp.gz or cpp <=> c.gz
-	static std::string cgalt(const std::string& s);
-
+	match_result compare_inner(const std::string& a, const std::string& b) const;
+	std::vector< match_descriptor > conditions;
 };
 
 

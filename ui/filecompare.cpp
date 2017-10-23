@@ -28,63 +28,72 @@
  */
 #include "filecompare.h"
 
+#include <cstdio>
+
 #include <QProcess>
 #include <QFile>
 
-#include "fileutil/compare.h"
-#include "util/strings.h"
-#include "qutilities/convert.h"
+#include "pbl/fileutil/compare.h"
+#include "pbl/util/strings.h"
+#include "qutility/convert.h"
 
 void FileCompare::compare(
 	const QString& first,
-	const QString& second
+	const QString& second,
+    const QString& lcommand,
+    const QString& rcommand,
+	long long      filesizelimit // in megabytes
 )
 {
-	bool res;
+	std::FILE* file1;
+	bool       is_process1 = false;
 
-	/// @todo Support different archive types (ex., bz2)
-	if ( first.endsWith(".gz") || second.endsWith(".gz") )
+	if (!lcommand.isEmpty())
 	{
-		/// @todo use popen and compare streams
-		const QByteArray data1 = gunzip( first.toStdString() );
-		const QByteArray data2 = gunzip( second.toStdString() );
-
-		res = ( data1 == data2 );
+		const std::string cmd = qt::convert(lcommand + " " + first);
+		file1       = ::popen(cmd.c_str(), "r");
+		is_process1 = true;
 	}
 	else
 	{
-		res = ( pbl::fs::compare( first.toStdString(), second.toStdString() ) == 1 );
+		const std::string p = qt::convert(first);
+		file1 = std::fopen(p.c_str(), "rb");
+	}
+
+	std::FILE* file2;
+	bool       is_process2 = false;
+
+	if (!rcommand.isEmpty())
+	{
+		const std::string cmd = qt::convert(rcommand + " " + second);
+		file2       = ::popen(cmd.c_str(), "r");
+		is_process2 = true;
+	}
+	else
+	{
+		const std::string p = qt::convert(second);
+		file2 = std::fopen(p.c_str(), "rb");
+	}
+
+	const bool res = ( pbl::fs::compare(file1, file2, filesizelimit * 1024 * 1024) == pbl::fs::compare_equal );
+
+	if ( is_process1 )
+	{
+		::pclose(file1);
+	}
+	else
+	{
+		std::fclose(file1);
+	}
+
+	if ( is_process2 )
+	{
+		::pclose(file2);
+	}
+	else
+	{
+		std::fclose(file2);
 	}
 
 	emit compared(first, second, res);
-}
-
-QByteArray FileCompare::gunzip(const std::string& filename)
-{
-	if ( pbl::ends_with(filename, ".gz") )
-	{
-		QStringList l;
-		l << "-c" << qt::convert(filename);
-
-		QProcess gz;
-		gz.start("gunzip", l);
-
-		if ( !gz.waitForFinished() )
-		{
-			return QByteArray();
-		}
-
-		return gz.readAllStandardOutput();
-	}
-	else
-	{
-		QFile file( qt::convert(filename) );
-
-		if ( !file.open(QIODevice::ReadOnly) )
-		{
-			return QByteArray();
-		}
-
-		return file.readAll();
-	}
 }
