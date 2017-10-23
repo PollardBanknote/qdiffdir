@@ -58,6 +58,7 @@
 #include "compare.h"
 #include "matcher.h"
 #include "mysettings.h"
+#include "filenamematcher.h"
 
 DirDiffForm::DirDiffForm(QWidget* parent_) :
 	QWidget(parent_),
@@ -492,9 +493,8 @@ void DirDiffForm::file_list_changed(
 	}
 
 	// Rematch files
-	ComparisonList matched;
-
-	matched.rematch(section_tree[0], section_tree[1]);
+	FileNameMatcher name_matcher;
+	std::vector< comparison_t > matched = match_directories(name_matcher, section_tree[0], section_tree[1]);
 
 	if ( !rootchanged )
 	{
@@ -505,15 +505,15 @@ void DirDiffForm::file_list_changed(
 		// Both lists are in sorted order
 		while ( i < n && j < m )
 		{
-			if ( ComparisonList::compare_by_items(list[i], matched[j]))
+			if ( list[i] < matched[j])
 			{
-				list.erase(i);
+				list.erase(list.begin() + i);
 				--n;
 				ui->multilistview->removeItem(i);
 			}
-			else if ( ComparisonList::compare_by_items(matched[j], list[i]))
+			else if ( matched[j] < list[i])
 			{
-				list.insert(matched[j]);
+				list.insert(list.begin() + i, matched[j]);
 				QStringList labels;
 				labels << qt::convert(matched[j].items[0]) << qt::convert(matched[j].items[1]);
 				ui->multilistview->insertItem(i, labels);
@@ -529,14 +529,14 @@ void DirDiffForm::file_list_changed(
 
 		while ( i < n )
 		{
-			list.erase(i);
+			list.erase(list.begin() + i);
 			--n;
 			ui->multilistview->removeItem(i);
 		}
 
 		while ( j < m )
 		{
-			list.insert(matched[j]);
+			list.insert(list.end(), matched[j]);
 			QStringList labels;
 			labels << qt::convert(matched[j].items[0]) << qt::convert(matched[j].items[1]);
 			ui->multilistview->insertItem(i, labels);
@@ -668,7 +668,9 @@ void DirDiffForm::refresh()
 {
 	section_tree[0].change_depth(0);
 	section_tree[1].change_depth(0);
-	list.forget();
+	for (std::size_t i = 0, n = list.size(); i < n; ++i)
+		list[i].res = NOT_COMPARED;
+
 	change_depth();
 }
 

@@ -44,6 +44,7 @@ class QFileSystemWatcher;
 
 #include "filecompare.h"
 #include "comparisonlist.h"
+#include "pbl/fileutil/directorycontents.h"
 
 namespace Ui
 {
@@ -206,7 +207,7 @@ private:
 
 	DirectoryContents section_tree[2];
 
-	ComparisonList list;
+	std::vector< comparison_t > list;
 	/*
 	   DirectoryComparison derp;
 	 */
