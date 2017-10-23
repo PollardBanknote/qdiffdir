@@ -27,7 +27,8 @@ SOURCES += main.cpp\
     settingsdialog.cpp \
     filenamematcher.cpp \
     filecompare.cpp \
-    comparisonlist.cpp
+    comparisonlist.cpp \
+    editmatchruledialog.cpp
 
 HEADERS  += mainwindow.h \
     dirdiffform.h \
@@ -37,11 +38,13 @@ HEADERS  += mainwindow.h \
     matcher.h \
     filenamematcher.h \
     filecompare.h \
-    comparisonlist.h
+    comparisonlist.h \
+    editmatchruledialog.h
 
 FORMS    += mainwindow.ui \
     dirdiffform.ui \
-    settingsdialog.ui
+    settingsdialog.ui \
+    editmatchruledialog.ui
 
 INCLUDEPATH += $$PWD/..
 

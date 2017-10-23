@@ -33,6 +33,7 @@
 #include <QMessageBox>
 
 #include "mysettings.h"
+#include "editmatchruledialog.h"
 
 SettingsDialog::SettingsDialog(QWidget* parent)
 	: QDialog(parent),
@@ -91,6 +92,21 @@ void SettingsDialog::on_save_clicked()
 	}
 
 	settings.setFilters(m);
+
+	std::vector< FileNameMatcher::match_descriptor > match_rules;
+
+	for (int i = 0, n = ui->match_rules->topLevelItemCount(); i < n; ++i)
+	{
+		QTreeWidgetItem* item = ui->match_rules->topLevelItem(i);
+
+		FileNameMatcher::match_descriptor t = {
+		    item->text(0), item->text(1), item->text(2), item->text(3),
+		    item->text(4).toInt()
+		};
+
+		match_rules.push_back(t);
+	}
+	settings.setMatchRules(match_rules);
 
 	accept();
 }
@@ -159,3 +175,55 @@ void SettingsDialog::on_edit_filter_clicked()
 		}
 	}
 }
+
+void SettingsDialog::on_add_match_clicked()
+{
+	EditMatchRuleDialog dlg;
+	if (dlg.exec() == QDialog::Accepted)
+	{
+		QStringList l;
+		l << dlg.getPattern() << dlg.getReplacement()
+		  << dlg.getPatternCommand() << dlg.getReplacementCommand()
+		  << QString::number(dlg.getWeight());
+
+		new QTreeWidgetItem(ui->match_rules, l);
+	}
+}
+
+void SettingsDialog::on_pushButton_clicked()
+{
+	QList< QTreeWidgetItem* > items = ui->match_rules->selectedItems();
+
+	if ( !items.isEmpty() )
+	{
+		QTreeWidgetItem* item = items.at(0);
+
+		EditMatchRuleDialog dlg(item->text(0), item->text(1), item->text(2), item->text(3), item->text(4).toInt());
+
+		if (dlg.exec() == QDialog::Accepted)
+		{
+			item->setText(0, dlg.getPattern());
+			item->setText(1, dlg.getReplacement());
+			item->setText(2, dlg.getPatternCommand());
+			item->setText(3, dlg.getReplacementCommand());
+			item->setText(4, QString::number(dlg.getWeight()));
+		}
+	}
+}
+
+void SettingsDialog::on_remove_match_clicked()
+{
+	QList< QTreeWidgetItem* > items = ui->match_rules->selectedItems();
+
+	if ( !items.isEmpty() )
+	{
+		if ( QMessageBox::question(this, "Delete match rule", "Are you sure?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes )
+		{
+			const int i = ui->match_rules->indexOfTopLevelItem(items.at(0));
+
+			ui->match_rules->takeTopLevelItem(i);
+			delete items.at(0);
+		}
+	}
+}
+

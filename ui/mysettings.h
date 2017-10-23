@@ -54,6 +54,7 @@ public:
 	void setFileSizeCompareLimit(int);
 
 	std::vector< FileNameMatcher::match_descriptor > getMatchRules() const;
+	void setMatchRules(const std::vector< FileNameMatcher::match_descriptor >&);
 private:
 	MySettings();
 	MySettings(const MySettings&);
