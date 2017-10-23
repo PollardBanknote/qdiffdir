@@ -82,7 +82,7 @@ public:
 public slots:
 	void settingsChanged();
 signals:
-	void compare_files(const QString&, const QString&, int);
+	void compare_files(const QString&, const QString&, const QString&, const QString&, int);
 private slots:
 	void on_viewdiff_clicked();
 	void on_copytoright_clicked();

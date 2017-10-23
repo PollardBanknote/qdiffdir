@@ -131,7 +131,7 @@ private:
 
 		for ( std::size_t i = 0, n = r.filecount(); i < n; ++i )
 		{
-			comparison_t c = { LULZ, { std::string(), std::string() }, { std::string(), std::string() }, NOT_COMPARED, false };
+			comparison_t c = { { std::string(), std::string() }, { std::string(), std::string() }, NOT_COMPARED, false };
 			c.items[j] = prefix + r.filename(i);
 			list.push_back(c);
 		}
@@ -168,51 +168,63 @@ private:
 	)
 	{
 		// Recursively apply to subdirectories
+		std::size_t       il = 0, ir = 0;
+		const std::size_t nl = l.dircount();
+		const std::size_t nr = r.dircount();
+
+		for (; il < nl && ir < nr;)
 		{
-			std::size_t       il = 0, ir = 0;
-			const std::size_t nl = l.dircount();
-			const std::size_t nr = r.dircount();
+			const DirectoryContents& ldir = l.subdir(il);
+			const DirectoryContents& rdir = r.subdir(ir);
 
-			for (; il < nl && ir < nr;)
+			if ( ldir.name() == rdir.name() )
 			{
-				const DirectoryContents& ldir = l.subdir(il);
-				const DirectoryContents& rdir = r.subdir(ir);
-
-				if ( ldir.name() == rdir.name() )
+				rematch(matcher, ldir, rdir, prefix + ldir.name() + "/");
+				++il;
+				++ir;
+			}
+			else
+			{
+				if ( ldir.name() < rdir.name() )
 				{
-					rematch(matcher, ldir, rdir, prefix + ldir.name() + "/");
+					rematch_section(matcher, 0, ldir, prefix + ldir.name() + "/");
 					++il;
-					++ir;
 				}
 				else
 				{
-					if ( ldir.name() < rdir.name() )
-					{
-						rematch_section(matcher, 0, ldir, prefix + ldir.name() + "/");
-						++il;
-					}
-					else
-					{
-						rematch_section(matcher, 1, rdir, prefix + rdir.name() + "/");
-						++ir;
-					}
+					rematch_section(matcher, 1, rdir, prefix + rdir.name() + "/");
+					++ir;
 				}
-			}
-
-			for (; il < nl; ++il )
-			{
-				const DirectoryContents& ldir = l.subdir(il);
-				rematch_section(matcher, 0, ldir, prefix + ldir.name() + "/");
-			}
-
-			for (; ir < nr; ++ir )
-			{
-				const DirectoryContents& rdir = r.subdir(ir);
-				rematch_section(matcher, 1, rdir, prefix + rdir.name() + "/");
 			}
 		}
 
-		// Match files
+		for (; il < nl; ++il )
+		{
+			const DirectoryContents& ldir = l.subdir(il);
+			rematch_section(matcher, 0, ldir, prefix + ldir.name() + "/");
+		}
+
+		for (; ir < nr; ++ir )
+		{
+			const DirectoryContents& rdir = r.subdir(ir);
+			rematch_section(matcher, 1, rdir, prefix + rdir.name() + "/");
+		}
+
+		match_filenames(matcher, l, r, prefix);
+	}
+
+	void match_filenames(
+	        const FileNameMatcher&   matcher,
+	        const DirectoryContents& l,
+	        const DirectoryContents& r,
+	        const std::string&       prefix
+	)
+	{
+		/* Match file names exactly. Merge both file lists as if by set union.
+		 * When two files have the same name, they are combined into a single
+		 * item. Files without matches are added to the list in the appropriate
+		 * place, but with the left (or right) file name empty.
+		 */
 		std::vector< comparison_t > matched_files;
 
 		const std::size_t nl = l.filecount();
@@ -222,7 +234,7 @@ private:
 
 		for (; il < nl && ir < nr;)
 		{
-			comparison_t       c     = { LULZ, { std::string(), std::string() }, { std::string(), std::string() }, NOT_COMPARED, false };
+			comparison_t       c     = { { std::string(), std::string() }, { std::string(), std::string() }, NOT_COMPARED, false };
 			const std::string& lname = l.filename(il);
 			const std::string& rname = r.filename(ir);
 
@@ -252,17 +264,21 @@ private:
 
 		for (; il < nl; ++il )
 		{
-			comparison_t c = { LULZ, { prefix + l.filename(il), std::string() }, { std::string(), std::string() }, NOT_COMPARED, false };
+			comparison_t c = { { prefix + l.filename(il), std::string() }, { std::string(), std::string() }, NOT_COMPARED, false };
 			matched_files.push_back(c);
 		}
 
 		for (; ir < nr; ++ir )
 		{
-			comparison_t c = { LULZ, { std::string(), prefix + r.filename(ir) }, { std::string(), std::string() }, NOT_COMPARED, false };
+			comparison_t c = { { std::string(), prefix + r.filename(ir) }, { std::string(), std::string() }, NOT_COMPARED, false };
 			matched_files.push_back(c);
 		}
 
-		// Second pass to match non-exact names
+		/* Second pass to match non-exact names. Items on the left that do not
+		 * have a match are checked against unmatched items on the right. If a
+		 * conversion is possible, they are matched and the right item is
+		 * removed.
+		 */
 		for ( std::size_t i = 0, n = matched_files.size(); i < n; ++i )
 		{
 			// Unmatched left item
@@ -271,19 +287,23 @@ private:
 				// Find the best match
 				std::size_t ibest = 0;
 				int         xbest = -1;
+				std::string lcommand;
+				std::string rcommand;
 
 				for ( std::size_t j = 0; j < n; ++j )
 				{
 					if ( matched_files[j].items[0].empty() )
 					{
-						const int x = matcher.compare(matched_files[i].items[0], matched_files[j].items[1]);
+						const FileNameMatcher::match_result res = matcher.compare(matched_files[i].items[0], matched_files[j].items[1]);
 
-						if ( x >= 0 )
+						if ( res.weight >= 0 )
 						{
-							if ( xbest == -1 || x < xbest )
+							if ( xbest == -1 || res.weight < xbest )
 							{
 								ibest = j;
-								xbest = x;
+								xbest = res.weight;
+								lcommand = res.lcommand;
+								rcommand = res.rcommand;
 							}
 						}
 					}
@@ -293,6 +313,8 @@ private:
 				if ( xbest != -1 )
 				{
 					matched_files[i].items[1] = matched_files[ibest].items[1];
+					matched_files[i].command[0] = lcommand;
+					matched_files[i].command[1] = rcommand;
 					matched_files.erase(matched_files.begin() + ibest);
 					--n;
 

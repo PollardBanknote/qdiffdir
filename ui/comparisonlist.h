@@ -37,11 +37,8 @@ class DirectoryContents;
 
 enum compare_result_t {NOT_COMPARED, COMPARED_SAME, COMPARED_DIFFERENT};
 
-enum DUMMY {LULZ};
-
 struct comparison_t
 {
-	DUMMY x;
 	std::string items[2];   // { left, right }
 	std::string command[2]; // command to run on left and right items when comparing
 	compare_result_t res;

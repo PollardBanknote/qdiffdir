@@ -38,7 +38,7 @@ class FileCompare
 {
 	Q_OBJECT
 public slots:
-	void compare(const QString& first, const QString& second, long long);
+	void compare(const QString& first, const QString& second, const QString&, const QString&, long long);
 signals:
 	void compared(const QString& first, const QString& second, bool);
 };

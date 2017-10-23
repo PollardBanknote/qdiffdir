@@ -1069,7 +1069,7 @@ void DirDiffForm::startComparison()
 		if ( j < n )
 		{
 			MySettings& settings = MySettings::instance();
-			emit        compare_files( qt::convert(section_tree[0].name() + "/" + list[j].items[0]), qt::convert(section_tree[1].name() + "/" + list[j].items[1]), settings.getFileSizeCompareLimit() );
+			emit        compare_files( qt::convert(section_tree[0].name() + "/" + list[j].items[0]), qt::convert(section_tree[1].name() + "/" + list[j].items[1]), qt::convert(list[j].command[0]), qt::convert(list[j].command[1]), settings.getFileSizeCompareLimit() );
 		}
 	}
 }

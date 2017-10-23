@@ -40,43 +40,39 @@
 void FileCompare::compare(
 	const QString& first,
 	const QString& second,
+    const QString& lcommand,
+    const QString& rcommand,
 	long long      filesizelimit // in megabytes
 )
 {
 	std::FILE* file1;
 	bool       is_process1 = false;
 
+	if (!lcommand.isEmpty())
+	{
+		const std::string cmd = qt::convert(lcommand + " " + first);
+		file1       = ::popen(cmd.c_str(), "r");
+		is_process1 = true;
+	}
+	else
 	{
 		const std::string p = qt::convert(first);
-
-		if ( pbl::ends_with(p, ".gz") )
-		{
-			const std::string cmd = "gunzip -c " + p;
-			file1       = ::popen(cmd.c_str(), "r");
-			is_process1 = true;
-		}
-		else
-		{
-			file1 = std::fopen(p.c_str(), "rb");
-		}
+		file1 = std::fopen(p.c_str(), "rb");
 	}
 
 	std::FILE* file2;
 	bool       is_process2 = false;
 
+	if (!rcommand.isEmpty())
+	{
+		const std::string cmd = qt::convert(rcommand + " " + second);
+		file2       = ::popen(cmd.c_str(), "r");
+		is_process2 = true;
+	}
+	else
 	{
 		const std::string p = qt::convert(second);
-
-		if ( pbl::ends_with(p, ".gz") )
-		{
-			const std::string cmd = "gunzip -c " + p;
-			file2       = ::popen(cmd.c_str(), "r");
-			is_process2 = true;
-		}
-		else
-		{
-			file2 = std::fopen(p.c_str(), "rb");
-		}
+		file2 = std::fopen(p.c_str(), "rb");
 	}
 
 	const bool res = ( pbl::fs::compare(file1, file2, filesizelimit * 1024 * 1024) == pbl::fs::compare_equal );
