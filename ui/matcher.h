@@ -47,7 +47,8 @@ public:
 	virtual int compare(const std::string&, const std::string&) const = 0;
 };
 
-class DefaultMatcher : public Matcher
+class DefaultMatcher
+	: public Matcher
 {
 public:
 	DefaultMatcher* clone() const

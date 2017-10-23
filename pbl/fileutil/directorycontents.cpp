@@ -76,30 +76,30 @@ void DirectoryContents::init(const std::string& path)
 	{
 		cpp::filesystem::file_status s = it->status();
 
-		if ( cpp::filesystem::is_directory(s))
+		if ( cpp::filesystem::is_directory(s) )
 		{
-			if ( hidden_dirs || !is_hidden(it->path()))
+			if ( hidden_dirs || !is_hidden( it->path() ) )
 			{
 				const cpp::filesystem::path rel = it->path().lexically_relative(path);
-				dirs.push_back(rel.native());
+				dirs.push_back( rel.native() );
 			}
 		}
-		else if ( cpp::filesystem::is_regular_file(s) || cpp::filesystem::is_symlink(s))
+		else if ( cpp::filesystem::is_regular_file(s) || cpp::filesystem::is_symlink(s) )
 		{
-			if ( hidden_files || !is_hidden(it->path()))
+			if ( hidden_files || !is_hidden( it->path() ) )
 			{
 				const cpp::filesystem::path rel = it->path().lexically_relative(path);
-				filenames.push_back(rel.native());
+				filenames.push_back( rel.native() );
 			}
 		}
 	}
 
 	// Save
-	std::sort(filenames.begin(), filenames.end());
+	std::sort( filenames.begin(), filenames.end() );
 	files.swap(filenames);
 
-	std::sort(dirs.begin(), dirs.end());
-	children.resize(dirs.size());
+	std::sort( dirs.begin(), dirs.end() );
+	children.resize( dirs.size() );
 
 	for ( std::size_t i = 0, n = dirs.size(); i < n; ++i )
 	{
@@ -114,7 +114,7 @@ void DirectoryContents::change_depth()
 
 void DirectoryContents::change_depth(int d)
 {
-	if ( name_.empty())
+	if ( name_.empty() )
 	{
 		children.clear();
 		files.clear();
@@ -133,7 +133,7 @@ void DirectoryContents::change_depth(
 {
 	if ( current_depth < d )
 	{
-		if ( files.empty() && children.empty())
+		if ( files.empty() && children.empty() )
 		{
 			init(current_path);
 		}
@@ -156,9 +156,9 @@ bool DirectoryContents::change_root(
 	int                d
 )
 {
-	if ( !dir.empty())
+	if ( !dir.empty() )
 	{
-		name_ = ( is_absolute(dir) && cpp::filesystem::is_directory(dir))
+		name_ = ( is_absolute(dir) && cpp::filesystem::is_directory(dir) )
 		        ? cpp::filesystem::cleanpath(dir)
 				: std::string();
 		children.clear();
@@ -188,7 +188,7 @@ bool DirectoryContents::rescan(
 		if ( dirname == s )
 		{
 			// Found the dir
-			if ( cpp::filesystem::is_directory(s))
+			if ( cpp::filesystem::is_directory(s) )
 			{
 				children[i].children.clear();
 				children[i].files.clear();
@@ -202,7 +202,7 @@ bool DirectoryContents::rescan(
 
 			return true;
 		}
-		else if ( pbl::starts_with(dirname, s + "/"))
+		else if ( pbl::starts_with(dirname, s + "/") )
 		{
 
 			// Descend
@@ -218,7 +218,7 @@ void DirectoryContents::rescan(
 	int                maxdepth
 )
 {
-	if ( !name_.empty())
+	if ( !name_.empty() )
 	{
 		if ( name_ == dirname )
 		{
@@ -226,7 +226,7 @@ void DirectoryContents::rescan(
 			children.clear();
 			files.clear();
 
-			if ( cpp::filesystem::is_directory(dirname))
+			if ( cpp::filesystem::is_directory(dirname) )
 			{
 				change_depth(maxdepth);
 			}
@@ -238,7 +238,7 @@ void DirectoryContents::rescan(
 		}
 		else
 		{
-			if ( pbl::starts_with(dirname, name_ + "/"))
+			if ( pbl::starts_with(dirname, name_ + "/") )
 			{
 				rescan(name_, dirname, 0, maxdepth);
 			}

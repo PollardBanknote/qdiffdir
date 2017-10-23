@@ -51,14 +51,15 @@ compare_result compare(
 {
 	compare_result res = compare_error;
 
-	if (std::FILE* fd1 = std::fopen(first.c_str(), "rb"))
+	if ( std::FILE* fd1 = std::fopen(first.c_str(), "rb") )
 	{
-		if (std::FILE* fd2 = std::fopen(second.c_str(), "rb"))
+		if ( std::FILE* fd2 = std::fopen(second.c_str(), "rb") )
 		{
 			res = compare(fd1, fd2, sizelimit);
 
 			std::fclose(fd2);
 		}
+
 		std::fclose(fd1);
 	}
 
@@ -66,13 +67,15 @@ compare_result compare(
 }
 
 compare_result compare(
-    std::FILE*       file1,
-    std::FILE*       file2,
-	long long sizelimit
+	std::FILE* file1,
+	std::FILE* file2,
+	long long  sizelimit
 )
 {
-	if (!file1 || !file2)
+	if ( !file1 || !file2 )
+	{
 		return compare_error;
+	}
 
 	{
 		/* Check if the files are obviously the same or different. Ex., because
@@ -81,7 +84,7 @@ compare_result compare(
 		int fd1 = ::fileno(file1);
 		int fd2 = ::fileno(file2);
 
-		if (fd1 != -1 && fd2 != -1)
+		if ( fd1 != -1 && fd2 != -1 )
 		{
 			struct stat s1;
 			struct stat s2;
@@ -92,7 +95,7 @@ compare_result compare(
 			if ( res1 && res2 )
 			{
 				// files of different size are obviously different
-				if ( S_ISREG(s1.st_mode) && S_ISREG(s2.st_mode) && (s1.st_size != s2.st_size ))
+				if ( S_ISREG(s1.st_mode) && S_ISREG(s2.st_mode) && ( s1.st_size != s2.st_size ) )
 				{
 					return compare_notequal;
 				}
@@ -131,10 +134,10 @@ compare_result compare(
 			const std::size_t m1 = sizeof( buf1 ) - size1;
 			const std::size_t n1 = std::fread(buf1 + size1, 1, m1, file1);
 
-			if (n1 < m1)
+			if ( n1 < m1 )
 			{
 				// eof or error
-				if (std::ferror(file1))
+				if ( std::ferror(file1) )
 				{
 					return compare_error;
 				}
@@ -151,10 +154,10 @@ compare_result compare(
 			const std::size_t m2 = sizeof( buf2 ) - size2;
 			const std::size_t n2 = std::fread(buf2 + size2, 1, m2, file2);
 
-			if (n2 < m2)
+			if ( n2 < m2 )
 			{
 				// eof or error
-				if (std::ferror(file2))
+				if ( std::ferror(file2) )
 				{
 					return compare_error;
 				}

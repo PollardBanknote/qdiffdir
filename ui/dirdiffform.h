@@ -54,7 +54,8 @@ class DirDiffForm;
 /** A widget for comparing two directories, with some file operations
  *
  */
-class DirDiffForm : public QWidget
+class DirDiffForm
+	: public QWidget
 {
 	Q_OBJECT
 public:

@@ -9,17 +9,27 @@ template< typename E >
 class return_code
 {
 public:
-	return_code(E value_) : value(value_) { }
+	return_code(E value_)
+		: value(value_)
+	{
+	}
 
-	friend bool operator==(const return_code& l, const return_code& r)
+	friend bool operator==(
+		const return_code& l,
+		const return_code& r
+	)
 	{
 		return l.value == r.value;
 	}
 
-	friend bool operator!=(const return_code& l, const return_code& r)
+	friend bool operator!=(
+		const return_code& l,
+		const return_code& r
+	)
 	{
 		return l.value != r.value;
 	}
+
 private:
 	E value;
 };

@@ -37,7 +37,7 @@ namespace pbl
 {
 namespace fs
 {
-enum compare_result_enum { compare_notequal, compare_equal, compare_error };
+enum compare_result_enum {compare_notequal, compare_equal, compare_error};
 
 typedef return_code< compare_result_enum > compare_result;
 

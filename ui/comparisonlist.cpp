@@ -39,7 +39,10 @@ namespace
 /* Compare paths directory by directory. Last path component of each must be
  * a file. Files are sorted after directories within the same directory
  */
-bool compare_paths(const std::string& l, const std::string& r)
+bool compare_paths(
+	const std::string& l,
+	const std::string& r
+)
 {
 	const std::size_t nl = l.length();
 	const std::size_t nr = r.length();
@@ -102,9 +105,9 @@ class Rematcher
 {
 public:
 	const std::vector< comparison_t >& rematch(
-	    const FileNameMatcher& matcher,
-	    const DirectoryContents& l,
-	    const DirectoryContents& r
+		const FileNameMatcher&   matcher,
+		const DirectoryContents& l,
+		const DirectoryContents& r
 	)
 	{
 		rematch(matcher, l, r, "");
@@ -113,10 +116,10 @@ public:
 
 private:
 	void rematch_section(
-	        const FileNameMatcher& matcher,
-	    std::size_t              j,
-	    const DirectoryContents& r,
-	    const std::string&       prefix
+		const FileNameMatcher&   matcher,
+		std::size_t              j,
+		const DirectoryContents& r,
+		const std::string&       prefix
 	)
 	{
 		// Recursively apply to subdirectories
@@ -133,35 +136,35 @@ private:
 			list.push_back(c);
 		}
 
-		std::sort(list.begin(), list.end());
+		std::sort( list.begin(), list.end() );
 	}
 
 	void rematch(
-	    const FileNameMatcher& matcher,
-	    const DirectoryContents& l,
-	    const DirectoryContents& r,
-	    const std::string&       prefix
+		const FileNameMatcher&   matcher,
+		const DirectoryContents& l,
+		const DirectoryContents& r,
+		const std::string&       prefix
 	)
 	{
-		if ( l.valid() && r.valid())
+		if ( l.valid() && r.valid() )
 		{
 			rematch_inner(matcher, l, r, prefix);
 		}
-		else if ( l.valid())
+		else if ( l.valid() )
 		{
 			rematch_section(matcher, 0, l, "");
 		}
-		else if ( r.valid())
+		else if ( r.valid() )
 		{
 			rematch_section(matcher, 1, r, "");
 		}
 	}
 
 	void rematch_inner(
-	    const FileNameMatcher& matcher,
-	    const DirectoryContents& l,
-	    const DirectoryContents& r,
-	    const std::string&       prefix
+		const FileNameMatcher&   matcher,
+		const DirectoryContents& l,
+		const DirectoryContents& r,
+		const std::string&       prefix
 	)
 	{
 		// Recursively apply to subdirectories
@@ -255,7 +258,7 @@ private:
 
 		for (; ir < nr; ++ir )
 		{
-			comparison_t c = { LULZ, {std::string(), prefix + r.filename(ir) }, { std::string(), std::string() }, NOT_COMPARED, false };
+			comparison_t c = { LULZ, { std::string(), prefix + r.filename(ir) }, { std::string(), std::string() }, NOT_COMPARED, false };
 			matched_files.push_back(c);
 		}
 
@@ -263,7 +266,7 @@ private:
 		for ( std::size_t i = 0, n = matched_files.size(); i < n; ++i )
 		{
 			// Unmatched left item
-			if ( matched_files[i].items[1].empty())
+			if ( matched_files[i].items[1].empty() )
 			{
 				// Find the best match
 				std::size_t ibest = 0;
@@ -271,7 +274,7 @@ private:
 
 				for ( std::size_t j = 0; j < n; ++j )
 				{
-					if ( matched_files[j].items[0].empty())
+					if ( matched_files[j].items[0].empty() )
 					{
 						const int x = matcher.compare(matched_files[i].items[0], matched_files[j].items[1]);
 
@@ -301,8 +304,8 @@ private:
 			}
 		}
 
-		list.insert(list.end(), matched_files.begin(), matched_files.end());
-		std::sort(list.begin(), list.end());
+		list.insert( list.end(), matched_files.begin(), matched_files.end() );
+		std::sort( list.begin(), list.end() );
 	}
 
 	std::vector< comparison_t > list;
@@ -311,11 +314,11 @@ private:
 
 bool comparison_t::has_only(std::size_t i) const
 {
-	if ( !items[i].empty())
+	if ( !items[i].empty() )
 	{
 		for ( std::size_t j = 0; j < 2; ++j )
 		{
-			if ( j != i && !items[j].empty())
+			if ( j != i && !items[j].empty() )
 			{
 				return false;
 			}
@@ -337,9 +340,13 @@ bool comparison_t::operator<(const comparison_t& b) const
 	return compare_paths(items[0].empty() ? items[1] : items[0], b.items[0].empty() ? b.items[1] : b.items[0]);
 }
 
-std::vector< comparison_t > match_directories(const FileNameMatcher& matcher, const DirectoryContents&l, const DirectoryContents&r)
+std::vector< comparison_t > match_directories(
+	const FileNameMatcher&   matcher,
+	const DirectoryContents& l,
+	const DirectoryContents& r
+)
 {
 	Rematcher t;
+
 	return t.rematch(matcher, l, r);
 }
-

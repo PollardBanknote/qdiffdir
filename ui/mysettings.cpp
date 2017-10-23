@@ -31,9 +31,9 @@
 #include <QSettings>
 #include <QString>
 
-const char difftool_key[] = "difftool";
-const char editor_key[]   = "editor";
-const char filters_key[]  = "filters";
+const char difftool_key[]      = "difftool";
+const char editor_key[]        = "editor";
+const char filters_key[]       = "filters";
 const char compare_limit_key[] = "comparelimit";
 
 MySettings& MySettings::instance()
@@ -71,7 +71,7 @@ QMap< QString, QString > MySettings::getFilters() const
 
 	for ( QMap< QString, QVariant >::const_iterator it = v.constBegin(); it != v.constEnd(); ++it )
 	{
-		m.insert(it.key(), it.value().toString());
+		m.insert( it.key(), it.value().toString() );
 	}
 
 	return m;
@@ -83,7 +83,7 @@ void MySettings::setFilters(const QMap< QString, QString >& m)
 
 	for ( QMap< QString, QString >::const_iterator it = m.constBegin(); it != m.constEnd(); ++it )
 	{
-		v.insert(it.key(), it.value());
+		v.insert( it.key(), it.value() );
 	}
 
 	store->setValue(filters_key, v);
@@ -92,8 +92,12 @@ void MySettings::setFilters(const QMap< QString, QString >& m)
 int MySettings::getFileSizeCompareLimit() const
 {
 	QVariant v = store->value(compare_limit_key);
-	if (!v.isNull())
+
+	if ( !v.isNull() )
+	{
 		return v.toInt();
+	}
+
 	return 0;
 }
 
@@ -117,7 +121,7 @@ void MySettings::setValue(
 	const QString& value
 )
 {
-	if ( value.isEmpty())
+	if ( value.isEmpty() )
 	{
 		store->remove(key);
 	}

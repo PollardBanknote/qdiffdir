@@ -34,16 +34,16 @@
 
 #include "mysettings.h"
 
-SettingsDialog::SettingsDialog(QWidget* parent) :
-	QDialog(parent),
+SettingsDialog::SettingsDialog(QWidget* parent)
+	: QDialog(parent),
 	ui(new Ui::SettingsDialog)
 {
 	ui->setupUi(this);
 
 	MySettings& settings = MySettings::instance();
-	ui->diffToolLineEdit->setText(settings.getDiffTool());
-	ui->editorLineEdit->setText(settings.getEditor());
-	ui->fileSizeCompareLimitMBSpinBox->setValue(settings.getFileSizeCompareLimit());
+	ui->diffToolLineEdit->setText( settings.getDiffTool() );
+	ui->editorLineEdit->setText( settings.getEditor() );
+	ui->fileSizeCompareLimitMBSpinBox->setValue( settings.getFileSizeCompareLimit() );
 
 	const QMap< QString, QString > filters = settings.getFilters();
 	int                            nrows   = 0;
@@ -51,8 +51,8 @@ SettingsDialog::SettingsDialog(QWidget* parent) :
 	for ( QMap< QString, QString >::const_iterator it = filters.constBegin(); it != filters.constEnd(); ++it )
 	{
 		ui->filter_list->insertRow(nrows);
-		QTableWidgetItem* first  = new QTableWidgetItem(it.key());
-		QTableWidgetItem* second = new QTableWidgetItem(it.value());
+		QTableWidgetItem* first  = new QTableWidgetItem( it.key() );
+		QTableWidgetItem* second = new QTableWidgetItem( it.value() );
 		ui->filter_list->setItem(nrows, 0, first);
 		ui->filter_list->setItem(nrows, 1, second);
 		++nrows;
@@ -68,15 +68,15 @@ void SettingsDialog::on_save_clicked()
 {
 	MySettings& settings = MySettings::instance();
 
-	settings.setDiffTool(ui->diffToolLineEdit->text());
-	settings.setEditor(ui->editorLineEdit->text());
-	settings.setFileSizeCompareLimit(ui->fileSizeCompareLimitMBSpinBox->value());
+	settings.setDiffTool( ui->diffToolLineEdit->text() );
+	settings.setEditor( ui->editorLineEdit->text() );
+	settings.setFileSizeCompareLimit( ui->fileSizeCompareLimitMBSpinBox->value() );
 
 	QMap< QString, QString > m;
 
 	for ( int i = 0, r = ui->filter_list->rowCount(); i < r; ++i )
 	{
-		m.insert(ui->filter_list->item(i, 0)->text(), ui->filter_list->item(i, 1)->text());
+		m.insert( ui->filter_list->item(i, 0)->text(), ui->filter_list->item(i, 1)->text() );
 	}
 
 	settings.setFilters(m);
@@ -98,11 +98,11 @@ void SettingsDialog::on_add_filter_clicked()
 {
 	const QString key = QInputDialog::getText(this, "Filter Name", "Please enter a name for the filter");
 
-	if ( !key.isEmpty())
+	if ( !key.isEmpty() )
 	{
 		const QString value = QInputDialog::getText(this, "Filter", "Please enter a filter (ex., \"*.cpp; *.h\")");
 
-		if ( !value.isEmpty())
+		if ( !value.isEmpty() )
 		{
 			const int r = ui->filter_list->rowCount();
 			ui->filter_list->insertRow(r);
@@ -119,11 +119,11 @@ void SettingsDialog::on_remove_filter_clicked()
 {
 	QList< QTableWidgetItem* > items = ui->filter_list->selectedItems();
 
-	if ( !items.isEmpty())
+	if ( !items.isEmpty() )
 	{
 		if ( QMessageBox::question(this, "Delete filter", "Are you sure?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes )
 		{
-			ui->filter_list->removeRow(items.at(0)->row());
+			ui->filter_list->removeRow( items.at(0)->row() );
 		}
 	}
 }
@@ -134,13 +134,13 @@ void SettingsDialog::on_edit_filter_clicked()
 
 	for ( int i = 0; i < items.count(); ++i )
 	{
-		if ( QTableWidgetItem* item = items.at(i))
+		if ( QTableWidgetItem* item = items.at(i) )
 		{
 			if ( item->column() == 1 )
 			{
-				const QString value = QInputDialog::getText(this, ui->filter_list->item(item->row(), 0)->text(), "Please enter a filter (ex., \"*.cpp; *.h\")", QLineEdit::Normal, item->text());
+				const QString value = QInputDialog::getText( this, ui->filter_list->item(item->row(), 0)->text(), "Please enter a filter (ex., \"*.cpp; *.h\")", QLineEdit::Normal, item->text() );
 
-				if ( !value.isEmpty())
+				if ( !value.isEmpty() )
 				{
 					item->setText(value);
 				}

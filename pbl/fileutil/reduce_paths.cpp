@@ -18,13 +18,17 @@ void replace_intermediate_paths(std::string& s)
 		}
 	}
 }
+
 }
 
 namespace pbl
 {
 namespace fs
 {
-std::pair<std::string, std::string> reduce_paths(const std::string& l_, const std::string& r_)
+std::pair< std::string, std::string > reduce_paths(
+	const std::string& l_,
+	const std::string& r_
+)
 {
 	std::string l = cpp::filesystem::basename(l_);
 	std::string r = cpp::filesystem::basename(r_);
@@ -36,7 +40,7 @@ std::pair<std::string, std::string> reduce_paths(const std::string& l_, const st
 
 		// Find common ancestor
 		std::size_t       i = 0;
-		const std::size_t n = std::min(l.length(), r.length());
+		const std::size_t n = std::min( l.length(), r.length() );
 
 		while ( i < n && l[i] == r[i] )
 		{
@@ -59,5 +63,6 @@ std::pair<std::string, std::string> reduce_paths(const std::string& l_, const st
 
 	return std::make_pair(l, r);
 }
+
 }
 }
