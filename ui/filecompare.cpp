@@ -34,7 +34,6 @@
 #include <QFile>
 
 #include "pbl/fileutil/compare.h"
-#include "pbl/util/strings.h"
 #include "qutility/convert.h"
 
 namespace
