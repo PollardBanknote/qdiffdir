@@ -37,6 +37,49 @@
 #include "pbl/util/strings.h"
 #include "qutility/convert.h"
 
+namespace
+{
+class FileOrProcess
+{
+public:
+	FileOrProcess(const QString& filename, const QString& command)
+	    : is_process(!command.isEmpty())
+	{
+		if ( is_process )
+		{
+			const std::string cmd = qt::convert(command + " " + filename);
+			file       = ::popen(cmd.c_str(), "r");
+		}
+		else
+		{
+			const std::string p = qt::convert(filename);
+			file = std::fopen(p.c_str(), "rb");
+		}
+	}
+
+	~FileOrProcess()
+	{
+		if ( is_process )
+		{
+			::pclose(file);
+		}
+		else
+		{
+			std::fclose(file);
+		}
+	}
+
+	std::FILE* handle() const
+	{
+		return file;
+	}
+
+private:
+	std::FILE* file;
+	bool is_process;
+};
+}
+
 void FileCompare::compare(
 	const QString& first,
 	const QString& second,
@@ -45,55 +88,10 @@ void FileCompare::compare(
 	long long      filesizelimit // in megabytes
 )
 {
-	std::FILE* file1;
-	bool       is_process1 = false;
+	FileOrProcess file1(first, lcommand);
+	FileOrProcess file2(second, rcommand);
 
-	if ( !lcommand.isEmpty() )
-	{
-		const std::string cmd = qt::convert(lcommand + " " + first);
-		file1       = ::popen(cmd.c_str(), "r");
-		is_process1 = true;
-	}
-	else
-	{
-		const std::string p = qt::convert(first);
-		file1 = std::fopen(p.c_str(), "rb");
-	}
-
-	std::FILE* file2;
-	bool       is_process2 = false;
-
-	if ( !rcommand.isEmpty() )
-	{
-		const std::string cmd = qt::convert(rcommand + " " + second);
-		file2       = ::popen(cmd.c_str(), "r");
-		is_process2 = true;
-	}
-	else
-	{
-		const std::string p = qt::convert(second);
-		file2 = std::fopen(p.c_str(), "rb");
-	}
-
-	const bool res = ( pbl::fs::compare(file1, file2, filesizelimit * 1024 * 1024) == pbl::fs::compare_equal );
-
-	if ( is_process1 )
-	{
-		::pclose(file1);
-	}
-	else
-	{
-		std::fclose(file1);
-	}
-
-	if ( is_process2 )
-	{
-		::pclose(file2);
-	}
-	else
-	{
-		std::fclose(file2);
-	}
+	const bool res = ( pbl::fs::compare(file1.handle(), file2.handle(), filesizelimit * 1024 * 1024) == pbl::fs::compare_equal );
 
 	emit compared(first, second, res);
 }
