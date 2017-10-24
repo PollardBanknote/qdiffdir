@@ -55,7 +55,7 @@ public:
 
 	explicit FileNameMatcher(const std::vector< match_descriptor >&);
 
-	match_result compare(const std::string& a, const std::string& b) const;
+	match_result operator()(const std::string& a, const std::string& b) const;
 private:
 	match_result compare_inner(const std::string& a, const std::string& b) const;
 	std::vector< match_descriptor > conditions;

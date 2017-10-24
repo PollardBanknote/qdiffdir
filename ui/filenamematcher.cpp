@@ -43,7 +43,7 @@ FileNameMatcher::FileNameMatcher(const std::vector< FileNameMatcher::match_descr
 
 }
 
-FileNameMatcher::match_result FileNameMatcher::compare(
+FileNameMatcher::match_result FileNameMatcher::operator()(
 	const std::string& a,
 	const std::string& b
 ) const
@@ -70,12 +70,6 @@ FileNameMatcher::match_result FileNameMatcher::compare_inner(
 	const std::string& b
 ) const
 {
-	if ( a == b )
-	{
-		match_result t = { 0, "", "" };
-		return t;
-	}
-
 	std::size_t best = static_cast< std::size_t >( -1 );
 
 	for ( std::size_t i = 0; i < conditions.size(); ++i )

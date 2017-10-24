@@ -240,6 +240,13 @@ private:
 
 			if ( lname == rname )
 			{
+				const FileNameMatcher::match_result res = matcher(lname, rname);
+				if (res.weight != -1)
+				{
+					c.command[0] = res.lcommand;
+					c.command[1] = res.rcommand;
+				}
+
 				c.items[0] = prefix + lname;
 				c.items[1] = prefix + rname;
 				++il;
@@ -294,7 +301,7 @@ private:
 				{
 					if ( matched_files[j].items[0].empty() )
 					{
-						const FileNameMatcher::match_result res = matcher.compare(matched_files[i].items[0], matched_files[j].items[1]);
+						const FileNameMatcher::match_result res = matcher(matched_files[i].items[0], matched_files[j].items[1]);
 
 						if ( res.weight >= 0 )
 						{
