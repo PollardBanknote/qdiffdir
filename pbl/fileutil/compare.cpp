@@ -49,7 +49,7 @@ compare_result compare(
 	long long          sizelimit
 )
 {
-	compare_result res = compare_error;
+	compare_result res = compare_error_open;
 
 	if ( std::FILE* fd1 = std::fopen(first.c_str(), "rb") )
 	{
@@ -74,7 +74,7 @@ compare_result compare(
 {
 	if ( !file1 || !file2 )
 	{
-		return compare_error;
+		return compare_error_null;
 	}
 
 	{
@@ -97,7 +97,7 @@ compare_result compare(
 				// files of different size are obviously different
 				if ( S_ISREG(s1.st_mode) && S_ISREG(s2.st_mode) && ( s1.st_size != s2.st_size ) )
 				{
-					return compare_notequal;
+					return compare_notequal_sizes;
 				}
 
 				// files with the same dev/inode are obviously the same and don't need to
@@ -111,7 +111,7 @@ compare_result compare(
 			// Don't check files that are larger than the size limit
 			if ( sizelimit != 0 && ( ( res1 && S_ISREG(s1.st_mode) && s1.st_size > sizelimit ) || ( res2 && S_ISREG(s2.st_mode) && s2.st_size > sizelimit ) ) )
 			{
-				return compare_error;
+				return compare_error_too_big;
 			}
 		}
 	}
@@ -139,7 +139,7 @@ compare_result compare(
 				// eof or error
 				if ( std::ferror(file1) )
 				{
-					return compare_error;
+					return compare_error_read;
 				}
 
 				// must be end of file, then
@@ -159,7 +159,7 @@ compare_result compare(
 				// eof or error
 				if ( std::ferror(file2) )
 				{
-					return compare_error;
+					return compare_error_read;
 				}
 
 				// must be end of file, then
@@ -175,7 +175,7 @@ compare_result compare(
 		// files are different
 		if ( std::memcmp(buf1, buf2, m) != 0 )
 		{
-			return compare_notequal;
+			return compare_notequal_content;
 		}
 		else
 		{
@@ -203,12 +203,10 @@ compare_result compare(
 			// files have different size
 			if ( ( eof1 && size2 != 0 ) || ( eof2 && size1 != 0 ) )
 			{
-				return compare_notequal;
+				return compare_notequal_sizes;
 			}
 		}
 	}
-
-	return compare_error;
 }
 
 }

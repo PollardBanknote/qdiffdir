@@ -37,7 +37,15 @@ namespace pbl
 {
 namespace fs
 {
-enum compare_result_enum {compare_notequal, compare_equal, compare_error};
+enum compare_result_enum {
+	compare_equal,
+	compare_notequal_sizes,
+	compare_notequal_content,
+	compare_error_open,
+	compare_error_null,
+	compare_error_too_big,
+	compare_error_read
+};
 
 typedef return_code< compare_result_enum > compare_result;
 
