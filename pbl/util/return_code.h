@@ -1,6 +1,8 @@
 #ifndef PBL_UTIL_RETURN_CODE_H
 #define PBL_UTIL_RETURN_CODE_H
 
+#include <iostream>
+
 namespace pbl
 {
 /** Wrapper around an enum E that prevents unwanted conversions (ex., to bool)
@@ -28,6 +30,11 @@ public:
 	)
 	{
 		return l.value != r.value;
+	}
+
+	friend std::ostream& operator<<(std::ostream& os, const return_code& c)
+	{
+		return os << c.value;
 	}
 
 private:
