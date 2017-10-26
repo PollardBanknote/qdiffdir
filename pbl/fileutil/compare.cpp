@@ -140,11 +140,14 @@ compare_result compare(
 				// eof or error
 				if ( std::ferror(file1) )
 				{
-					if (errno != EINTR)
+					if ( errno != EINTR )
+					{
 						return compare_error_read;
+					}
+
 					std::clearerr(file1);
 				}
-				else if (std::feof(file1))
+				else if ( std::feof(file1) )
 				{
 					// must be end of file, then
 					eof1 = true;
@@ -164,11 +167,14 @@ compare_result compare(
 				// eof or error
 				if ( std::ferror(file2) )
 				{
-					if (errno != EINTR)
+					if ( errno != EINTR )
+					{
 						return compare_error_read;
+					}
+
 					std::clearerr(file2);
 				}
-				else if (std::feof(file2))
+				else if ( std::feof(file2) )
 				{
 					// must be end of file, then
 					eof2 = true;

@@ -70,9 +70,9 @@ FileNameMatcher::match_result FileNameMatcher::compare_inner(
 	{
 		QRegularExpression pattern("^" + conditions[i].pattern + "$");
 
-		QRegularExpressionMatch match = pattern.match(QString::fromStdString(a));
+		QRegularExpressionMatch match = pattern.match( QString::fromStdString(a) );
 
-		if (match.hasMatch())
+		if ( match.hasMatch() )
 		{
 			QString replace = conditions[i].replacement;
 

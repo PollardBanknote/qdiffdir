@@ -241,7 +241,8 @@ private:
 			if ( lname == rname )
 			{
 				const FileNameMatcher::match_result res = matcher(lname, rname);
-				if (res.weight != -1)
+
+				if ( res.weight != -1 )
 				{
 					c.command[0] = res.lcommand;
 					c.command[1] = res.rcommand;

@@ -37,7 +37,8 @@ namespace pbl
 {
 namespace fs
 {
-enum compare_result_enum {
+enum compare_result_enum
+{
 	compare_equal,
 	compare_notequal_sizes,
 	compare_notequal_content,

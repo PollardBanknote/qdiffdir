@@ -32,7 +32,10 @@ public:
 		return l.value != r.value;
 	}
 
-	friend std::ostream& operator<<(std::ostream& os, const return_code& c)
+	friend std::ostream& operator<<(
+		std::ostream&      os,
+		const return_code& c
+	)
 	{
 		return os << c.value;
 	}

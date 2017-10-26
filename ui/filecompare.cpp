@@ -41,13 +41,16 @@ namespace
 class FileOrProcess
 {
 public:
-	FileOrProcess(const QString& filename, const QString& command)
-	    : is_process(!command.isEmpty())
+	FileOrProcess(
+		const QString& filename,
+		const QString& command
+	)
+		: is_process( !command.isEmpty() )
 	{
 		if ( is_process )
 		{
 			const std::string cmd = qt::convert(command + " " + filename);
-			file       = ::popen(cmd.c_str(), "r");
+			file = ::popen(cmd.c_str(), "r");
 		}
 		else
 		{
@@ -75,7 +78,7 @@ public:
 
 private:
 	std::FILE* file;
-	bool is_process;
+	bool       is_process;
 };
 }
 
