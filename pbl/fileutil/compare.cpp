@@ -29,6 +29,7 @@
 #include "compare.h"
 
 #include <cstring>
+#include <cerrno>
 
 #if !defined( _WIN32 ) && ( defined( __unix__ ) || defined( __unix ) || ( defined( __APPLE__ ) && defined( __MACH__ )  ) )
 #include <unistd.h>
@@ -139,11 +140,14 @@ compare_result compare(
 				// eof or error
 				if ( std::ferror(file1) )
 				{
-					return compare_error_read;
+					if (errno != EINTR)
+						return compare_error_read;
 				}
-
-				// must be end of file, then
-				eof1 = true;
+				else if (std::feof(file1))
+				{
+					// must be end of file, then
+					eof1 = true;
+				}
 			}
 
 			size1 += n1;
@@ -159,11 +163,14 @@ compare_result compare(
 				// eof or error
 				if ( std::ferror(file2) )
 				{
-					return compare_error_read;
+					if (errno != EINTR)
+						return compare_error_read;
 				}
-
-				// must be end of file, then
-				eof2 = true;
+				else if (std::feof(file2))
+				{
+					// must be end of file, then
+					eof2 = true;
+				}
 			}
 
 			size2 += n2;
