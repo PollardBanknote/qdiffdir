@@ -28,15 +28,9 @@
  */
 #include "filenamematcher.h"
 
-#include <iostream>
-
 #include <QRegularExpression>
 #include <QString>
-#include <QDebug>
 
-#include "pbl/util/strings.h"
-
-/// @todo file.bak
 FileNameMatcher::FileNameMatcher(const std::vector< FileNameMatcher::match_descriptor >& conditions_)
 	: conditions(conditions_)
 {
@@ -75,16 +69,22 @@ FileNameMatcher::match_result FileNameMatcher::compare_inner(
 	for ( std::size_t i = 0; i < conditions.size(); ++i )
 	{
 		QRegularExpression pattern("^" + conditions[i].pattern + "$");
-		QString            replace = conditions[i].replacement;
 
-		QString b2 = QString::fromStdString(a);
-		b2.replace(pattern, replace);
+		QRegularExpressionMatch match = pattern.match(QString::fromStdString(a));
 
-		if ( b2.toStdString() == b )
+		if (match.hasMatch())
 		{
-			if ( best == static_cast< std::size_t >( -1 ) || conditions[i].weight < conditions[best].weight )
+			QString replace = conditions[i].replacement;
+
+			QString b2 = QString::fromStdString(a);
+			b2.replace(pattern, replace);
+
+			if ( b2.toStdString() == b )
 			{
-				best = i;
+				if ( best == static_cast< std::size_t >( -1 ) || conditions[i].weight < conditions[best].weight )
+				{
+					best = i;
+				}
 			}
 		}
 	}
