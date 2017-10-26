@@ -142,6 +142,7 @@ compare_result compare(
 				{
 					if (errno != EINTR)
 						return compare_error_read;
+					std::clearerr(file1);
 				}
 				else if (std::feof(file1))
 				{
@@ -165,6 +166,7 @@ compare_result compare(
 				{
 					if (errno != EINTR)
 						return compare_error_read;
+					std::clearerr(file2);
 				}
 				else if (std::feof(file2))
 				{
